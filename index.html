@@ -1228,46 +1228,69 @@ function confirmImportJSON(){
   save();closeModal();render();toast('Import réussi ✓');
   window._pendingImport=null;
 }
-/* Auto-catégorisation par mots-clés */
+/* ── AUTO-CATÉGORISATION ─────────────────────────────────────────────────── */
 const AUTO_CATS={
-  'Alimentation':['lidl','colruyt','delhaize','aldi','carrefour','spar','okay','proxy','albert','cora','match','intermarche','repas','restaurant','boulangerie','friterie','sushi','pizza','mcdo','burger','kebab','lunch','takeaway','deliveroo','uber eat','takeout','courses','supermarche','epicerie','boucherie','fromagerie'],
-  'Transport':['shell','q8','total','dats','texaco','esso','lukoil','essence','carburant','parking','sncb','stib','de lijn','tec','nmbs','train','tram','metro','bus','taxi','uber','bolt','cambio','avis','hertz','eurocar','autoroute','vignette'],
-  'Abonnements':['spotify','netflix','disney','amazon prime','hbo','apple','google','microsoft','adobe','youtube','twitch','deezer','tidal','prime video','canal','rtl'],
-  'Sport':['basic fit','fitness','gym','myprotein','decathlon','go sport','running','veloland','cycling','swimming','sportworld','proteine','creatine','supplement'],
-  'Santé':['pharmacie','medic','docteur','dentiste','kiné','hopital','clinique','mutuelle','assurance santé','optique','lunette','ophtalmo'],
-  'Shopping':['zara','h&m','primark','pull','uniqlo','bershka','shein','amazon','zalando','bol.com','fnac','coolblue','mediamarkt','ikea','action','hema'],
-  'Loisirs':['cinema','theatre','concert','musee','escape','bowling','karting','laser','sport aventure','billeterie','ticketmaster','fnac spectacle'],
-  'Logement':['loyer','hypotheque','charges','eau','gaz','electricite','swde','ores','eneco','luminus','sibelga','proximus','telenet','voo','immobiliere'],
-  'Factures':['proximus','telenet','voo','orange','base','edpnet','scarlet','droit','notaire','comptable','avocat'],
-  'Épargne':['livret','epargne','argenta','belfius','kbc','ing epargne','triodos','nagelmackers'],
-  'Salaire':['salaire','traitement','remuneration','virement employeur','flexi','interim','adecco','manpower','randstad']
+  'Alimentation':['intermarche','lidl','colruyt','delhaize','aldi','carrefour','spar','okay','proxy','albert','cora','match','auchan','makro','repas','restaurant','boulangerie','friterie','sushi','pizza','mcdo','burger','kebab','lunch','snack','brasserie','boucherie','fromagerie','patisserie','chien vert','nautilus','panier garni','voor allen','pour tous'],
+  'Transport':['shell','q8','total','dats','texaco','esso','lukoil','essence','carburant','parking','sncb','stib','de lijn','tec','nmbs','train','tram','metro','bus','taxi','uber','bolt','cambio','avis','hertz','autoroute','vignette','dott','lime','bird'],
+  'Abonnements':['spotify','netflix','disney','amazon prime','hbo','apple.com','apple bill','google','microsoft','adobe','youtube','twitch','deezer','tidal','prime video','canal','rtl','apple subscr'],
+  'Sport':['basic-fit','basic fit','fitness','gym','myprotein','decathlon','go sport','running','cycling','swimming','proteine','creatine','supplement','chaussures running'],
+  'Santé':['pharmacie','medic','docteur','dentiste','kine','hopital','clinique','mutuelle','assurance sante','optique','lunette','ophtalmo','kruidvat','di cosmetique','newpharma'],
+  'Shopping':['zara','h&m','primark','pull','uniqlo','bershka','shein','amazon','zalando','bol.com','fnac','coolblue','mediamarkt','ikea','action','hema','jbc','kiabi','casa','brico'],
+  'Loisirs':['cinema','theatre','concert','musee','escape','bowling','karting','laser','billeterie','ticketmaster','laucas','event','bar','cafe','night','club','lounge','midnight','mignight'],
+  'Logement':['loyer','hypotheque','eau','gaz','electricite','swde','ores','eneco','luminus','sibelga','immobiliere'],
+  'Factures':['proximus','telenet','voo','orange','base','edpnet','scarlet','frais','taxe','interet','decompte','provision'],
+  'Épargne':['epargne','livret','argenta','belfius','kbc ing','triodos','nagelmackers','crelan'],
+  'Salaire':['salaire','traitement','remuneration','flexi','interim','adecco','manpower','randstad','toscane']
 };
-function autoCat(desc){
-  const d=desc.toLowerCase();
-  for(const[cat,kws]of Object.entries(AUTO_CATS)){
-    if(kws.some(k=>d.includes(k)))return cat;
-  }
+function autoCat(text){
+  const t=text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  for(const[cat,kws]of Object.entries(AUTO_CATS)){if(kws.some(k=>t.includes(k)))return cat;}
   return'Divers';
 }
-/* Détection format ING Belgique */
+
+/* ── PARSER ING BELGIQUE ─────────────────────────────────────────────────── */
+/* Format réel ING BE (11 cols, séparateur ;):
+   0:NumCompte | 1:NomCompte | 2:NumContrepartie | 3:NumMouvement |
+   4:DateComptable | 5:DateValeur | 6:Montant | 7:Devise |
+   8:Libellés | 9:DétailsMouvement | 10:Message                        */
+function extractINGDesc(label){
+  let m;
+  // Paiement carte: "Paiement Debit Mastercard DD/MM/YY - HHhMM - MERCHANT ..."
+  m=label.match(/Paiement Debit Mastercard \d{2}\/\d{2}\/\d{2} - \d{2}h\d{2} - (.+?)(?:\s+\d{4,5}\s+-|\s+Num[eé]ro|\s+R[eé]f[eé]rence|$)/i);
+  if(m)return m[1].replace(/SumUp\s*\*/i,'').replace(/\s{2,}/g,' ').trim();
+  // P2P Bancontact: "... Transfert Bancontact DD/MM - HHhMM - NAME Numéro"
+  m=label.match(/Transfert Bancontact \d{2}\/\d{2}\/\d{2} - \d{2}h\d{2} - (.+?) Num[eé]ro de carte/i);
+  if(m)return m[1].trim();
+  // Virement reçu: "De: NAME - IBAN" ou "De: NAME Instantané"
+  m=label.match(/De:\s+(.+?)(?:\s+-\s+BE\d{14}|\s+Instant)/i);
+  if(m)return m[1].trim();
+  // Virement envoyé: "Vers: NAME - IBAN"
+  m=label.match(/Vers:\s+(.+?)\s+-\s+BE\d{14}/i);
+  if(m)return m[1].trim();
+  // Domiciliation (prélèvement): "Domiciliation ... SEPA) NAME Avis/BIC"
+  m=label.match(/Domiciliation en euros \(SEPA\)\s+(.+?)(?:\s+Avis|\s+BIC|\s+Mandat|$)/i);
+  if(m)return m[1].trim();
+  // Ordre permanent avec communication
+  m=label.match(/Communication:\s*(.+?)(?:\s+Info personnelle:|$)/i);
+  if(m&&m[1].length>2&&m[1].length<80)return m[1].trim();
+  // Fallback: libellé nettoyé
+  return label.replace(/Num[eé]ro de carte.+/i,'').replace(/R[eé]f[eé]rence ING.+/i,'').replace(/\s{2,}/g,' ').trim().slice(0,70);
+}
 function parseINGLine(parts){
-  // ING BE format: Num compte;Nom compte;Num contrepartie;Nom contrepartie;Rue;CP;Date tx;Date valeur;Montant;Devise;BIC;Communication;Détails
-  if(parts.length>=9){
-    const dateRaw=parts[6]?.trim()||parts[0]?.trim();
-    const contrepartie=(parts[3]||'').trim();
-    const communication=(parts[11]||'').trim();
-    const desc=contrepartie||(communication)||'Transaction';
-    const amtStr=(parts[8]||'').trim().replace(',','.').replace(/\s/g,'');
-    const amtRaw=parseFloat(amtStr);
-    let dateISO='';
-    if(/\d{2}\/\d{2}\/\d{4}/.test(dateRaw)){const[d,m,y]=dateRaw.split('/');dateISO=`${y}-${m}-${d}`;}
-    else if(/\d{4}-\d{2}-\d{2}/.test(dateRaw)){dateISO=dateRaw;}
-    if(!dateISO||isNaN(amtRaw))return null;
-    const cat=autoCat(desc+' '+(communication||''));
-    const type=amtRaw>=0?'Revenu':cat==='Épargne'?'Épargne':'Dépense';
-    return{date:dateISO,desc,amt:amtRaw,type,cat,tags:[]};
-  }
-  return null;
+  if(parts.length<9)return null;
+  const dateRaw=(parts[4]||'').trim();
+  const amtStr=(parts[6]||'').trim().replace(',','.').replace(/\s/g,'');
+  const labelRaw=(parts[8]||'').trim();
+  if(!dateRaw||!amtStr)return null;
+  const amtRaw=parseFloat(amtStr);
+  if(isNaN(amtRaw)||amtRaw===0)return null; // ignorer montant zéro (messages)
+  let dateISO='';
+  if(/\d{2}\/\d{2}\/\d{4}/.test(dateRaw)){const[d,m,y]=dateRaw.split('/');dateISO=`${y}-${m}-${d}`;}
+  if(!dateISO)return null;
+  const desc=extractINGDesc(labelRaw);
+  const cat=autoCat(desc+' '+labelRaw);
+  const type=amtRaw>=0?(cat==='Salaire'?'Revenu':'Revenu'):cat==='Épargne'?'Épargne':'Dépense';
+  return{date:dateISO,desc,amt:amtRaw,type,cat,tags:[]};
 }
 function importCSV(input){
   const file=input.files[0];if(!file)return;
@@ -1278,8 +1301,9 @@ function importCSV(input){
     _csvParsed=[];
     /* Détecter le séparateur */
     const sep=lines[0]?.includes(';')?';':',';
-    /* Détecter si format ING (≥9 colonnes, 1ère col = numéro de compte BE) */
-    const isING=lines[0]&&(lines[0].includes('Num') || /BE\d{14}/.test(lines[1]||'') || lines[0].split(';').length>=9);
+    /* Détecter format ING BE: header contient "Date comptable" ou "Libellés", ou 2e ligne commence par BE+14 chiffres */
+    const hdr=lines[0]||'';
+    const isING=hdr.includes('Date comptable')||hdr.includes('Libell')||(/^BE\d{14}/.test(lines[1]||''));
     lines.forEach((line,i)=>{
       if(i===0)return; // skip header always
       const parts=line.split(sep);
