@@ -124,7 +124,7 @@ input[type=checkbox]{width:auto;accent-color:var(--cyan)}
 .search-wrap input{padding-left:32px}
 .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--g2);font-size:14px;pointer-events:none}
 .csv-preview{max-height:200px;overflow-y:auto;border:1px solid var(--b);border-radius:var(--r2);margin-top:8px}
-.csv-row{display:grid;grid-template-columns:1fr 2fr 1fr;gap:8px;padding:6px 10px;font-size:12px;font-family:var(--font-mono);border-bottom:1px solid var(--b)}
+.csv-row{display:grid;grid-template-columns:90px 1fr 80px 80px;gap:8px;padding:6px 10px;font-size:11px;font-family:var(--mono);border-bottom:1px solid var(--b)}
 .csv-row:last-child{border-bottom:none}
 .trend-up{color:var(--green);font-size:12px;font-weight:700}
 .trend-dn{color:var(--red);font-size:12px;font-weight:700}
@@ -1228,46 +1228,104 @@ function confirmImportJSON(){
   save();closeModal();render();toast('Import réussi ✓');
   window._pendingImport=null;
 }
+/* Auto-catégorisation par mots-clés */
+const AUTO_CATS={
+  'Alimentation':['lidl','colruyt','delhaize','aldi','carrefour','spar','okay','proxy','albert','cora','match','intermarche','repas','restaurant','boulangerie','friterie','sushi','pizza','mcdo','burger','kebab','lunch','takeaway','deliveroo','uber eat','takeout','courses','supermarche','epicerie','boucherie','fromagerie'],
+  'Transport':['shell','q8','total','dats','texaco','esso','lukoil','essence','carburant','parking','sncb','stib','de lijn','tec','nmbs','train','tram','metro','bus','taxi','uber','bolt','cambio','avis','hertz','eurocar','autoroute','vignette'],
+  'Abonnements':['spotify','netflix','disney','amazon prime','hbo','apple','google','microsoft','adobe','youtube','twitch','deezer','tidal','prime video','canal','rtl'],
+  'Sport':['basic fit','fitness','gym','myprotein','decathlon','go sport','running','veloland','cycling','swimming','sportworld','proteine','creatine','supplement'],
+  'Santé':['pharmacie','medic','docteur','dentiste','kiné','hopital','clinique','mutuelle','assurance santé','optique','lunette','ophtalmo'],
+  'Shopping':['zara','h&m','primark','pull','uniqlo','bershka','shein','amazon','zalando','bol.com','fnac','coolblue','mediamarkt','ikea','action','hema'],
+  'Loisirs':['cinema','theatre','concert','musee','escape','bowling','karting','laser','sport aventure','billeterie','ticketmaster','fnac spectacle'],
+  'Logement':['loyer','hypotheque','charges','eau','gaz','electricite','swde','ores','eneco','luminus','sibelga','proximus','telenet','voo','immobiliere'],
+  'Factures':['proximus','telenet','voo','orange','base','edpnet','scarlet','droit','notaire','comptable','avocat'],
+  'Épargne':['livret','epargne','argenta','belfius','kbc','ing epargne','triodos','nagelmackers'],
+  'Salaire':['salaire','traitement','remuneration','virement employeur','flexi','interim','adecco','manpower','randstad']
+};
+function autoCat(desc){
+  const d=desc.toLowerCase();
+  for(const[cat,kws]of Object.entries(AUTO_CATS)){
+    if(kws.some(k=>d.includes(k)))return cat;
+  }
+  return'Divers';
+}
+/* Détection format ING Belgique */
+function parseINGLine(parts){
+  // ING BE format: Num compte;Nom compte;Num contrepartie;Nom contrepartie;Rue;CP;Date tx;Date valeur;Montant;Devise;BIC;Communication;Détails
+  if(parts.length>=9){
+    const dateRaw=parts[6]?.trim()||parts[0]?.trim();
+    const contrepartie=(parts[3]||'').trim();
+    const communication=(parts[11]||'').trim();
+    const desc=contrepartie||(communication)||'Transaction';
+    const amtStr=(parts[8]||'').trim().replace(',','.').replace(/\s/g,'');
+    const amtRaw=parseFloat(amtStr);
+    let dateISO='';
+    if(/\d{2}\/\d{2}\/\d{4}/.test(dateRaw)){const[d,m,y]=dateRaw.split('/');dateISO=`${y}-${m}-${d}`;}
+    else if(/\d{4}-\d{2}-\d{2}/.test(dateRaw)){dateISO=dateRaw;}
+    if(!dateISO||isNaN(amtRaw))return null;
+    const cat=autoCat(desc+' '+(communication||''));
+    const type=amtRaw>=0?'Revenu':cat==='Épargne'?'Épargne':'Dépense';
+    return{date:dateISO,desc,amt:amtRaw,type,cat,tags:[]};
+  }
+  return null;
+}
 function importCSV(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
-    const lines=e.target.result.split('\n').filter(l=>l.trim());
+    const raw=e.target.result;
+    const lines=raw.split('\n').filter(l=>l.trim());
     _csvParsed=[];
+    /* Détecter le séparateur */
+    const sep=lines[0]?.includes(';')?';':',';
+    /* Détecter si format ING (≥9 colonnes, 1ère col = numéro de compte BE) */
+    const isING=lines[0]&&(lines[0].includes('Num') || /BE\d{14}/.test(lines[1]||'') || lines[0].split(';').length>=9);
     lines.forEach((line,i)=>{
-      if(i===0&&isNaN(parseFloat(line.split(/[,;]/)[2])))return; // skip header
-      const parts=line.split(/[,;]/);
-      if(parts.length<3)return;
-      const dateRaw=parts[0].trim();
-      const desc=parts[1].trim();
-      const amtRaw=parseFloat(parts[2].replace(',','.').trim());
-      if(!desc||isNaN(amtRaw))return;
-      // Try parse date formats: DD/MM/YYYY or YYYY-MM-DD
-      let dateISO='';
-      if(/\d{2}\/\d{2}\/\d{4}/.test(dateRaw)){
-        const[d,m,y]=dateRaw.split('/');dateISO=`${y}-${m}-${d}`;
-      }else if(/\d{4}-\d{2}-\d{2}/.test(dateRaw)){dateISO=dateRaw;}
-      if(!dateISO)return;
-      const type=amtRaw>=0?'Revenu':'Dépense';
-      _csvParsed.push({date:dateISO,desc,amt:amtRaw,type,cat:'Divers'});
+      if(i===0)return; // skip header always
+      const parts=line.split(sep);
+      let tx=null;
+      if(isING){tx=parseINGLine(parts);}
+      else{
+        /* Format générique: date;desc;montant */
+        if(parts.length<3)return;
+        const dateRaw=parts[0].trim();
+        const desc=(parts[1]||'').trim();
+        const amtRaw=parseFloat((parts[2]||'').replace(',','.').trim());
+        if(!desc||isNaN(amtRaw))return;
+        let dateISO='';
+        if(/\d{2}\/\d{2}\/\d{4}/.test(dateRaw)){const[d,m,y]=dateRaw.split('/');dateISO=`${y}-${m}-${d}`;}
+        else if(/\d{4}-\d{2}-\d{2}/.test(dateRaw)){dateISO=dateRaw;}
+        if(!dateISO)return;
+        const cat=autoCat(desc);
+        const type=amtRaw>=0?'Revenu':cat==='Épargne'?'Épargne':'Dépense';
+        tx={date:dateISO,desc,amt:amtRaw,type,cat,tags:[]};
+      }
+      if(tx)_csvParsed.push(tx);
     });
-    if(!_csvParsed.length){toast('Aucune transaction valide trouvée');return;}
-    const previewRows=_csvParsed.slice(0,10).map(r=>`<div class="csv-row">
-      <span>${r.date}</span><span>${esc(r.desc)}</span>
-      <span style="color:${r.amt>=0?'var(--green)':'var(--red)'}">${fmtAmt(r.amt)}</span>
+    if(!_csvParsed.length){toast('Aucune transaction valide trouvée — vérifie le format','#FF3A5C');return;}
+    const fmtBadge=isING?'<span style="background:#00D4FF22;border:1px solid #00D4FF44;color:#00D4FF;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:8px">Format ING détecté ✓</span>':'';
+    const previewRows=_csvParsed.slice(0,12).map(r=>`<div class="csv-row">
+      <span style="color:var(--g2)">${r.date}</span>
+      <span title="${esc(r.desc)}">${esc(r.desc.length>28?r.desc.slice(0,28)+'…':r.desc)}</span>
+      <span style="color:var(--g2);font-size:10px">${r.cat}</span>
+      <span style="color:${r.amt>=0?'var(--green)':'var(--red)'}; font-weight:700">${r.amt>=0?'+':''}${r.amt.toFixed(2)}\u00a0€</span>
     </div>`).join('');
-    openModal(`
-      <button class="modal-close" onclick="closeModal()">×</button>
-      <div class="modal-title">Aperçu CSV</div>
-      <div style="font-size:13px;color:var(--g1);margin-bottom:8px">${_csvParsed.length} transactions détectées</div>
-      <div class="csv-preview"><div class="csv-row" style="font-weight:600;background:var(--bg3)"><span>Date</span><span>Description</span><span>Montant</span></div>${previewRows}</div>
-      ${_csvParsed.length>10?`<div style="font-size:11px;color:var(--g2);margin-top:4px">...et ${_csvParsed.length-10} de plus</div>`:''}
-      <div style="display:flex;gap:8px;margin-top:16px">
-        <button class="btn btn-primary" onclick="confirmImportCSV()">Importer ${_csvParsed.length} transactions</button>
-        <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+    openModal(`<div style="display:flex;align-items:center;margin-bottom:4px"><div class="eyebrow">Aperçu import CSV</div>${fmtBadge}</div>
+      <div style="font-size:12px;color:var(--g1);margin-bottom:10px">${_csvParsed.length} transaction${_csvParsed.length>1?'s':''} détectée${_csvParsed.length>1?'s':''}</div>
+      <div class="csv-preview">
+        <div class="csv-row" style="font-weight:700;font-size:10px;letter-spacing:1px;color:var(--g2);background:var(--bg3)"><span>DATE</span><span>DESCRIPTION</span><span>CAT.</span><span>MONTANT</span></div>
+        ${previewRows}
+      </div>
+      ${_csvParsed.length>12?`<div style="font-size:11px;color:var(--g2);margin-top:4px;text-align:center">... et ${_csvParsed.length-12} transactions de plus</div>`:''}
+      <div style="background:var(--bg2);border-radius:8px;padding:10px;margin:12px 0;font-size:11px;color:var(--g2);line-height:1.6">
+        💡 Les catégories ont été assignées automatiquement. Tu pourras les modifier après l'import.
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-p" style="background:var(--amber);color:var(--bg);flex:1" onclick="confirmImportCSV()">Importer ${_csvParsed.length} transactions →</button>
+        <button class="btn-p" style="background:var(--bg2);color:var(--g1)" onclick="closeModal()">Annuler</button>
       </div>`);
   };
-  reader.readAsText(file);
+  reader.readAsText(file,'ISO-8859-1'); // ING exports in Latin-1
   input.value='';
 }
 function confirmImportCSV(){
