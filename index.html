@@ -130,6 +130,12 @@ input[type=checkbox]{width:auto;accent-color:var(--cyan)}
 .trend-dn{color:var(--red);font-size:12px;font-weight:700}
 .theme-toggle{background:none;border:1px solid var(--b);border-radius:var(--r2);padding:5px 10px;cursor:pointer;font-size:16px;color:var(--w);transition:all var(--t)}
 .theme-toggle:hover{border-color:var(--cyan)}
+#fab{position:fixed;bottom:80px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--cyan);color:#06090D;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(0,212,255,0.4);z-index:200;transition:all var(--t);display:flex;align-items:center;justify-content:center}
+#fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(0,212,255,0.6)}
+@media(min-width:768px){#fab{bottom:24px;right:24px}}
+body.compact{font-size:13px}
+body.compact .card{padding:10px;margin-bottom:8px}
+body.compact .habit-row{padding:7px 0}
 </style>
 </head>
 <body>
@@ -139,6 +145,7 @@ input[type=checkbox]{width:auto;accent-color:var(--cyan)}
   <aside id="right-panel"></aside>
 </div>
 <nav id="bnav"></nav>
+<button id="fab" onclick="nav('checkin')" title="Check-in rapide">✓</button>
 <div id="toast"></div>
 <div id="overlay" onclick="closeModal()"><div id="modal" onclick="event.stopPropagation()"></div></div>
 <script>
@@ -153,12 +160,19 @@ const CATS=['Alimentation','Transport','Logement','Santé','Sport','Loisirs','Sh
 const MN=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
 const TCH={Revenu:'#00E5A0',Dépense:'#FF3A5C','Épargne':'#A855F7'};
 const PAGES=['home','checkin','finances','analytics','config'];
-const SK='mcp_v4';
+const SK='mcp_v5';
 const CY=new Date().getFullYear();
 let _gid=0;
+const DEF_HAB_COLORS=['#00D4FF','#00E5A0','#FFB800','#A855F7','#FF3A5C'];
+const QUOTES_BY_TIER=[
+  ['Chaque grand voyage commence par un premier pas. 🚶','Lance-toi, c\'est maintenant ! 🎯','Le début est toujours le plus dur. 💪'],
+  ['7 jours c\'est une semaine entière. Tu tiens ! 🔥','La régularité bat le talent. Continue. ⚡','Une semaine de done. Garde le cap. 🚀'],
+  ['2 semaines de discipline. Tu es dans le flow. 🌊','Ton futur toi te remercie. 🏆','14 jours = une nouvelle habitude ancrée. 💎'],
+  ['Un mois. Tu es une machine. 🤖','30 jours = tu as changé ton cerveau. 🧠','Inarrêtable. C\'est ton mode par défaut maintenant. ⚡']
+];
 
 /* ── STATE ─────────────────────────────────────────────────────────────── */
-let S={habits:{},finance:[],hcfg:[],config:{streakGoal:30,savingsGoal:200,theme:'dark',weights:{},budgets:{},recurring:[]}};
+let S={habits:{},finance:[],hcfg:[],config:{}};
 let _page='home',_ftab='history',_atabH=0,_atabF=0,_atabA=0,_atabC=0;
 let _ciDate=iso();
 let _ci={};
@@ -166,26 +180,54 @@ let _fSearch='';
 let _fTagFilter='';
 let _calView='heatmap';
 let _csvParsed=[];
+let _anaFrom='',_anaTo='';
+let _snapSlot=0;
+let _ciNoteExpanded=null;
+let _quickAdd='';
+
+function dc(x){return JSON.parse(JSON.stringify(x));}
 
 function load(){
   try{
-    const raw=localStorage.getItem(SK);
+    let raw=localStorage.getItem(SK);
+    if(!raw)raw=localStorage.getItem('mcp_v4'); // migrate from v4
     if(raw){S=JSON.parse(raw);}
-    else{S=JSON.parse(JSON.stringify(SEED));S.hcfg=JSON.parse(JSON.stringify(DEF_HABITS));}
-  }catch(e){S=JSON.parse(JSON.stringify(SEED));S.hcfg=JSON.parse(JSON.stringify(DEF_HABITS));}
-  if(!S.hcfg||!S.hcfg.length)S.hcfg=JSON.parse(JSON.stringify(DEF_HABITS));
+    else{S=dc(SEED);S.hcfg=dc(DEF_HABITS);}
+  }catch(e){S=dc(SEED);S.hcfg=dc(DEF_HABITS);}
+  if(!S.hcfg||!S.hcfg.length)S.hcfg=dc(DEF_HABITS);
   if(!S.habits)S.habits={};
   if(!S.finance)S.finance=[];
-  S.config=S.config||{streakGoal:30,savingsGoal:200,theme:'dark',weights:{},budgets:{},recurring:[]};
-  if(!S.config.streakGoal)S.config.streakGoal=30;
-  if(!S.config.savingsGoal)S.config.savingsGoal=200;
-  if(!S.config.theme)S.config.theme='dark';
-  if(!S.config.weights)S.config.weights={};
-  if(!S.config.budgets)S.config.budgets={};
-  if(!S.config.recurring)S.config.recurring=[];
-  document.getElementById('html-root').classList.toggle('light',S.config.theme==='light');
+  // ensure all config fields
+  const defCfg={streakGoal:30,savingsGoal:200,theme:'dark',weights:{},budgets:{},recurring:[],
+    weekStart:1,density:'comfortable',profile:{name:'Massimo',emoji:'⚡'},
+    catColors:{},homeModules:{streak:true,kpis:true,weekBars:true,checkin:true,finAlert:true,goals:true},
+    freezeJokers:{},goals:[],dayTemplates:{},customCats:[],challenges:[],
+    lastBreakModal:'',snapshots:{}};
+  S.config=Object.assign(defCfg,S.config||{});
+  if(!S.config.profile)S.config.profile={name:'Massimo',emoji:'⚡'};
+  if(!S.config.homeModules)S.config.homeModules={streak:true,kpis:true,weekBars:true,checkin:true,finAlert:true,goals:true};
+  if(!S.config.goals)S.config.goals=[];
+  if(!S.config.challenges)S.config.challenges=[];
+  if(!S.config.customCats)S.config.customCats=[];
+  if(!S.config.dayTemplates)S.config.dayTemplates={};
+  if(!S.config.freezeJokers)S.config.freezeJokers={};
+  if(!S.config.snapshots)S.config.snapshots={};
+  // ensure habit colors
+  S.hcfg.forEach((h,i)=>{if(!h.color)h.color=DEF_HAB_COLORS[i%5];if(!h.monthTarget)h.monthTarget=0;if(!h.group)h.group=null;});
+  // ensure finance fields
+  S.finance.forEach(t=>{if(!t.tags)t.tags=[];if(t.pending===undefined)t.pending=false;if(!t.note)t.note='';});
+  applyTheme();
+}
+function applyTheme(){
+  const root=document.getElementById('html-root');
+  if(!root)return;
+  const t=S.config.theme;
+  if(t==='auto'){root.classList.toggle('light',window.matchMedia('(prefers-color-scheme: light)').matches);}
+  else{root.classList.toggle('light',t==='light');}
+  document.body.classList.toggle('compact',S.config.density==='compact');
 }
 function save(){localStorage.setItem(SK,JSON.stringify(S));}
+function allCats(){return [...CATS,...(S.config.customCats||[])];}
 
 /* ── UTILS ─────────────────────────────────────────────────────────────── */
 function iso(d){const dt=d||new Date();return dt.toISOString().slice(0,10);}
@@ -214,16 +256,118 @@ function scoreColor(sc,mx){const p=pct(sc,mx);return p>=80?'var(--green)':p>=50?
 function currentStreak(){
   let streak=0,d=iso();
   const today=d;
-  // Don't require today if not yet checked in
   while(true){
     const day=S.habits[d];
+    const mk=d.slice(0,7);
+    // Check if joker was used for this month — treat missing day as ok
+    const jokerUsed=S.config.freezeJokers&&S.config.freezeJokers[mk];
     if(!day||scoreDay(day)===0){
       if(d===today){d=isoPlus(d,-1);continue;}
+      if(jokerUsed&&streak>0){d=isoPlus(d,-1);continue;} // skip one miss if joker
       break;
     }
     streak++;d=isoPlus(d,-1);
   }
   return streak;
+}
+function habitStreak(hid){
+  let n=0,d=iso();
+  const today=d;
+  while(true){
+    const day=S.habits[d];
+    if(!day||day[hid]!==true){if(d===today){d=isoPlus(d,-1);continue;}break;}
+    n++;d=isoPlus(d,-1);
+  }
+  return n;
+}
+function habitBestDay(hid){
+  const counts=Array(7).fill(0),total=Array(7).fill(0);
+  Object.entries(S.habits).forEach(([k,day])=>{
+    if(!day)return;
+    const dow=new Date(k).getDay();
+    total[dow]++;
+    if(day[hid]===true)counts[dow]++;
+  });
+  let best=-1,bestPct=0;
+  total.forEach((t,i)=>{if(t>=3){const p=counts[i]/t;if(p>bestPct){bestPct=p;best=i;}}});
+  return best; // 0=Sun, 1=Mon ...
+}
+function getMotivationQuote(streak){
+  const tier=streak>=30?3:streak>=14?2:streak>=7?1:0;
+  const arr=QUOTES_BY_TIER[tier];
+  const idx=Math.floor(new Date().getDate()%arr.length);
+  return arr[idx];
+}
+function weeklyMomentum(){
+  const today=iso();
+  const last7=[],prev7=[];
+  for(let i=0;i<7;i++){const d=isoPlus(today,-i);const day=S.habits[d];last7.push(day?scoreDay(day):0);}
+  for(let i=7;i<14;i++){const d=isoPlus(today,-i);const day=S.habits[d];prev7.push(day?scoreDay(day):0);}
+  const mx=H().length||1;
+  const r1=last7.reduce((a,v)=>a+v,0)/(7*mx);
+  const r2=prev7.reduce((a,v)=>a+v,0)/(7*mx);
+  const delta=Math.round((r1-r2)*100);
+  return{r1:Math.round(r1*100),r2:Math.round(r2*100),delta};
+}
+function habitMonthProgress(hid,mk){
+  const days=Object.keys(S.habits).filter(d=>d.startsWith(mk));
+  return days.filter(d=>S.habits[d]&&S.habits[d][hid]===true).length;
+}
+function detectRecurring(){
+  const map={};
+  S.finance.forEach(t=>{
+    if(t.type==='Épargne')return;
+    const key=t.desc.toLowerCase().trim().slice(0,20)+'_'+Math.round(Math.abs(t.amt));
+    if(!map[key])map[key]={count:0,desc:t.desc,amt:t.amt,type:t.type,cat:t.cat,months:new Set()};
+    map[key].count++;
+    map[key].months.add(t.date.slice(0,7));
+  });
+  return Object.values(map).filter(x=>x.months.size>=2&&x.count>=2).slice(0,5);
+}
+function topMerchants(n=10){
+  const map={};
+  S.finance.filter(t=>t.type==='Dépense').forEach(t=>{
+    const k=t.desc.trim();
+    if(!map[k])map[k]={desc:k,count:0,total:0,cat:t.cat};
+    map[k].count++;map[k].total+=Math.abs(t.amt);
+  });
+  return Object.values(map).sort((a,b)=>b.count-a.count).slice(0,n);
+}
+function activeChallenge(){
+  const today=iso();
+  return (S.config.challenges||[]).find(c=>c.startDate<=today&&c.endDate>=today);
+}
+function challengeProgress(c){
+  if(!c)return 0;
+  const days=[];for(let d=c.startDate;d<=iso();d=isoPlus(d,1))days.push(d);
+  return days.filter(d=>S.habits[d]&&S.habits[d][c.habitId]===true).length;
+}
+function expenseVelocity(){
+  const today=iso();
+  let w1=0,w2=0;
+  for(let i=0;i<7;i++){const d=isoPlus(today,-i);w1+=S.finance.filter(t=>t.date===d&&t.type==='Dépense').reduce((a,t)=>a+Math.abs(t.amt),0);}
+  for(let i=7;i<14;i++){const d=isoPlus(today,-i);w2+=S.finance.filter(t=>t.date===d&&t.type==='Dépense').reduce((a,t)=>a+Math.abs(t.amt),0);}
+  return{perDayThis:+(w1/7).toFixed(1),perDayPrev:+(w2/7).toFixed(1),delta:+(w1/7-w2/7).toFixed(1)};
+}
+function dataHealthCheck(){
+  const issues=[];
+  // duplicate IDs
+  const ids=S.finance.map(t=>t.id);
+  const uniq=new Set(ids);
+  if(ids.length!==uniq.size)issues.push('⚠️ Transactions avec IDs dupliqués détectées');
+  // zero-amount
+  const zeros=S.finance.filter(t=>t.amt===0);
+  if(zeros.length)issues.push(`⚠️ ${zeros.length} transaction(s) avec montant 0€`);
+  // future habits
+  const today=iso();
+  const futureHabits=Object.keys(S.habits).filter(d=>d>today);
+  if(futureHabits.length)issues.push(`⚠️ ${futureHabits.length} jour(s) d'habitudes dans le futur`);
+  // big gaps in habits (>7 consecutive missing days in last 90 days)
+  let maxGap=0,curGap=0;
+  for(let i=90;i>=1;i--){const d=isoPlus(today,-i);if(!S.habits[d]||scoreDay(S.habits[d])===0)curGap++;else{maxGap=Math.max(maxGap,curGap);curGap=0;}}
+  if(maxGap>7)issues.push(`ℹ️ Écart max de ${maxGap} jours sans check-in (90 derniers jours)`);
+  if(!issues.length)issues.push('✅ Aucune anomalie détectée — données saines !');
+  return issues;
 }
 function bestStreak(){
   const dates=Object.keys(S.habits).filter(d=>scoreDay(S.habits[d])>0).sort();
@@ -366,6 +510,19 @@ function lineChart(data,color,h=80,showDots=true){
     <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.3"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
     <polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
     ${dots}
+  </svg>`;
+}
+
+function svgRing(val,max,color,size=44){
+  if(!max)return '';
+  const r=16,cx=size/2,cy=size/2,circ=2*Math.PI*r;
+  const p=Math.min(1,val/max);
+  const dash=circ*p;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="flex-shrink:0">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--bg3)" stroke-width="3"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="3"
+      stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${circ/4}" stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
+    <text x="${cx}" y="${cy+4}" text-anchor="middle" fill="${color}" font-size="11" font-weight="700" font-family="JetBrains Mono,monospace">${val}</text>
   </svg>`;
 }
 
@@ -517,55 +674,99 @@ function renderHome(){
     </div>`;
   }
 
+  const mom=weeklyMomentum();
+  const momSign=mom.delta>=0?'↑':'↓';
+  const momColor=mom.delta>=0?'var(--green)':'var(--red)';
+  const weekDone=Array.from({length:7},(_,i)=>{const d=isoPlus(today,-6+i);return(S.habits[d]&&scoreDay(S.habits[d])>0)?1:0;}).reduce((a,v)=>a+v,0);
+  const nearRecord=(best>5&&streak>=best-3&&streak<best);
+  const quote=getMotivationQuote(streak);
+  const jokerAvail=!S.config.freezeJokers[today.slice(0,7)];
+  const chal=activeChallenge();
+  const chalProg=chal?challengeProgress(chal):0;
+  const hm=S.config.homeModules;
+  const profileName=S.config.profile&&S.config.profile.name?S.config.profile.name:'Massimo';
+  const profileEmoji=S.config.profile&&S.config.profile.emoji?S.config.profile.emoji:'⚡';
+
   return `<div class="page">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div class="page-title">Bonjour 👋</div>
-      <button class="theme-toggle" onclick="toggleTheme()" style="display:none" id="mobile-theme-btn">
+      <div>
+        <div class="page-title">${profileEmoji} ${profileName}</div>
+        <div style="font-size:12px;color:var(--g2)">${new Date().toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long'})}</div>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()">
         ${S.config.theme==='dark'?'☀️':'🌙'}
       </button>
     </div>
-    <div class="card" style="text-align:center;padding:24px">
-      <div style="font-size:42px;margin-bottom:4px">${getScoreEmoji(score,mx)}</div>
-      <div class="stat-num" style="font-size:36px;color:${scoreColor(score,mx)}">${score}/${mx}</div>
-      <div class="stat-label">Aujourd'hui — ${fmtDate(today)}</div>
-      <div class="progress-bar" style="margin-top:12px;height:8px">
-        <div class="progress-fill" style="width:${pct(score,mx)}%;background:${scoreColor(score,mx)}"></div>
+
+    ${nearRecord?`<div style="background:#00D4FF10;border:1px solid #00D4FF44;border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">🎯</span>
+      <div><div style="font-size:13px;font-weight:700;color:var(--cyan)">Record en vue !</div><div style="font-size:12px;color:var(--g1)">Plus que ${best-streak} jour${best-streak>1?'s':''} pour battre ton record de ${best} jours</div></div>
+    </div>`:''}
+
+    ${chal?`<div style="background:#A855F710;border:1px solid #A855F744;border-radius:12px;padding:12px 16px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:700;color:var(--purp)">🏆 ${esc(chal.label)}</div>
+        <div style="font-size:12px;color:var(--g1)">${chalProg}/${chal.target}</div>
       </div>
-    </div>
-    <div class="card">
+      <div style="background:var(--bg3);border-radius:4px;height:6px"><div style="background:var(--purp);border-radius:4px;height:100%;width:${Math.min(100,Math.round(chalProg/chal.target*100))}%"></div></div>
+    </div>`:''}
+
+    ${hm.streak!==false?`<div class="card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
-          <div class="stat-label">Streak actuel</div>
+          <div class="stat-label">Streak actuel <span style="font-size:11px;color:${momColor};margin-left:4px">${momSign}${Math.abs(mom.delta)}%</span></div>
           <div style="display:flex;align-items:baseline;gap:8px">
             <div class="stat-num" style="color:var(--amber)">${streak}</div>
             <div style="font-size:13px;color:var(--g1)">jours</div>
           </div>
-          <div style="font-size:11px;color:var(--g2);margin-top:2px">Record: ${best} jours</div>
-          <div class="streak-bar" style="width:120px;margin-top:6px">
-            <div class="streak-fill" style="width:${pct(streak,goal)}%"></div>
-          </div>
-          <div style="font-size:11px;color:var(--g2);margin-top:2px">${streak}/${goal} objectif</div>
+          <div style="font-size:11px;color:var(--g2);margin-top:2px">Record: ${best} · ${weekDone}/7 cette semaine</div>
+          <div class="streak-bar" style="width:120px;margin-top:6px"><div class="streak-fill" style="width:${pct(streak,goal)}%"></div></div>
+          <div style="font-size:11px;color:var(--g2);margin-top:2px">${streak}/${goal} objectif${jokerAvail?` · <span style="color:var(--cyan);cursor:pointer" onclick="useStreakJoker()">🛡 Joker dispo</span>`:''}</div>
         </div>
         <div style="text-align:right">
           <div class="stat-label">Épargne mois</div>
           <div class="stat-num" style="color:${savColor}">${sav.toFixed(0)}€</div>
-          <div class="progress-bar" style="width:100px;margin-top:6px;margin-left:auto">
-            <div class="progress-fill" style="width:${savPct}%;background:${savColor}"></div>
-          </div>
+          <div class="progress-bar" style="width:100px;margin-top:6px;margin-left:auto"><div class="progress-fill" style="width:${savPct}%;background:${savColor}"></div></div>
           <div style="font-size:11px;color:var(--g2);margin-top:2px">${savPct}% de ${savGoal}€</div>
         </div>
       </div>
-    </div>
-    <div class="card">
-      <div class="section-label">Habitudes du jour</div>
-      ${H().map(hb=>`
-        <div class="habit-row">
+      <div style="font-size:12px;color:var(--g2);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--b)">"${quote}"</div>
+    </div>`:''}
+
+    ${hm.checkin!==false?`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="section-label">Aujourd'hui — ${score}/${mx}</div>
+        ${svgRing(score,mx,scoreColor(score,mx),44)}
+      </div>
+      ${H().map(hb=>{
+        const v=day[hb.id];
+        const hstr=habitStreak(hb.id);
+        return `<div class="habit-row" style="border-left:3px solid ${hb.color||'var(--b)'}">
           <span style="font-size:20px">${hb.emoji}</span>
           <span style="flex:1;font-size:14px;font-weight:500">${hb.label}</span>
-          <button class="habit-toggle${day[hb.id]===true?' on':''}" onclick="toggleHabitToday('${hb.id}')"></button>
-        </div>`).join('')}
-      <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="nav('checkin')">Ouvrir Check-in complet</button>
-    </div>
+          ${hstr>0?`<span style="font-size:10px;color:var(--amber);margin-right:6px">🔥${hstr}</span>`:''}
+          <button class="habit-toggle${v===true?' on':''}" style="${v===true?'background:'+hb.color+';border-color:'+hb.color:''}" onclick="toggleHabitToday('${hb.id}')"></button>
+        </div>`;
+      }).join('')}
+      <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="nav('checkin')">Check-in complet →</button>
+    </div>`:''}
+
+    ${(S.config.goals||[]).length>0&&hm.goals!==false?`<div class="card">
+      <div class="section-label" style="margin-bottom:8px">Objectifs</div>
+      ${(S.config.goals||[]).slice(0,3).map(g=>{
+        const pct2=Math.min(100,Math.round((g.current||0)/g.target*100));
+        const daysLeft=g.deadline?Math.max(0,Math.round((new Date(g.deadline)-new Date())/(86400000))):null;
+        return `<div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:13px;font-weight:600">${g.emoji||'🎯'} ${esc(g.label)}</div>
+            <div style="font-size:12px;color:var(--g1)">${g.current||0}/${g.target}€${daysLeft!==null?` · J-${daysLeft}`:''}</div>
+          </div>
+          <div style="background:var(--bg3);border-radius:4px;height:6px"><div style="background:var(--cyan);border-radius:4px;height:100%;width:${pct2}%"></div></div>
+        </div>`;
+      }).join('')}
+      ${(S.config.goals||[]).length>3?`<div style="font-size:11px;color:var(--g2);text-align:center">+${(S.config.goals||[]).length-3} autres objectifs</div>`:''}
+    </div>`:''}
+
     ${weekHtml}
   </div>`;
 }
@@ -581,6 +782,27 @@ function toggleHabitToday(hid){
   S.habits[d][hid]=!S.habits[d][hid];
   save();render();
 }
+function useStreakJoker(){
+  const mk=iso().slice(0,7);
+  if(S.config.freezeJokers[mk]){toast('Joker déjà utilisé ce mois','#FF3A5C');return;}
+  openModal(`<div style="font-size:18px;font-weight:800;margin-bottom:8px">🛡 Utiliser le joker ?</div>
+    <p style="color:var(--g1);font-size:13px;margin-bottom:20px">Le joker préserve ta série pour UN jour manqué ce mois. Tu ne pourras l'utiliser qu'une fois.</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="confirmJoker()">Utiliser</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Annuler</button>
+    </div>`);
+}
+function confirmJoker(){
+  S.config.freezeJokers[iso().slice(0,7)]=true;
+  save();closeModal();toast('🛡 Joker activé ce mois !','#00D4FF');render();
+}
+function copyYesterday(){
+  const yest=isoPlus(iso(),-1);
+  const yDay=S.habits[yest];
+  if(!yDay){toast('Aucun check-in hier','#FF3A5C');return;}
+  H().forEach(hb=>{if(_ci[hb.id]===undefined||_ci[hb.id]===null)_ci[hb.id]=yDay[hb.id]||false;});
+  render();toast('Valeurs d\'hier copiées ✓');
+}
 
 /* ── CHECK-IN PAGE ─────────────────────────────────────────────────────── */
 function renderCheckin(){
@@ -593,29 +815,53 @@ function renderCheckin(){
   const note=S.habits[_ciDate]&&S.habits[_ciDate]._note||'';
   const minDate=isoPlus(today,-30);
 
+  const dow=new Date(_ciDate).getDay();
+  const dowStr=['dim','lun','mar','mer','jeu','ven','sam'][dow];
+  const tmpl=(S.config.dayTemplates||{})[String(dow)]||[];
+  const habNotes=(S.habits[_ciDate]&&S.habits[_ciDate]._notes)||{};
+
+  // group habits by group
+  const groups={morning:[],evening:[],weekly:[],null:[]};
+  H().forEach(hb=>groups[hb.group||'null'].push(hb));
+  const groupLabels={morning:'🌅 Matin',evening:'🌙 Soir',weekly:'📅 Semaine',null:'Habitudes'};
+
+  const habitRows=Object.entries(groups).filter(([g,hbs])=>hbs.length).map(([g,hbs])=>`
+    ${hbs.length&&g!=='null'?`<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--g2);margin:10px 0 6px;text-transform:uppercase">${groupLabels[g]}</div>`:''}
+    ${hbs.map(hb=>{
+      const v=day[hb.id];
+      const hstr=habitStreak(hb.id);
+      const isExpected=tmpl.includes(hb.id);
+      const n=habNotes[hb.id]||'';
+      return `<div class="habit-row" style="border-left:3px solid ${hb.color||'var(--b)'};flex-wrap:wrap">
+        <span style="font-size:20px">${hb.emoji}</span>
+        <span style="flex:1;font-size:14px;font-weight:500">${hb.label}${isExpected?'<span style="font-size:10px;color:var(--amber);margin-left:4px">attendu</span>':''}</span>
+        ${hstr>0?`<span style="font-size:10px;color:var(--amber)">🔥${hstr}</span>`:''}
+        <button class="habit-toggle${v===true?' on':''}" style="${v===true?'background:'+hb.color+';border-color:'+hb.color:''}" onclick="toggleHabit('${_ciDate}','${hb.id}')"></button>
+        ${_ciNoteExpanded===hb.id?`<div style="width:100%;margin-top:6px"><input type="text" style="width:100%;background:var(--bg2);border:1px solid var(--b);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--w)" placeholder="Note pour ${hb.label}…" value="${esc(n)}" oninput="saveHabitNote('${hb.id}',this.value)" onblur="_ciNoteExpanded=null"></div>`:''}
+        <button onclick="_ciNoteExpanded=_ciNoteExpanded==='${hb.id}'?null:'${hb.id}';render()" style="background:none;border:none;font-size:13px;color:${n?'var(--cyan)':'var(--g2)'};padding:2px 4px;cursor:pointer" title="Note">📝</button>
+      </div>`;
+    }).join('')}`).join('');
+
   return `<div class="page">
     <div class="page-title">Check-in</div>
     <div class="card">
-      <div class="form-group">
-        <label>Date</label>
-        <input type="date" value="${_ciDate}" min="${minDate}" max="${today}" onchange="setCiDate(this.value)">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+        <input type="date" value="${_ciDate}" min="${minDate}" max="${today}" onchange="setCiDate(this.value)" style="flex:1;background:var(--bg2);border:1px solid var(--b);border-radius:8px;padding:8px 10px;color:var(--w);font-size:13px">
+        <button class="btn btn-ghost" onclick="copyYesterday()" style="font-size:12px;white-space:nowrap">📋 Hier</button>
       </div>
-      ${!isToday?`<div class="rattrapage-banner">Rattrapage — ${fmtDate(_ciDate)}</div>`:''}
-      <div style="text-align:center;margin-bottom:16px">
-        <div style="font-size:32px">${getScoreEmoji(score,mx)}</div>
-        <div style="font-family:var(--font-mono);font-size:24px;font-weight:700;color:${scoreColor(score,mx)}">${score}/${mx}</div>
+      ${!isToday?`<div class="rattrapage-banner">Rattrapage — ${fmtDate(_ciDate)} (${dowStr})</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:600">${score}/${mx} habitudes</div>
+        ${svgRing(score,mx,scoreColor(score,mx),44)}
       </div>
-      ${H().map(hb=>`
-        <div class="habit-row">
-          <span style="font-size:20px">${hb.emoji}</span>
-          <span style="flex:1;font-size:14px;font-weight:500">${hb.label}</span>
-          <button class="habit-toggle${day[hb.id]===true?' on':''}" onclick="toggleHabit('${_ciDate}','${hb.id}')"></button>
-        </div>`).join('')}
-      <div class="form-group" style="margin-top:16px">
-        <label>Note du jour (optionnel)</label>
-        <textarea rows="2" placeholder="Comment s'est passée ta journée..." onchange="saveNote(this.value)">${esc(note)}</textarea>
+      ${habitRows}
+      <div style="margin-top:16px">
+        <label style="font-size:12px;color:var(--g2);font-weight:600">Note du jour</label>
+        <textarea rows="2" style="width:100%;margin-top:6px;background:var(--bg2);border:1px solid var(--b);border-radius:8px;padding:8px;color:var(--w);font-size:13px" placeholder="Comment s'est passée ta journée..." onchange="saveNote(this.value)">${esc(note)}</textarea>
       </div>
-      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="saveCheckin()">Sauvegarder</button>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px;${score===mx?'box-shadow:0 0 16px var(--green)44':''}" onclick="saveCheckin()">
+        ${score===mx?'🔥 Parfait ! ':''} Sauvegarder ${score}/${mx}
+      </button>
     </div>
   </div>`;
 }
@@ -631,15 +877,21 @@ function saveNote(val){
   S.habits[_ciDate]._note=val;
   save();
 }
+function saveHabitNote(hid,val){
+  if(!S.habits[_ciDate])S.habits[_ciDate]={};
+  if(!S.habits[_ciDate]._notes)S.habits[_ciDate]._notes={};
+  S.habits[_ciDate]._notes[hid]=val;
+  save();
+}
 function saveCheckin(){save();toast('Check-in sauvegardé ✓');}
 
 /* ── FINANCES PAGE ─────────────────────────────────────────────────────── */
 function renderFinances(){
-  const tabs=['Historique','Ajouter'];
+  const tabs=['Historique','Ajouter','Analyse'];
   return `<div class="page">
     <div class="page-title">Finances</div>
     <div class="tabs">${tabs.map((t,i)=>`<button class="tab${_ftab===i?' active':''}" onclick="_ftab=${i};render()">${t}</button>`).join('')}</div>
-    ${_ftab===0?renderFinHistory():renderFinAdd()}
+    ${_ftab===0?renderFinHistory():_ftab===1?renderFinAdd():renderFinAnalyse()}
   </div>`;
 }
 
@@ -705,11 +957,13 @@ function renderFinHistory(){
 function renderTxRow(t){
   const c=TCH[t.type]||'var(--g1)';
   const tags=(t.tags||[]).map(tg=>`<span class="tag-badge" onclick="event.stopPropagation();_fTagFilter='${esc(tg)}';render()" style="cursor:pointer">${esc(tg)}</span>`).join('');
-  return `<div class="tx-row">
+  const pendingBadge=t.pending?`<span style="font-size:10px;background:#FFB80020;color:var(--amber);border:1px solid #FFB80044;padding:1px 6px;border-radius:8px;margin-left:4px;cursor:pointer" onclick="togglePending('${t.id}')">⏳ en attente</span>`:'';
+  return `<div class="tx-row" style="${t.pending?'opacity:0.6':''}">
     <div class="tx-icon" style="background:${c}22">${catEmoji(t.cat)}</div>
     <div style="flex:1;min-width:0">
-      <div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.desc)}</div>
+      <div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.desc)}${pendingBadge}</div>
       <div style="font-size:11px;color:var(--g1)">${esc(t.cat)} · ${fmtDate(t.date)}</div>
+      ${t.note?`<div style="font-size:11px;color:var(--g2);font-style:italic">📝 ${esc(t.note)}</div>`:''}
       ${tags?`<div style="margin-top:2px">${tags}</div>`:''}
     </div>
     <div>
@@ -719,9 +973,33 @@ function renderTxRow(t){
   </div>`;
 }
 
+function parseQuickAdd(text){
+  // "Lidl 45€" or "Lidl 45" or "+salaire 950€" or "epargne 200"
+  const txt=text.trim();
+  if(!txt)return null;
+  const isIncome=txt.startsWith('+');
+  const isSav=/^epargne|^épargne/i.test(txt);
+  const clean=txt.replace(/^[+]/,'');
+  const amtMatch=clean.match(/(\d+[.,]?\d*)\s*€?/);
+  if(!amtMatch)return null;
+  const amt=parseFloat(amtMatch[1].replace(',','.'));
+  const desc=clean.replace(amtMatch[0],'').replace(/€/g,'').trim()||'Transaction';
+  const cat=autoCat(desc);
+  const type=isSav?'Épargne':isIncome?'Revenu':cat==='Salaire'?'Revenu':'Dépense';
+  return{desc:desc||'Transaction',amt:isIncome||isSav?amt:-amt,type,cat};
+}
 function renderFinAdd(){
   const rec=S.config.recurring||[];
+  const qa=window._qaPreview;
   return `
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-label">Saisie rapide ⚡</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="qa-input" value="${esc(_quickAdd)}" placeholder="Ex: Lidl 47€   +salaire 950€   epargne 200" style="flex:1" oninput="_quickAdd=this.value;renderQAPreview()">
+        <button class="btn btn-primary" onclick="submitQuickAdd()">+</button>
+      </div>
+      <div id="qa-preview" style="margin-top:8px;font-size:12px;color:var(--g1)"></div>
+    </div>
     ${rec.length>0?`<div class="card" style="margin-bottom:12px">
       <div class="section-label">Récurrents</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">
@@ -731,7 +1009,7 @@ function renderFinAdd(){
       </div>
     </div>`:''}
     <div class="card">
-      <div class="section-label">Nouvelle transaction</div>
+      <div class="section-label">Nouvelle transaction (détaillée)</div>
       <div class="form-group">
         <label>Date</label>
         <input type="date" id="f-date" value="${iso()}">
@@ -758,9 +1036,19 @@ function renderFinAdd(){
         <label>Tags (séparés par virgule, max 3)</label>
         <input type="text" id="f-tags" placeholder="courses, urgent, famille">
       </div>
-      <div class="form-group" style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="f-recurring" style="width:auto">
-        <label for="f-recurring" style="margin:0;cursor:pointer">Marquer comme récurrent</label>
+      <div class="form-group">
+        <label>Note (optionnel)</label>
+        <input type="text" id="f-note" placeholder="Remarque...">
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="f-recurring" style="width:auto">
+          <label for="f-recurring" style="margin:0;cursor:pointer;font-size:13px">Récurrent</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="f-pending" style="width:auto">
+          <label for="f-pending" style="margin:0;cursor:pointer;font-size:13px">⏳ En attente</label>
+        </div>
       </div>
       <button class="btn btn-primary" style="width:100%" onclick="addTx()">Ajouter</button>
     </div>`;
@@ -773,11 +1061,13 @@ function addTx(){
   const desc=document.getElementById('f-desc').value.trim();
   const amt=parseFloat(document.getElementById('f-amt').value);
   const tagsRaw=document.getElementById('f-tags').value;
+  const note=(document.getElementById('f-note')||{}).value||'';
   const isRec=document.getElementById('f-recurring').checked;
+  const isPending=document.getElementById('f-pending').checked;
   if(!desc||isNaN(amt)||amt<=0){toast('Remplis tous les champs');return;}
   const tags=tagsRaw.split(',').map(t=>t.trim()).filter(Boolean).slice(0,3);
   const finalAmt=(type==='Revenu'?1:-1)*Math.abs(amt);
-  const tx={id:uid(),date,type,cat,desc,amt:finalAmt,tags};
+  const tx={id:uid(),date,type,cat,desc,amt:finalAmt,tags,note,pending:isPending};
   S.finance.push(tx);
   if(isRec){
     S.config.recurring.push({id:uid(),desc,type,cat,amt:finalAmt});
@@ -785,16 +1075,74 @@ function addTx(){
   save();toast('Transaction ajoutée ✓');_ftab=0;render();
 }
 
+function renderQAPreview(){
+  const el=document.getElementById('qa-preview');
+  if(!el)return;
+  const p=parseQuickAdd(_quickAdd);
+  if(!p){el.textContent='';return;}
+  const c=TCH[p.type]||'var(--g1)';
+  el.innerHTML=`<span style="color:${c};font-weight:600">${p.type}</span> · ${esc(p.cat)} · <span style="font-family:var(--font-mono);color:${c}">${p.amt>=0?'+':''}${p.amt.toFixed(2)}€</span> — ${esc(p.desc)}`;
+}
+function submitQuickAdd(){
+  const p=parseQuickAdd(_quickAdd);
+  if(!p){toast('Format non reconnu');return;}
+  S.finance.push({id:uid(),date:iso(),...p,tags:[],pending:false,note:''});
+  save();_quickAdd='';_ftab=0;render();toast('Transaction ajoutée ✓');
+}
 function addRecurring(rid){
   const r=S.config.recurring.find(x=>x.id===rid);
   if(!r)return;
-  const tx={id:uid(),date:iso(),type:r.type,cat:r.cat,desc:r.desc,amt:r.amt,tags:[]};
+  const tx={id:uid(),date:iso(),type:r.type,cat:r.cat,desc:r.desc,amt:r.amt,tags:[],pending:false,note:''};
   S.finance.push(tx);save();toast('Transaction ajoutée ✓');_ftab=0;render();
 }
 
 function deleteTx(id){
   S.finance=S.finance.filter(t=>t.id!==id);
   save();render();
+}
+function togglePending(id){
+  const t=S.finance.find(x=>x.id===id);
+  if(t){t.pending=!t.pending;save();render();}
+}
+function renderFinAnalyse(){
+  const mk=mKey();
+  const ev=expenseVelocity();
+  const merchants=topMerchants(8);
+  const catSpend={};
+  S.finance.filter(t=>t.type==='Dépense').forEach(t=>{catSpend[t.cat]=(catSpend[t.cat]||0)+Math.abs(t.amt);});
+  const topCats=Object.entries(catSpend).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const totalDep=topCats.reduce((a,[,v])=>a+v,0)||1;
+  const evDeltaColor=ev.delta<=0?'var(--green)':'var(--red)';
+  return `
+    <div class="card">
+      <div class="section-label">Vélocité dépenses</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--amber)">${ev.perDayThis}€<span style="font-size:12px;color:var(--g1)">/jour</span></div>
+          <div style="font-size:12px;color:var(--g2)">semaine dernière: ${ev.perDayPrev}€/j</div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:${evDeltaColor}">${ev.delta>=0?'+':''}${ev.delta}€/j</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">Dépenses par catégorie (tout)</div>
+      ${topCats.map(([cat,amt])=>{
+        const p=Math.round(amt/totalDep*100);
+        return `<div class="budget-row">
+          <div class="budget-label"><span>${catEmoji(cat)} ${cat}</span><span style="font-family:var(--font-mono)">${amt.toFixed(0)}€ · ${p}%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:var(--red)"></div></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="card">
+      <div class="section-label">Top commerçants</div>
+      ${merchants.length===0?'<div style="color:var(--g1);font-size:13px">Aucune dépense</div>':
+        merchants.map(m=>`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--b)">
+          <div style="flex:1;font-size:13px;font-weight:500">${esc(m.desc)}</div>
+          <div style="font-size:11px;color:var(--g2)">${m.count}×</div>
+          <div style="font-family:var(--font-mono);font-size:13px;color:var(--red)">-${m.total.toFixed(0)}€</div>
+        </div>`).join('')}
+    </div>`;
 }
 
 function catEmoji(cat){
@@ -1063,11 +1411,11 @@ function generateInsightText(corr){
 
 /* ── CONFIG PAGE ───────────────────────────────────────────────────────── */
 function renderConfig(){
-  const tabs=['Habitudes','Budgets','Récurrents','Données'];
+  const tabs=['Habitudes','Budgets','Récurrents','Objectifs','Profil','Données'];
   return `<div class="page">
     <div class="page-title">Configuration</div>
-    <div class="tabs">${tabs.map((t,i)=>`<button class="tab${_atabC===i?' active':''}" onclick="_atabC=${i};render()">${t}</button>`).join('')}</div>
-    ${_atabC===0?renderCfgHabits():_atabC===1?renderCfgBudgets():_atabC===2?renderCfgRecurring():renderCfgData()}
+    <div class="tabs" style="flex-wrap:wrap">${tabs.map((t,i)=>`<button class="tab${_atabC===i?' active':''}" onclick="_atabC=${i};render()" style="min-width:80px">${t}</button>`).join('')}</div>
+    ${_atabC===0?renderCfgHabits():_atabC===1?renderCfgBudgets():_atabC===2?renderCfgRecurring():_atabC===3?renderCfgGoals():_atabC===4?renderCfgProfile():renderCfgData()}
   </div>`;
 }
 
@@ -1169,20 +1517,220 @@ function addManualRecurring(){
 }
 function deleteRecurring(id){S.config.recurring=S.config.recurring.filter(r=>r.id!==id);save();render();}
 
+function renderCfgGoals(){
+  const goals=S.config.goals||[];
+  const challenges=S.config.challenges||[];
+  return `<div class="card">
+    <div class="section-label">Objectifs financiers</div>
+    ${goals.map((g,i)=>`<div style="padding:10px;background:var(--bg2);border-radius:var(--r2);margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:16px">${g.emoji||'🎯'}</span>
+        <div style="flex:1;font-size:13px;font-weight:600">${esc(g.label)}</div>
+        <button onclick="deleteGoal(${i})" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="number" value="${g.current||0}" min="0" placeholder="Actuel" style="width:80px;font-size:12px" onchange="S.config.goals[${i}].current=parseFloat(this.value)||0;save()">
+        <span style="color:var(--g2);font-size:12px">/ ${g.target}€</span>
+        ${g.deadline?`<span style="font-size:11px;color:var(--g2)">→ ${g.deadline}</span>`:''}
+      </div>
+    </div>`).join('')}
+    <div style="margin-top:12px;border-top:1px solid var(--b);padding-top:12px">
+      <div class="section-label">Nouvel objectif</div>
+      <div class="form-group"><label>Label</label><input type="text" id="g-label" placeholder="Ex: Voyage Japon"></div>
+      <div class="grid2">
+        <div class="form-group"><label>Cible (€)</label><input type="number" id="g-target" min="0" step="100"></div>
+        <div class="form-group"><label>Délai (date)</label><input type="date" id="g-deadline"></div>
+      </div>
+      <div class="form-group"><label>Emoji</label><input type="text" id="g-emoji" placeholder="🎯" style="width:60px"></div>
+      <button class="btn btn-primary" onclick="addGoal()">Ajouter objectif</button>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="section-label">Challenges habitudes 🏆</div>
+    ${challenges.map((c,i)=>`<div style="padding:10px;background:var(--bg2);border-radius:var(--r2);margin-bottom:8px;display:flex;align-items:center;gap:8px">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${esc(c.label)}</div>
+        <div style="font-size:11px;color:var(--g2)">${H().find(h=>h.id===c.habitId)?.label||c.habitId} · ${c.startDate} → ${c.endDate} · ${c.target} jours</div>
+      </div>
+      <button onclick="deleteChallenge(${i})" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
+    </div>`).join('')}
+    ${challenges.length===0?`<div style="font-size:13px;color:var(--g2);margin-bottom:12px">Aucun challenge actif</div>`:''}
+    <div style="border-top:1px solid var(--b);padding-top:12px">
+      <div class="section-label">Nouveau challenge</div>
+      <div class="form-group"><label>Label</label><input type="text" id="ch-label" placeholder="Ex: 30 jours sport"></div>
+      <div class="form-group"><label>Habitude</label>
+        <select id="ch-habit">${H().map(h=>`<option value="${h.id}">${h.emoji} ${h.label}</option>`).join('')}</select>
+      </div>
+      <div class="grid2">
+        <div class="form-group"><label>Début</label><input type="date" id="ch-start" value="${iso()}"></div>
+        <div class="form-group"><label>Fin</label><input type="date" id="ch-end"></div>
+      </div>
+      <div class="form-group"><label>Cible (jours)</label><input type="number" id="ch-target" min="1" value="30"></div>
+      <button class="btn btn-primary" onclick="addChallenge()">Démarrer challenge</button>
+    </div>
+  </div>`;
+}
+function addGoal(){
+  const label=document.getElementById('g-label').value.trim();
+  const target=parseFloat(document.getElementById('g-target').value)||0;
+  const deadline=document.getElementById('g-deadline').value;
+  const emoji=document.getElementById('g-emoji').value.trim()||'🎯';
+  if(!label||!target){toast('Remplis label + cible');return;}
+  S.config.goals.push({id:uid(),label,target,current:0,deadline,emoji});
+  save();render();toast('Objectif ajouté ✓');
+}
+function deleteGoal(i){S.config.goals.splice(i,1);save();render();}
+function addChallenge(){
+  const label=document.getElementById('ch-label').value.trim();
+  const habitId=document.getElementById('ch-habit').value;
+  const startDate=document.getElementById('ch-start').value;
+  const endDate=document.getElementById('ch-end').value;
+  const target=parseInt(document.getElementById('ch-target').value)||30;
+  if(!label||!startDate||!endDate){toast('Remplis tous les champs');return;}
+  S.config.challenges.push({id:uid(),label,habitId,startDate,endDate,target});
+  save();render();toast('Challenge démarré 🏆');
+}
+function deleteChallenge(i){S.config.challenges.splice(i,1);save();render();}
+
+function renderCfgProfile(){
+  const p=S.config.profile||{name:'Massimo',emoji:'⚡'};
+  const hm=S.config.homeModules||{};
+  const density=S.config.density||'comfortable';
+  const wkStart=S.config.weekStart||1;
+  return `<div class="card">
+    <div class="section-label">Profil</div>
+    <div class="grid2">
+      <div class="form-group"><label>Prénom</label><input type="text" id="p-name" value="${esc(p.name||'')}" placeholder="Massimo"></div>
+      <div class="form-group"><label>Emoji</label><input type="text" id="p-emoji" value="${esc(p.emoji||'⚡')}" style="width:60px"></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveProfile()">Sauvegarder profil</button>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="section-label">Affichage</div>
+    <div class="form-group">
+      <label>Densité</label>
+      <div style="display:flex;gap:8px">
+        <button class="btn${density==='comfortable'?' btn-primary':' btn-ghost'}" onclick="setDensity('comfortable')">Confort</button>
+        <button class="btn${density==='compact'?' btn-primary':' btn-ghost'}" onclick="setDensity('compact')">Compact</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Premier jour de semaine</label>
+      <div style="display:flex;gap:8px">
+        <button class="btn${wkStart===1?' btn-primary':' btn-ghost'}" onclick="setWeekStart(1)">Lundi</button>
+        <button class="btn${wkStart===0?' btn-primary':' btn-ghost'}" onclick="setWeekStart(0)">Dimanche</button>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="section-label">Modules de l'accueil</div>
+    ${[['streak','Streak & objectif'],['kpis','KPIs'],['weekBars','Barres semaine'],['checkin','Check-in rapide'],['finAlert','Alerte finances'],['goals','Objectifs']].map(([k,label])=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b)">
+        <span style="font-size:13px">${label}</span>
+        <button class="habit-toggle${hm[k]!==false?' on':''}" onclick="toggleModule('${k}')"></button>
+      </div>`).join('')}
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="section-label">Catégories personnalisées</div>
+    ${(S.config.customCats||[]).map((c,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b)">
+      <span style="flex:1;font-size:13px">${esc(c)}</span>
+      <button onclick="deleteCustomCat(${i})" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
+    </div>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input type="text" id="cc-label" placeholder="Nouvelle catégorie..." style="flex:1">
+      <button class="btn btn-primary" onclick="addCustomCat()">+</button>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="section-label">Snapshots de sauvegarde</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      ${[1,2,3].map(n=>{
+        const snap=S.config.snapshots&&S.config.snapshots[n];
+        return `<div style="flex:1;min-width:80px;background:var(--bg2);border:1px solid var(--b);border-radius:var(--r2);padding:10px;text-align:center">
+          <div style="font-size:11px;color:var(--g2);margin-bottom:6px">Slot ${n}</div>
+          ${snap?`<div style="font-size:10px;color:var(--cyan);margin-bottom:6px">${snap.date}</div>`:'<div style="font-size:10px;color:var(--g2);margin-bottom:6px">Vide</div>'}
+          <div style="display:flex;gap:4px;justify-content:center">
+            <button class="btn btn-ghost btn-sm" onclick="saveSnapshot(${n})" title="Sauvegarder">💾</button>
+            ${snap?`<button class="btn btn-ghost btn-sm" onclick="restoreSnapshot(${n})" title="Restaurer">↩</button>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="section-label">Diagnostic données</div>
+    <button class="btn btn-ghost" onclick="showDataHealth()" style="width:100%">🔍 Analyser les données</button>
+    <div id="health-result" style="margin-top:8px"></div>
+  </div>`;
+}
+function saveProfile(){
+  S.config.profile.name=document.getElementById('p-name').value.trim()||'Massimo';
+  S.config.profile.emoji=document.getElementById('p-emoji').value.trim()||'⚡';
+  save();render();toast('Profil sauvegardé ✓');
+}
+function setDensity(d){S.config.density=d;document.body.classList.toggle('compact',d==='compact');save();render();}
+function setWeekStart(n){S.config.weekStart=n;save();render();}
+function toggleModule(k){
+  S.config.homeModules[k]=S.config.homeModules[k]===false?true:false;
+  save();render();
+}
+function addCustomCat(){
+  const v=document.getElementById('cc-label').value.trim();
+  if(!v)return;
+  if(allCats().includes(v)){toast('Catégorie déjà existante');return;}
+  S.config.customCats.push(v);
+  save();render();toast('Catégorie ajoutée');
+}
+function deleteCustomCat(i){S.config.customCats.splice(i,1);save();render();}
+function saveSnapshot(n){
+  S.config.snapshots[n]={date:iso(),data:JSON.stringify(S)};
+  save();render();toast(`Snapshot ${n} sauvegardé ✓`);
+}
+function restoreSnapshot(n){
+  const snap=S.config.snapshots&&S.config.snapshots[n];
+  if(!snap)return;
+  if(!confirm(`Restaurer le snapshot du ${snap.date} ? Tes données actuelles seront remplacées.`))return;
+  try{S=JSON.parse(snap.data);save();render();toast('Snapshot restauré ✓');}catch(e){toast('Erreur snapshot');}
+}
+function showDataHealth(){
+  const issues=dataHealthCheck();
+  const el=document.getElementById('health-result');
+  if(el)el.innerHTML=issues.map(i=>`<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--b)">${i}</div>`).join('');
+}
+
 function renderCfgData(){
   return `<div class="card">
     <div class="section-label">Thème</div>
     <div style="display:flex;gap:8px;margin-bottom:16px">
       <button class="btn${S.config.theme==='dark'?' btn-primary':' btn-ghost'}" onclick="setTheme('dark')">🌙 Sombre</button>
       <button class="btn${S.config.theme==='light'?' btn-primary':' btn-ghost'}" onclick="setTheme('light')">☀️ Clair</button>
+      <button class="btn${S.config.theme==='auto'?' btn-primary':' btn-ghost'}" onclick="setTheme('auto')">⚙️ Auto</button>
     </div>
     <div class="section-label">Export / Import</div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <button class="btn btn-ghost" onclick="exportJSON()">📤 Exporter JSON</button>
       <button class="btn btn-ghost" onclick="document.getElementById('json-import').click()">📥 Importer JSON</button>
       <input type="file" id="json-import" accept=".json" style="display:none" onchange="importJSON(this)">
-      <button class="btn btn-ghost" onclick="document.getElementById('csv-import').click()">📊 Importer CSV bancaire</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('csv-import').click()">📊 Importer CSV ING</button>
       <input type="file" id="csv-import" accept=".csv,.txt" style="display:none" onchange="importCSV(this)">
+    </div>
+    <div style="margin-top:16px">
+      <div class="section-label">Déployer sur GitHub Pages</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input type="password" id="gh-token" placeholder="GitHub token (ghp_...)" style="flex:1;font-size:12px">
+        <button class="btn btn-primary" onclick="deployToGithub()">🚀 Deploy</button>
+      </div>
+      <div id="deploy-status" style="font-size:12px;color:var(--g1)"></div>
+    </div>
+    <div style="margin-top:16px">
+      <div class="section-label">Raccourcis clavier</div>
+      <div style="background:var(--bg2);border-radius:var(--r2);padding:10px">
+        ${[['1-5','Navigation pages'],['Échap','Fermer modal'],['?','Cette aide']].map(([k,v])=>`
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--b)">
+            <kbd style="background:var(--bg3);padding:2px 7px;border-radius:4px;font-family:var(--font-mono);font-size:11px">${k}</kbd>
+            <span style="color:var(--g1)">${v}</span>
+          </div>`).join('')}
+      </div>
     </div>
     <div style="margin-top:16px">
       <button class="btn btn-danger" style="width:100%" onclick="resetData()">🗑 Réinitialiser les données</button>
@@ -1334,7 +1882,7 @@ function importCSV(input){
       <span style="color:var(--g2);font-size:10px">${r.cat}</span>
       <span style="color:${r.amt>=0?'var(--green)':'var(--red)'}; font-weight:700">${r.amt>=0?'+':''}${r.amt.toFixed(2)}\u00a0€</span>
     </div>`).join('');
-    openModal(`<div style="display:flex;align-items:center;margin-bottom:4px"><div class="eyebrow">Aperçu import CSV</div>${fmtBadge}</div>
+    openModal(`<div style="display:flex;align-items:center;margin-bottom:4px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--g1)">Aperçu import CSV</div>${fmtBadge}</div>
       <div style="font-size:12px;color:var(--g1);margin-bottom:10px">${_csvParsed.length} transaction${_csvParsed.length>1?'s':''} détectée${_csvParsed.length>1?'s':''}</div>
       <div class="csv-preview">
         <div class="csv-row" style="font-weight:700;font-size:10px;letter-spacing:1px;color:var(--g2);background:var(--bg3)"><span>DATE</span><span>DESCRIPTION</span><span>CAT.</span><span>MONTANT</span></div>
@@ -1345,8 +1893,8 @@ function importCSV(input){
         💡 Les catégories ont été assignées automatiquement. Tu pourras les modifier après l'import.
       </div>
       <div style="display:flex;gap:8px">
-        <button class="btn-p" style="background:var(--amber);color:var(--bg);flex:1" onclick="confirmImportCSV()">Importer ${_csvParsed.length} transactions →</button>
-        <button class="btn-p" style="background:var(--bg2);color:var(--g1)" onclick="closeModal()">Annuler</button>
+        <button class="btn btn-primary" style="flex:1" onclick="confirmImportCSV()">Importer ${_csvParsed.length} transactions →</button>
+        <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
       </div>`);
   };
   reader.readAsText(file,'ISO-8859-1'); // ING exports in Latin-1
@@ -1360,14 +1908,52 @@ function resetData(){
   if(!confirm('Réinitialiser toutes les données ? Cette action est irréversible.'))return;
   localStorage.removeItem(SK);load();render();toast('Données réinitialisées');
 }
+async function deployToGithub(){
+  const token=document.getElementById('gh-token').value.trim();
+  if(!token){toast('Saisis ton GitHub token');return;}
+  const statusEl=document.getElementById('deploy-status');
+  if(statusEl)statusEl.textContent='Déploiement en cours...';
+  try{
+    const html=document.documentElement.outerHTML;
+    const b64=btoa(unescape(encodeURIComponent(html)));
+    const owner='massimoharnisfeger-hue',repo='cockpit',path='index.html';
+    // Get current SHA
+    const meta=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{headers:{Authorization:`token ${token}`}});
+    const metaJson=await meta.json();
+    const sha=metaJson.sha;
+    const res=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{
+      method:'PUT',
+      headers:{Authorization:`token ${token}`,'Content-Type':'application/json'},
+      body:JSON.stringify({message:`Cockpit v5 — ${iso()}`,content:b64,sha})
+    });
+    if(res.ok){
+      if(statusEl)statusEl.innerHTML='✅ Déployé sur <a href="https://massimoharnisfeger-hue.github.io/cockpit/" target="_blank" style="color:var(--cyan)">GitHub Pages</a>';
+      toast('Déploiement réussi ✓');
+    }else{
+      const err=await res.json();
+      if(statusEl)statusEl.textContent='❌ Erreur: '+(err.message||res.status);
+    }
+  }catch(e){
+    if(statusEl)statusEl.textContent='❌ Erreur réseau: '+e.message;
+  }
+}
 
 /* ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────── */
 function handleKey(e){
-  if(window.innerWidth<768)return;
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+  if(e.key==='Escape'){closeModal();return;}
+  if(window.innerWidth<768)return;
   const map={'1':'home','2':'checkin','3':'finances','4':'analytics','5':'config'};
   if(map[e.key]){nav(map[e.key]);}
-  else if(e.key==='Escape'){closeModal();}
+  else if(e.key==='?'){
+    openModal(`<button class="modal-close" onclick="closeModal()">×</button>
+      <div class="modal-title">Raccourcis clavier</div>
+      ${[['1','Accueil'],['2','Check-in'],['3','Finances'],['4','Analytics'],['5','Config'],['?','Cette aide'],['Échap','Fermer modal']].map(([k,v])=>`
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b)">
+          <kbd style="background:var(--bg3);padding:3px 10px;border-radius:4px;font-family:var(--font-mono)">${k}</kbd>
+          <span style="color:var(--g1)">${v}</span>
+        </div>`).join('')}`);
+  }
 }
 document.addEventListener('keydown',handleKey);
 
@@ -1384,9 +1970,9 @@ function render(){
     case 'analytics':root.innerHTML=renderAnalytics();break;
     case 'config':root.innerHTML=renderConfig();break;
   }
-  // Show mobile theme button
-  const mb=document.getElementById('mobile-theme-btn');
-  if(mb&&window.innerWidth<768)mb.style.display='flex';
+  // FAB: hide on checkin page
+  const fab=document.getElementById('fab');
+  if(fab)fab.style.display=_page==='checkin'?'none':'flex';
 }
 
 /* ── INIT ──────────────────────────────────────────────────────────────── */
