@@ -4152,7 +4152,7 @@ window.renderHomeV8=function(){
     <div class="v8-hab-grid v8-anim">${habCards}</div>
     <div class="v8-sec">7 derniers jours</div>
     <div class="v8-card v8-anim-1" style="padding:14px 12px;margin-bottom:16px">
-      <canvas id="chart-home-week" style="width:100%;height:140px"></canvas>
+      <div style="position:relative;height:140px"><canvas id="chart-home-week" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas></div>
     </div>
     <div class="v8-sec">Tâches en cours</div>
     <div class="v8-card v8-anim-2" style="padding:12px 16px">
@@ -4238,7 +4238,7 @@ window.renderArgentV8=function(){
     </div>
     ${catKeys.length?`<div class="v8-sec">Répartition dépenses</div>
     <div class="v8-card v8-anim-3" style="padding:16px;margin-bottom:16px">
-      <div class="v8-doughnut-wrap"><canvas id="chart-argent-doughnut"></canvas></div>
+      <div class="v8-doughnut-wrap"><canvas id="chart-argent-doughnut" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas></div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px">
         ${catKeys.map((k,i)=>`<span style="font-size:11px;color:${doughnutColors[i]||'#fff'};background:${doughnutColors[i]||'#fff'}22;padding:2px 8px;border-radius:10px">${k}: ${catVals[i]}€</span>`).join('')}
       </div>
@@ -4295,7 +4295,7 @@ window.renderStatsV8=function(){
           <span class="v8-sec" style="margin:0">Score 30 jours</span>
           <span style="font-size:13px;color:var(--cyan);font-weight:700;font-family:var(--font-mono)">Moy: ${avg30}%</span>
         </div>
-        <canvas id="chart-stats-line" style="width:100%;height:140px"></canvas>
+        <div style="position:relative;height:140px"><canvas id="chart-stats-line" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas></div>
       </div>
       <div class="grid2" style="gap:8px">
         ${weekDays.map((dn,i)=>{const col=weekAvgs[i]>=70?'var(--green)':weekAvgs[i]>=40?'var(--amber)':'var(--red)';return `<div class="v8-stat-card" style="padding:10px"><div style="font-size:12px;color:var(--g1);margin-bottom:4px">${dn}</div><div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:${col}">${weekAvgs[i]}%</div></div>`;}).join('')}
