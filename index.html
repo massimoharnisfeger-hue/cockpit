@@ -3235,6 +3235,16 @@ const BADGES_DEF=[
 // ── Extended state init ───────────────────────────────────────────────────
 function loadV7(){
   if(!S.tasks)S.tasks=[];
+  // Migrate old tasks format: ensure all have status field
+  S.tasks.forEach(t=>{
+    if(!t.status)t.status=t.done?'done':'todo';
+    if(!t.priority)t.priority='moyenne';
+    if(!t.category)t.category='perso';
+    if(!t.subtasks)t.subtasks=[];
+    if(!t.xpReward)t.xpReward=10;
+    if(!t.order)t.order=0;
+    if(!t.createdAt)t.createdAt=iso();
+  });
   if(!S.metrics)S.metrics={};
   if(!S.config.xp)S.config.xp=0;
   if(!S.config.badges)S.config.badges=[];
@@ -3797,6 +3807,41 @@ window.render=function(){
   setTimeout(addSwipeToHabits,100);
 };
 
+/* ── TASK CATEGORIES & PARSER (shared, outside V8 IIFE) ─────────────────── */
+const TASK_CATEGORIES=[
+  {id:'tfe',label:'TFE',color:'#00D4FF',emoji:'📖'},
+  {id:'boulot',label:'Boulot',color:'#00E5A0',emoji:'💼'},
+  {id:'ecom',label:'E-commerce',color:'#A855F7',emoji:'🛒'},
+  {id:'perso',label:'Personnel',color:'#FFB800',emoji:'⭐'},
+  {id:'sante',label:'Santé/Sport',color:'#FF3A5C',emoji:'💪'},
+  {id:'finance',label:'Finance',color:'#6C5CE7',emoji:'💰'},
+  {id:'admin',label:'Administratif',color:'#636E72',emoji:'📋'},
+  {id:'social',label:'Social',color:'#FF9F43',emoji:'👥'},
+];
+function parseTaskInput(text){
+  let t={text:text.trim(),status:'todo',priority:'moyenne',category:'perso',dueDate:null,reminder:null,tags:[],subtasks:[],xpReward:10,order:Date.now(),createdAt:iso()};
+  const today=iso();
+  const tomorrow=isoPlus(today,1);
+  // Priority
+  if(/urgent|!!/i.test(t.text)){t.priority='urgente';t.text=t.text.replace(/urgent|!!/gi,'').trim();}
+  else if(/important|!/i.test(t.text)){t.priority='haute';t.text=t.text.replace(/important|!/gi,'').trim();}
+  else if(/\bbas\b/i.test(t.text)){t.priority='basse';t.text=t.text.replace(/\bbas\b/gi,'').trim();}
+  // Category
+  const catMatch=t.text.match(/#(\w+)/);
+  if(catMatch){const c=TASK_CATEGORIES.find(x=>x.id===catMatch[1].toLowerCase());if(c)t.category=c.id;t.text=t.text.replace(/#\w+/g,'').trim();}
+  // Date
+  if(/aujourd'?hui|today/i.test(t.text)){t.dueDate=today;t.text=t.text.replace(/aujourd'?hui|today/gi,'').trim();}
+  else if(/demain|tomorrow/i.test(t.text)){t.dueDate=tomorrow;t.text=t.text.replace(/demain|tomorrow/gi,'').trim();}
+  else if(/dans (\d+) jours?/i.test(t.text)){const m=t.text.match(/dans (\d+) jours?/i);t.dueDate=isoPlus(today,parseInt(m[1]));t.text=t.text.replace(/dans \d+ jours?/gi,'').trim();}
+  else{const days=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];for(let i=0;i<days.length;i++){if(new RegExp('\\b'+days[i]+'\\b','i').test(t.text)){const cur=new Date().getDay();let diff=(i-cur+7)%7||7;t.dueDate=isoPlus(today,diff);t.text=t.text.replace(new RegExp('\\b'+days[i]+'\\b','gi'),'').trim();break;}}}
+  // Reminder
+  const remMatch=t.text.match(/@rappel:(\w+)/i);
+  if(remMatch){t.reminder=remMatch[1];t.text=t.text.replace(/@rappel:\w+/gi,'').trim();}
+  t.text=t.text.replace(/\s+/g,' ').trim();
+  t.id='t'+Date.now()+Math.random().toString(36).slice(2,6);
+  return t;
+}
+
 /* ── V8 ─────────────────────────────────────────────────────────────────── */
 /* REPLACES V7 render with 4-page nav — premium redesign with Chart.js */
 (function(){
@@ -3917,6 +3962,17 @@ const v8css=`
 .v8-nav-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:10px;cursor:pointer;transition:background .15s;}
 .v8-nav-item:hover{background:var(--bg3);}
 .v8-nav-icon{width:38px;height:38px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+/* kanban */
+.v8-kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start;overflow-x:auto;}
+@media(max-width:900px){.v8-kanban{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.v8-kanban{grid-template-columns:1fr;}}
+.v8-kcol{background:rgba(12,17,24,0.8);border:1px solid var(--b);border-radius:14px;padding:12px;min-height:200px;}
+.v8-kcol-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b);}
+.v8-ktask{background:var(--bg);border:1px solid var(--b);border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .2s;user-select:none;}
+.v8-ktask:hover{border-color:var(--cyan);}
+.v8-task-input-row{display:flex;gap:8px;margin-bottom:16px;}
+.v8-task-input-row input{flex:1;background:var(--bg1);border:1px solid var(--b);border-radius:10px;padding:10px 14px;color:var(--w);font-size:13px;}
+.v8-task-input-row input:focus{outline:none;border-color:var(--cyan);}
 `;
 const styleEl=document.createElement('style');
 styleEl.id='v8-styles';
@@ -4018,7 +4074,10 @@ window.confirmQuickDepense=function(){
 window.confirmQuickTask=function(){
   const txt=document.getElementById('qs-task')?.value?.trim();
   if(!txt){toast('Texte vide');return;}
-  addTask(txt);closeQuickSheet();toast('Tâche créée ✓');
+  const t=parseTaskInput(txt);
+  if(!S.tasks)S.tasks=[];
+  S.tasks.push(t);
+  save();closeQuickSheet();render();toast('Tâche créée ✓','var(--green)');
 };
 
 // ── Rattrapage / check-in modal ────────────────────────────────────────────────
@@ -4061,22 +4120,20 @@ window.toggleHabitHome=function(d,hid,el){
   el.classList.toggle('done',!!S.habits[d][hid]);
   addXP(S.habits[d][hid]?5:-2,'habit toggle');
 };
-window.toggleTaskV8=function(id,el){
+window.toggleTaskV8=function(id){
   const t=(S.tasks||[]).find(x=>x.id===id);
   if(!t)return;
-  t.done=true;t.doneAt=iso();
-  save();
-  el.classList.add('done');el.textContent='✓';
-  if(el.nextElementSibling)el.nextElementSibling.classList.add('done');
-  addXP(5,'task done');checkBadges();
-  setTimeout(()=>render(),600);
+  t.status=t.status==='done'?'todo':'done';
+  if(t.status==='done'){t.completedAt=iso();addXP(t.xpReward||10,'tâche ✓');}
+  save();render();
 };
 window.addTaskFromInput=function(){
   const inp=document.getElementById('v8-task-input');
-  if(!inp)return;
-  const txt=inp.value.trim();
-  if(!txt){toast('Texte vide');return;}
-  addTask(txt);inp.value='';render();toast('Tâche ajoutée ✓');
+  if(!inp||!inp.value.trim())return;
+  const t=parseTaskInput(inp.value);
+  if(!S.tasks)S.tasks=[];
+  S.tasks.push(t);
+  save();inp.value='';render();toast('Tâche ajoutée ✓','var(--green)');
 };
 
 // ── renderHomeV8 ──────────────────────────────────────────────────────────────
@@ -4130,12 +4187,12 @@ window.renderHomeV8=function(){
   const weekLabels=days7.map(dd=>dayLabels[new Date(dd+'T12:00:00').getDay()]);
 
   // Tasks
-  const tasks=(S.tasks||[]).filter(t=>!t.done).slice(0,6);
+  const tasks=(S.tasks||[]).filter(t=>t.status!=='done').sort((a,b)=>{const pri={urgente:0,haute:1,moyenne:2,basse:3};return (pri[a.priority]||2)-(pri[b.priority]||2);}).slice(0,6);
   const priorities=['urgent','moyen','bas'];
   const taskRows=tasks.length?tasks.map((t,i)=>{
     const pri=t.priority||priorities[i%3];
     return `<div class="v8-task-item">
-      <div class="v8-task-cb" onclick="toggleTaskV8('${t.id}',this)"></div>
+      <div class="v8-task-cb" onclick="toggleTaskV8('${t.id}')"></div>
       <span class="v8-task-text">${t.text||''}</span>
       <span class="v8-priority-badge v8-priority-${pri==='urgent'?'urgent':pri==='moyen'?'moyen':'bas'}">${pri==='urgent'?'URGENT':pri==='moyen'?'MOYEN':'BAS'}</span>
       <span class="v8-xp-badge">+5XP</span>
@@ -4193,8 +4250,11 @@ window.renderArgentV8=function(){
   const allTx=[...S.finance].sort((a,b)=>b.date.localeCompare(a.date));
   const monthTx=allTx.filter(t=>t.date.startsWith(mk));
   const monthExpenses=monthTx.filter(t=>t.amt<0);
+  const monthRevenues=monthTx.filter(t=>t.amt>0);
   const totalMonth=monthExpenses.reduce((s,t)=>s+Math.abs(t.amt),0);
-  const netEstim=bal>0?(bal-totalMonth):null;
+  const totalRevenu=monthRevenues.reduce((s,t)=>s+t.amt,0);
+  const netEstim=totalRevenu-totalMonth;
+  const disponible=bal>0?bal-totalMonth:null;
 
   // Dépenses par catégorie (pour doughnut)
   const catTotals={};
@@ -4226,16 +4286,22 @@ window.renderArgentV8=function(){
       <div class="v8-hero-sub">${savPct}% de l'objectif ${goal>0?goal+'€':''}</div>
       <div class="progress-bar" style="margin-top:10px;height:6px"><div class="progress-fill" style="width:${savPct}%;background:linear-gradient(90deg,var(--cyan),var(--purp))"></div></div>
     </div>
-    <div class="grid2" style="gap:10px;margin:16px 0">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0">
       <div class="v8-stat-card v8-anim-1">
+        <div class="v8-stat-val" style="color:var(--green)">${totalRevenu.toFixed(0)}€</div>
+        <div class="v8-stat-lbl">Revenus ce mois</div>
+      </div>
+      <div class="v8-stat-card v8-anim-2">
         <div class="v8-stat-val" style="color:var(--red)">${totalMonth.toFixed(0)}€</div>
         <div class="v8-stat-lbl">Dépenses ce mois</div>
       </div>
-      <div class="v8-stat-card v8-anim-2">
-        <div class="v8-stat-val" style="color:${netEstim!==null&&netEstim>=0?'var(--green)':'var(--red)'}">${netEstim!==null?netEstim.toFixed(0)+'€':'—'}</div>
-        <div class="v8-stat-lbl">Net estimé</div>
+      <div class="v8-stat-card v8-anim-3">
+        <div class="v8-stat-val" style="color:${netEstim>=0?'var(--green)':'var(--red)'}">${netEstim.toFixed(0)}€</div>
+        <div class="v8-stat-lbl">Net (rev − dép)</div>
       </div>
     </div>
+    ${disponible!==null?`<div class="v8-stat-card v8-anim-4" style="margin-bottom:16px;text-align:left;padding:14px 16px;display:flex;align-items:center;justify-content:space-between"><span class="v8-stat-lbl" style="margin:0">Disponible (solde − dép)</span><span class="v8-stat-val" style="font-size:20px;color:${disponible>=0?'var(--cyan)':'var(--red)'};">${disponible.toFixed(0)}€</span></div>`:''}
+
     ${catKeys.length?`<div class="v8-sec">Répartition dépenses</div>
     <div class="v8-card v8-anim-3" style="padding:16px;margin-bottom:16px">
       <div class="v8-doughnut-wrap"><canvas id="chart-argent-doughnut" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas></div>
@@ -4390,14 +4456,15 @@ window.renderPlusV8=function(){
 };
 
 // ── Sidebar & bnav V8 ─────────────────────────────────────────────────────────
-const PAGES_V8=['home','argent','stats','plus'];
+const PAGES_V8=['home','taches','argent','stats','plus'];
 const PAGE_ICONS_V8={
   home:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline stroke-linecap="round" stroke-linejoin="round" stroke-width="2" points="9 22 9 12 15 12 15 22"/>',
+  taches:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
   argent:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
   stats:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
   plus:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>',
 };
-const PAGE_LABELS_V8={home:'Home',argent:'Argent',stats:'Stats',plus:'Plus'};
+const PAGE_LABELS_V8={home:'Home',taches:'Tâches',argent:'Argent',stats:'Stats',plus:'Plus'};
 
 window.renderSidebarV8=function(){
   const el=document.getElementById('sidebar');if(!el)return;
@@ -4440,13 +4507,18 @@ window.renderRightPanelV8=function(){
       <div class="progress-bar"><div class="progress-fill" style="width:${scorePct}%;background:${scorePct>=80?'var(--green)':scorePct>=50?'var(--amber)':'var(--red)'}"></div></div>
       <div style="font-size:11px;color:var(--g1);margin-top:4px">${scorePct}% des habitudes</div>
     </div>
-    <div class="v8-rp-section">
+    ${_page!=='argent'?`<div class="v8-rp-section">
       <div class="v8-rp-title">Solde bancaire</div>
       <div onclick="promptBalance()" style="cursor:pointer">
         <div style="font-family:var(--font-mono);font-size:20px;font-weight:700;color:${bal>0?'var(--cyan)':'var(--g1)'}">${bal>0?bal.toFixed(2)+'€':'— tap pour définir'}</div>
         <div class="progress-bar" style="margin-top:6px"><div class="progress-fill" style="width:${balPct}%;background:linear-gradient(90deg,var(--cyan),var(--purp))"></div></div>
         <div style="font-size:11px;color:var(--g2);margin-top:3px">${balPct}% · objectif ${balGoal>0?balGoal+'€':''}</div>
       </div>
+    </div>`:''}
+
+    <div class="v8-rp-section">
+      <div class="v8-rp-title">TÂCHES AUJOURD'HUI · ${(S.tasks||[]).filter(t=>t.dueDate===iso()&&t.status!=='done').length}</div>
+      ${(()=>{const todayTasks=(S.tasks||[]).filter(t=>t.dueDate===iso()&&t.status!=='done');const PRI_C={urgente:'var(--red)',haute:'var(--amber)',moyenne:'var(--cyan)',basse:'var(--g1)'};return todayTasks.length===0?`<div style="font-size:11px;color:var(--g1);padding:4px 0">Aucune tâche pour aujourd'hui</div>`:todayTasks.slice(0,3).map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b)"><div onclick="moveTaskStatus('${t.id}','done')" style="width:14px;height:14px;border:1.5px solid ${PRI_C[t.priority]||'var(--g1)'};border-radius:4px;cursor:pointer;flex-shrink:0"></div><span style="font-size:12px;color:var(--w);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.text}</span></div>`).join('');})()}
     </div>
     <div class="v8-rp-section">
       <div class="v8-rp-title">Streak 🔥</div>
@@ -4473,6 +4545,7 @@ window.render=function(){
   if(!root)return;
   switch(_page){
     case 'home':root.innerHTML=renderHomeV8();initChartsHome();break;
+    case 'taches':root.innerHTML=renderTachesV8();break;
     case 'argent':root.innerHTML=renderArgentV8();initChartsArgent();break;
     case 'stats':root.innerHTML=renderStatsV8();initChartsStats();break;
     case 'plus':root.innerHTML=renderPlusV8();break;
@@ -4490,12 +4563,156 @@ window.nav=function(p){_page=p;window._statsTab='analytics';render();const root=
 
 Object.assign(window,{PAGES:PAGES_V8});
 
+// ── renderTachesV8 ────────────────────────────────────────────────────────────
+window.renderTachesV8=function(){
+  const COLS=[
+    {id:'todo',label:'À faire',color:'var(--g1)'},
+    {id:'doing',label:'En cours',color:'var(--cyan)'},
+    {id:'done',label:'Fait',color:'var(--green)'},
+    {id:'blocked',label:'Bloqué',color:'var(--red)'}
+  ];
+  const PRI_COLORS={urgente:'var(--red)',haute:'var(--amber)',moyenne:'var(--cyan)',basse:'var(--g1)'};
+  const cats=Object.fromEntries(TASK_CATEGORIES.map(c=>[c.id,c]));
+
+  const colsHTML=COLS.map(col=>{
+    const tasks=(S.tasks||[]).filter(t=>t.status===col.id).sort((a,b)=>(a.order||0)-(b.order||0));
+    const cards=tasks.map(t=>{
+      const cat=cats[t.category]||{color:'#666',emoji:'📌',label:t.category};
+      const priColor=PRI_COLORS[t.priority]||'var(--g1)';
+      const overdue=t.dueDate&&t.dueDate<iso()&&t.status!=='done';
+      const sub=t.subtasks||[];
+      const subDone=sub.filter(s=>s.done).length;
+      return `<div class="v8-ktask" draggable="true" data-id="${t.id}" data-status="${col.id}" onclick="openTaskDetail('${t.id}')">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <span style="font-size:10px;font-weight:700;color:${priColor};background:${priColor}22;padding:1px 6px;border-radius:6px;text-transform:uppercase">${t.priority}</span>
+          <span style="font-size:10px;color:${cat.color};background:${cat.color}22;padding:1px 6px;border-radius:6px">${cat.emoji} ${cat.label}</span>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--w);line-height:1.3;margin-bottom:6px">${t.text||''}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+          ${t.dueDate?`<span style="font-size:11px;color:${overdue?'var(--red)':'var(--g1)'}">${overdue?'⚠️ ':''} ${t.dueDate}</span>`:'<span></span>'}
+          ${sub.length?`<span style="font-size:11px;color:var(--g1)">${subDone}/${sub.length} ✓</span>`:''}
+        </div>
+        ${sub.length?`<div style="height:3px;background:var(--b);border-radius:2px;margin-top:6px"><div style="height:100%;background:var(--green);border-radius:2px;width:${sub.length?Math.round(subDone/sub.length*100):0}%"></div></div>`:''}
+        <div style="display:flex;gap:6px;margin-top:8px">
+          ${col.id!=='done'?`<button onclick="event.stopPropagation();moveTaskStatus('${t.id}','done')" style="flex:1;font-size:11px;padding:3px;background:rgba(0,229,160,.15);border:none;border-radius:6px;color:var(--green);cursor:pointer">✓ Fait</button>`:''}
+          ${col.id==='todo'?`<button onclick="event.stopPropagation();moveTaskStatus('${t.id}','doing')" style="flex:1;font-size:11px;padding:3px;background:rgba(0,212,255,.15);border:none;border-radius:6px;color:var(--cyan);cursor:pointer">▶ Démarrer</button>`:''}
+          <button onclick="event.stopPropagation();deleteTask('${t.id}')" style="font-size:11px;padding:3px 8px;background:rgba(255,58,92,.15);border:none;border-radius:6px;color:var(--red);cursor:pointer">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="v8-kcol" id="kcol-${col.id}">
+      <div class="v8-kcol-hdr" style="border-top:3px solid ${col.color}">
+        <span style="font-weight:700;font-size:13px;color:${col.color}">${col.label}</span>
+        <span style="font-size:11px;color:var(--g1);background:var(--b);padding:2px 8px;border-radius:10px">${tasks.length}</span>
+      </div>
+      ${cards||'<div style="color:var(--g1);font-size:12px;text-align:center;padding:16px">Vide</div>'}
+    </div>`;
+  }).join('');
+
+  return `<div class="page" style="max-width:100%;padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="page-title" style="margin:0">✅ Tâches</div>
+      <button onclick="openQuickSheet('tache')" style="background:var(--cyan);color:#000;border:none;border-radius:10px;padding:8px 16px;font-weight:700;font-size:13px;cursor:pointer">+ Ajouter</button>
+    </div>
+    <div class="v8-task-input-row">
+      <input id="v8-quick-task" type="text" placeholder="Nouvelle tâche... (ex: Appeler dentiste demain #sante urgent)" onkeydown="if(event.key==='Enter')quickAddTask()"/>
+      <button onclick="quickAddTask()" style="background:var(--cyan);color:#000;border:none;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer">+</button>
+    </div>
+    <div class="v8-kanban">${colsHTML}</div>
+  </div>`;
+};
+
+// ── Task functions ────────────────────────────────────────────────────────────
+window.quickAddTask=function(){
+  const inp=document.getElementById('v8-quick-task');
+  if(!inp||!inp.value.trim())return;
+  const t=parseTaskInput(inp.value);
+  if(!S.tasks)S.tasks=[];
+  S.tasks.push(t);
+  save();
+  inp.value='';
+  render();
+  toast('Tâche ajoutée ✓','var(--green)');
+};
+
+window.moveTaskStatus=function(id,status){
+  const t=(S.tasks||[]).find(x=>x.id===id);
+  if(!t)return;
+  t.status=status;
+  if(status==='done'){t.completedAt=iso();addXP(t.xpReward||10,'tâche complétée');}
+  save();render();
+};
+
+window.openTaskDetail=function(id){
+  const t=(S.tasks||[]).find(x=>x.id===id);
+  if(!t)return;
+  const PRI_OPTS=['urgente','haute','moyenne','basse'];
+  const html=`<h3 style="margin:0 0 16px;color:var(--w)">${t.text}</h3>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      ${PRI_OPTS.map(p=>`<button onclick="updateTaskField('${id}','priority','${p}')" style="padding:4px 12px;border-radius:8px;border:1.5px solid ${t.priority===p?'var(--cyan)':'var(--b)'};background:${t.priority===p?'rgba(0,212,255,.15)':'transparent'};color:${t.priority===p?'var(--cyan)':'var(--g1)'};cursor:pointer;font-size:12px">${p}</button>`).join('')}
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--g1)">Échéance</label>
+      <input type="date" value="${t.dueDate||''}" onchange="updateTaskField('${id}','dueDate',this.value)" style="display:block;width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:8px;color:var(--w);font-size:13px">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--g1)">Notes</label>
+      <textarea onchange="updateTaskField('${id}','notes',this.value)" style="display:block;width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:8px;color:var(--w);font-size:13px;resize:vertical;min-height:80px">${t.notes||''}</textarea>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--g1)">Sous-tâches</label>
+      ${(t.subtasks||[]).map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+        <input type="checkbox" ${s.done?'checked':''} onchange="toggleSubtask('${id}',${i})">
+        <span style="font-size:13px;color:${s.done?'var(--g1)':'var(--w)'}${s.done?';text-decoration:line-through':''}">${s.text}</span>
+      </div>`).join('')}
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input id="sub-inp-${id}" type="text" placeholder="Ajouter sous-tâche" style="flex:1;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:6px 10px;color:var(--w);font-size:12px">
+        <button onclick="addSubtask('${id}')" style="background:rgba(0,212,255,.15);border:1px solid var(--cyan);border-radius:8px;padding:6px 12px;color:var(--cyan);cursor:pointer;font-size:12px">+</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button onclick="moveTaskStatus('${id}','done');closeModal();" style="flex:1;background:rgba(0,229,160,.15);border:1px solid var(--green);border-radius:10px;padding:10px;color:var(--green);cursor:pointer;font-weight:700">✓ Marquer fait</button>
+      <button onclick="deleteTask('${id}');closeModal();" style="background:rgba(255,58,92,.15);border:1px solid var(--red);border-radius:10px;padding:10px;color:var(--red);cursor:pointer">🗑</button>
+    </div>`;
+  openModal(html);
+};
+
+window.updateTaskField=function(id,field,val){
+  const t=(S.tasks||[]).find(x=>x.id===id);
+  if(!t)return;
+  t[field]=val;
+  save();
+  if(field==='priority')openTaskDetail(id);
+};
+
+window.addSubtask=function(id){
+  const inp=document.getElementById('sub-inp-'+id);
+  if(!inp||!inp.value.trim())return;
+  const t=(S.tasks||[]).find(x=>x.id===id);
+  if(!t)return;
+  if(!t.subtasks)t.subtasks=[];
+  t.subtasks.push({id:'s'+Date.now(),text:inp.value.trim(),done:false});
+  save();
+  openTaskDetail(id);
+};
+
+window.toggleSubtask=function(taskId,subIdx){
+  const t=(S.tasks||[]).find(x=>x.id===taskId);
+  if(!t||!t.subtasks[subIdx])return;
+  t.subtasks[subIdx].done=!t.subtasks[subIdx].done;
+  if(t.subtasks.length&&t.subtasks.every(s=>s.done)&&t.status!=='done'){
+    t.status='done';t.completedAt=iso();addXP(t.xpReward||10,'tâche complétée');
+  }
+  save();
+  openTaskDetail(taskId);
+};
+
 })(); // end V8 IIFE
 
 /* ── INIT ──────────────────────────────────────────────────────────────── */
 load();
 loadV7();
-Object.assign(window,{PAGES:['home','argent','stats','plus']});
+Object.assign(window,{PAGES:['home','taches','argent','stats','plus']});
 render();
 injectManifest();
 checkNotifOnLoad();
