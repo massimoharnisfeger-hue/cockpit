@@ -3842,6 +3842,25 @@ function parseTaskInput(text){
   return t;
 }
 
+/* ── QUOTES (outside V8 IIFE) ───────────────────────────────────────────── */
+const QUOTES=[
+  "La discipline est le pont entre les objectifs et les accomplissements.",
+  "Un jour à la fois. Une habitude à la fois.",
+  "Le succès est la somme de petits efforts répétés jour après jour.",
+  "Commence là où tu es. Utilise ce que tu as. Fais ce que tu peux.",
+  "La cohérence bat la perfection.",
+  "Chaque expert a commencé en débutant.",
+  "Ta future version te remercie pour ce que tu fais aujourd'hui.",
+  "L'action chasse la peur.",
+  "Les grands résultats viennent de petites actions constantes.",
+  "Sois plus fort que tes excuses.",
+  "Le progrès, pas la perfection.",
+  "Construis l'empire une brique à la fois.",
+  "Tes habitudes définissent ton futur.",
+  "Souffre maintenant, vis comme un champion ensuite.",
+  "Ce que tu répètes, tu le deviens.",
+];
+
 /* ── V8 ─────────────────────────────────────────────────────────────────── */
 /* REPLACES V7 render with 4-page nav — premium redesign with Chart.js */
 (function(){
@@ -3958,6 +3977,8 @@ const v8css=`
 .v8-anim-4{animation:slideIn .3s .20s ease both;}
 /* niveau XP card */
 .v8-xp-circle{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#06090D;flex-shrink:0;}
+/* 3-column grid */
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
 /* nav menu items */
 .v8-nav-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:10px;cursor:pointer;transition:background .15s;}
 .v8-nav-item:hover{background:var(--bg3);}
@@ -4149,24 +4170,43 @@ window.renderHomeV8=function(){
   const xp=S.config.xp||0;
   const lvl=getLevelInfo(xp);
 
-  // 4 stat cards
+  // A2 — Mode matin/soir automatique
+  const hour=new Date().getHours();
+  const isMorning=hour<14;
+  const isEvening=hour>=19;
+  const timeLabel=isMorning?'🌅 Matin':isEvening?'🌙 Soir':'☀️ Journée';
+
+  // A1 — Score ring + 3 stat cards
   const scoreColor=score>=80?'var(--green)':score>=50?'var(--amber)':'var(--red)';
-  const statCards=`<div class="grid2" style="gap:10px;margin-bottom:16px">
-    <div class="v8-stat-card v8-anim" onclick="openRattrapage()">
-      <div class="v8-stat-val" style="color:${scoreColor}">${score}<span style="font-size:16px">%</span></div>
-      <div class="v8-stat-lbl">Score du jour</div>
+  const scoreRing=`<div style="display:flex;justify-content:center;margin-bottom:16px">
+    <div style="position:relative;width:120px;height:120px;cursor:pointer" onclick="openRattrapage()">
+      <div style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(${scoreColor} ${score}%,var(--b) ${score}%);display:flex;align-items:center;justify-content:center">
+        <div style="width:90px;height:90px;border-radius:50%;background:var(--bg1);display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div style="font-family:var(--font-mono);font-size:28px;font-weight:800;color:${scoreColor}">${score}<span style="font-size:14px">%</span></div>
+          <div style="font-size:10px;color:var(--g1)">Score</div>
+        </div>
+      </div>
     </div>
-    <div class="v8-stat-card v8-anim-1">
-      <div class="v8-stat-val" style="color:var(--amber)">${streak}<span style="font-size:16px">🔥</span></div>
-      <div class="v8-stat-lbl">Streak actuel</div>
+  </div>`;
+
+  // A5 — Near-record banner
+  const bestStreak=Math.max(S.config.bestStreak||0,streak);
+  if(bestStreak>=(S.config.bestStreak||0)){S.config.bestStreak=bestStreak;}
+  const nearRecord=streak>0&&bestStreak>5&&streak>=bestStreak-3&&streak<bestStreak;
+  const nearRecordBanner=nearRecord?`<div style="background:rgba(255,184,0,.12);border:1px solid var(--amber);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--amber)">🏆 Plus que ${bestStreak-streak} jour${bestStreak-streak>1?'s':''} pour battre ton record de ${bestStreak} jours !</div>`:'';
+
+  const statCards=`${nearRecordBanner}<div class="grid3" style="gap:10px;margin-bottom:16px">
+    <div class="v8-stat-card v8-anim">
+      <div class="v8-stat-val" style="color:var(--amber)">${streak}<span style="font-size:14px">🔥</span></div>
+      <div class="v8-stat-lbl">Streak</div>
     </div>
-    <div class="v8-stat-card v8-anim-2" onclick="promptBalance()" style="cursor:pointer">
-      <div class="v8-stat-val" style="color:${bal>0?'var(--cyan)':'var(--g1);font-size:18px'}">${bal>0?bal.toFixed(0)+'€':'—'}</div>
+    <div class="v8-stat-card v8-anim-1" onclick="promptBalance()" style="cursor:pointer">
+      <div class="v8-stat-val" style="color:${bal>0?'var(--cyan)':'var(--g1)'};font-size:${bal>0&&bal>=1000?'18px':'22px'}">${bal>0?bal.toFixed(0)+'€':'—'}</div>
       <div class="v8-stat-lbl">Solde 💳</div>
     </div>
-    <div class="v8-stat-card v8-anim-3">
-      <div class="v8-stat-val v8-gradient-text" style="font-size:20px">${lvl.name}</div>
-      <div class="v8-stat-lbl">Niveau ${lvl.lvl}</div>
+    <div class="v8-stat-card v8-anim-2">
+      <div class="v8-stat-val v8-gradient-text" style="font-size:18px">${lvl.name}</div>
+      <div class="v8-stat-lbl">Niv. ${lvl.lvl}</div>
     </div>
   </div>`;
 
@@ -4178,6 +4218,37 @@ window.renderHomeV8=function(){
       <div class="hc-name">${h.label||''}</div>
     </div>`;
   }).join(''):`<p style="color:var(--g1);font-size:13px;grid-column:1/-1">Aucune habitude — <a href="#" onclick="nav('config')" style="color:var(--cyan)">Configurer</a></p>`;
+
+  // A2 — Evening bilan section
+  let eveningBilan='';
+  if(isEvening){
+    const habDone=habs.filter(h=>!!day[h.id]).length;
+    const tasksDoneToday=(S.tasks||[]).filter(t=>t.status==='done'&&t.completedAt===d).length;
+    const daySpend=(S.finance||[]).filter(t=>t.date===d&&t.amt<0).reduce((s,t)=>s+Math.abs(t.amt),0);
+    eveningBilan=`<div class="v8-card v8-anim-3" style="padding:12px 16px;margin-bottom:16px;border-color:rgba(168,85,247,.3)">
+      <div class="v8-sec" style="margin:0 0 10px;color:var(--purp)">🌙 Bilan du soir</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:13px">
+        <span style="color:var(--w)">Habitudes: <strong style="color:var(--cyan)">${habDone}/${habs.length}</strong></span>
+        <span style="color:var(--w)">Tâches: <strong style="color:var(--green)">${tasksDoneToday}</strong></span>
+        <span style="color:var(--w)">Dépenses: <strong style="color:var(--red)">${daySpend.toFixed(0)}€</strong></span>
+      </div>
+    </div>`;
+  }
+
+  // A2 — Morning priorities section
+  let morningPriorities='';
+  if(isMorning){
+    const topTasks=(S.tasks||[]).filter(t=>t.status!=='done'&&(t.priority==='urgente'||t.priority==='haute')).sort((a,b)=>{const pri={urgente:0,haute:1};return (pri[a.priority]||1)-(pri[b.priority]||1);}).slice(0,3);
+    if(topTasks.length){
+      morningPriorities=`<div class="v8-card v8-anim-3" style="padding:12px 16px;margin-bottom:16px;border-color:rgba(255,184,0,.3)">
+        <div class="v8-sec" style="margin:0 0 10px;color:var(--amber)">🌅 Priorités du matin</div>
+        ${topTasks.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:var(--w)">
+          <span style="color:${t.priority==='urgente'?'var(--red)':'var(--amber)'}">●</span>
+          <span>${t.text}</span>
+        </div>`).join('')}
+      </div>`;
+    }
+  }
 
   // Week bar chart (7 jours — canvas)
   const days7=[];
@@ -4199,14 +4270,27 @@ window.renderHomeV8=function(){
     </div>`;
   }).join(''):`<div style="color:var(--g1);font-size:13px;padding:12px 0;text-align:center">Aucune tâche — ajoute-en une ci-dessous</div>`;
 
+  // A4 — Quote du jour
+  const doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(1000*60*60*24));
+  const quote=QUOTES[doy%QUOTES.length];
+
   return `<div class="page">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div class="page-title" style="margin:0">🏠 Aujourd'hui</div>
-      <div style="font-size:12px;color:var(--g1)">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'short'})}</div>
+      <div style="font-size:12px;color:var(--g1)">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'short'})} · ${timeLabel}</div>
     </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input id="home-quick-input" type="text" placeholder="Ajouter une tâche... (ex: Appeler dentiste demain #sante urgent)"
+        style="flex:1;background:var(--bg1);border:1px solid var(--b);border-radius:10px;padding:10px 14px;color:var(--w);font-size:13px;"
+        onkeydown="if(event.key==='Enter')homeQuickAdd()"/>
+      <button onclick="homeQuickAdd()" style="background:var(--cyan);color:#000;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer">+</button>
+    </div>
+    ${scoreRing}
     ${statCards}
     <div class="v8-sec">Habitudes du jour</div>
     <div class="v8-hab-grid v8-anim">${habCards}</div>
+    ${isEvening?eveningBilan:''}
+    ${isMorning?morningPriorities:''}
     <div class="v8-sec">7 derniers jours</div>
     <div class="v8-card v8-anim-1" style="padding:14px 12px;margin-bottom:16px">
       <div style="position:relative;height:140px"><canvas id="chart-home-week" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas></div>
@@ -4219,10 +4303,10 @@ window.renderHomeV8=function(){
         <button onclick="addTaskFromInput()">+</button>
       </div>
     </div>
+    <div style="margin-top:16px;padding:12px 16px;border-left:3px solid var(--b);color:var(--g1);font-size:12px;font-style:italic;line-height:1.5">"${quote}"</div>
   </div>
   <script>window._homeWeekScores=${JSON.stringify(weekScores)};window._homeWeekLabels=${JSON.stringify(weekLabels)};<\/script>`;
 };
-
 // ── initChartsHome ────────────────────────────────────────────────────────────
 window.initChartsHome=function(){
   setTimeout(function(){
@@ -4245,7 +4329,15 @@ window.renderArgentV8=function(){
   const bal=getBankBalance();
   const goal=parseFloat(S.config.savingsGoal||4000);
   const savPct=goal>0?Math.min(100,Math.round(bal/goal*100)):0;
-  const mk=mKey();
+  if(!window._argentMois)window._argentMois=mKey();
+  const mk=window._argentMois;
+  const mkDate=new Date(mk+'-01');
+  const mkLabel=mkDate.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  const mkPrev=new Date(mkDate);mkPrev.setMonth(mkPrev.getMonth()-1);
+  const mkNext=new Date(mkDate);mkNext.setMonth(mkNext.getMonth()+1);
+  const mkPrevStr=mkPrev.toISOString().slice(0,7);
+  const mkNextStr=mkNext.toISOString().slice(0,7);
+  const isCurrentMonth=mk===mKey();
   const CAT_EMOJI={Alimentation:'🍔',Transport:'🚗',Loisirs:'🎮',Santé:'💊',Logement:'🏠',Shopping:'👕',Épargne:'💰',Salaire:'💵','Revenus divers':'💼',Sport:'💪',Abonnements:'📱',Factures:'🧾',Divers:'📦'};
   const allTx=[...S.finance].sort((a,b)=>b.date.localeCompare(a.date));
   const monthTx=allTx.filter(t=>t.date.startsWith(mk));
@@ -4255,6 +4347,13 @@ window.renderArgentV8=function(){
   const totalRevenu=monthRevenues.reduce((s,t)=>s+t.amt,0);
   const netEstim=totalRevenu-totalMonth;
   const disponible=bal>0?bal-totalMonth:null;
+  // B4 projection
+  const today=new Date();
+  const daysInMonth=new Date(today.getFullYear(),today.getMonth()+1,0).getDate();
+  const dayOfMonth=today.getDate();
+  const monthDepenses=totalMonth;
+  const projDep=isCurrentMonth&&dayOfMonth>0?Math.round(monthDepenses/dayOfMonth*daysInMonth):monthDepenses;
+  const projNet=totalRevenu-projDep;
 
   // Dépenses par catégorie (pour doughnut)
   const catTotals={};
@@ -4266,7 +4365,7 @@ window.renderArgentV8=function(){
   // Transactions récentes
   const txRows=allTx.slice(0,15).map(t=>{
     const ico=CAT_EMOJI[t.cat]||'📦';
-    const color=t.amt>0?'var(--green)':t.amt===0?'var(--g1)':'var(--red)';
+    const color=t.cat==='Épargne'?'var(--purp)':t.amt>0?'var(--green)':t.amt===0?'var(--g1)':'var(--red)';
     const bg=t.amt>0?'rgba(0,229,160,.12)':t.amt<0?'rgba(255,58,92,.12)':'rgba(139,155,173,.1)';
     return `<div class="v8-tx-row">
       <div class="v8-tx-icon" style="background:${bg}">${ico}</div>
@@ -4284,7 +4383,14 @@ window.renderArgentV8=function(){
       <div class="v8-hero-lbl">Solde bancaire · tap pour modifier</div>
       <div class="v8-hero-amt v8-gradient-text">${bal>0?bal.toFixed(2)+'€':'— €'}</div>
       <div class="v8-hero-sub">${savPct}% de l'objectif ${goal>0?goal+'€':''}</div>
-      <div class="progress-bar" style="margin-top:10px;height:6px"><div class="progress-fill" style="width:${savPct}%;background:linear-gradient(90deg,var(--cyan),var(--purp))"></div></div>
+      <div class="progress-bar" style="margin-top:10px;height:6px">
+      ${savPct>0?`<div class="progress-fill" style="width:${savPct}%;min-width:0;background:linear-gradient(90deg,var(--cyan),var(--purp))"></div>`:''}
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0">
+      <button onclick="window._argentMois='${mkPrevStr}';render()" style="background:var(--bg1);border:1px solid var(--b);border-radius:8px;padding:6px 12px;color:var(--w);cursor:pointer">← ${mkPrev.toLocaleDateString('fr-FR',{month:'short'})}</button>
+      <span style="font-weight:700;color:${isCurrentMonth?'var(--cyan)':'var(--w)'};font-size:14px">${mkLabel}</span>
+      ${!isCurrentMonth?`<button onclick="window._argentMois='${mkNextStr}';render()" style="background:var(--bg1);border:1px solid var(--b);border-radius:8px;padding:6px 12px;color:var(--w);cursor:pointer">${mkNext.toLocaleDateString('fr-FR',{month:'short'})} →</button>`:'<span style="width:80px"></span>'}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0">
       <div class="v8-stat-card v8-anim-1">
@@ -4301,6 +4407,14 @@ window.renderArgentV8=function(){
       </div>
     </div>
     ${disponible!==null?`<div class="v8-stat-card v8-anim-4" style="margin-bottom:16px;text-align:left;padding:14px 16px;display:flex;align-items:center;justify-content:space-between"><span class="v8-stat-lbl" style="margin:0">Disponible (solde − dép)</span><span class="v8-stat-val" style="font-size:20px;color:${disponible>=0?'var(--cyan)':'var(--red)'};">${disponible.toFixed(0)}€</span></div>`:''}
+
+    ${isCurrentMonth?`<div class="v8-card" style="padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--g1)">Projection fin de mois</span>
+      <div style="text-align:right">
+        <div style="font-family:var(--font-mono);font-size:16px;font-weight:700;color:${projNet>=0?'var(--green)':'var(--red)'}">${projNet>=0?'+':''}${projNet.toFixed(0)}€</div>
+        <div style="font-size:11px;color:var(--g1)">(dép. estimées: ${projDep.toFixed(0)}€)</div>
+      </div>
+    </div>`:''}
 
     ${catKeys.length?`<div class="v8-sec">Répartition dépenses</div>
     <div class="v8-card v8-anim-3" style="padding:16px;margin-bottom:16px">
@@ -4355,7 +4469,25 @@ window.renderStatsV8=function(){
       const sc=[];for(let w=0;w<4;w++){const dd=new Date();const diff=((dd.getDay()-1-i+7)%7)+w*7;dd.setDate(dd.getDate()-diff);const k=dd.toISOString().slice(0,10);sc.push(Math.round(scoreDay(S.habits[k]||{})/mx30*100));}
       return Math.round(sc.reduce((a,b)=>a+b,0)/sc.length);
     });
+    // C2 — Week comparison
+    const thisWeekStart=new Date();thisWeekStart.setDate(thisWeekStart.getDate()-7);
+    const prevWeekStart=new Date();prevWeekStart.setDate(prevWeekStart.getDate()-14);
+    const weekScoreAvg=(start,days)=>{let s=0;for(let i=0;i<days;i++){const d=new Date(start);d.setDate(d.getDate()+i);const k=d.toISOString().slice(0,10);s+=Math.round(scoreDay(S.habits[k]||{})/mx30*100);}return Math.round(s/days);};
+    const thisWeekAvg=weekScoreAvg(thisWeekStart,7);
+    const prevWeekAvg=weekScoreAvg(prevWeekStart,7);
+    const weekDelta=thisWeekAvg-prevWeekAvg;
     body=`
+      <div class="grid2" style="gap:8px;margin-bottom:12px">
+        <div class="v8-stat-card" style="padding:10px">
+          <div style="font-size:10px;color:var(--g1);margin-bottom:4px">Cette semaine</div>
+          <div style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--cyan)">${thisWeekAvg}%</div>
+        </div>
+        <div class="v8-stat-card" style="padding:10px">
+          <div style="font-size:10px;color:var(--g1);margin-bottom:4px">Semaine précédente</div>
+          <div style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--g1)">${prevWeekAvg}%</div>
+          <div style="font-size:11px;color:${weekDelta>=0?'var(--green)':'var(--red)'};margin-top:2px">${weekDelta>=0?'↑':'↓'} ${Math.abs(weekDelta)}%</div>
+        </div>
+      </div>
       <div class="v8-card v8-anim" style="padding:14px;margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <span class="v8-sec" style="margin:0">Score 30 jours</span>
@@ -4365,6 +4497,20 @@ window.renderStatsV8=function(){
       </div>
       <div class="grid2" style="gap:8px">
         ${weekDays.map((dn,i)=>{const col=weekAvgs[i]>=70?'var(--green)':weekAvgs[i]>=40?'var(--amber)':'var(--red)';return `<div class="v8-stat-card" style="padding:10px"><div style="font-size:12px;color:var(--g1);margin-bottom:4px">${dn}</div><div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:${col}">${weekAvgs[i]}%</div></div>`;}).join('')}
+      </div>
+      <div class="v8-sec" style="margin-top:16px">Année en pixels</div>
+      <div class="v8-card v8-anim" style="padding:12px;overflow-x:auto">
+        <div style="display:flex;gap:3px;flex-wrap:wrap">
+          ${(()=>{const heatDays=[];const heatStart=new Date();heatStart.setFullYear(heatStart.getFullYear()-1);heatStart.setDate(heatStart.getDate()+1);for(let i=0;i<365;i++){const d=new Date(heatStart);d.setDate(heatStart.getDate()+i);const k=d.toISOString().slice(0,10);const sc=Math.round(scoreDay(S.habits[k]||{})/mx30*100);heatDays.push({k,sc});}return heatDays.map(({k,sc})=>{const col=sc>=80?'#00E5A0':sc>=50?'#FFB800':sc>=20?'#FF8C42':'var(--bg3)';return `<div title="${k}: ${sc}%" style="width:10px;height:10px;border-radius:2px;background:${col};flex-shrink:0"></div>`;}).join('');})()}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;font-size:10px;color:var(--g1);align-items:center">
+          <span>Moins</span>
+          <div style="width:10px;height:10px;border-radius:2px;background:var(--bg3)"></div>
+          <div style="width:10px;height:10px;border-radius:2px;background:#FF8C42"></div>
+          <div style="width:10px;height:10px;border-radius:2px;background:#FFB800"></div>
+          <div style="width:10px;height:10px;border-radius:2px;background:#00E5A0"></div>
+          <span>Plus</span>
+        </div>
       </div>
     <script>window._statsScores30=${JSON.stringify(scores30)};window._statsLabels30=${JSON.stringify(labels30)};<\/script>`;
   } else if(tab==='goals'){
@@ -4419,6 +4565,19 @@ window.renderPlusV8=function(){
   const lvl=getLevelInfo(xp);
   const streak=currentStreak(),best=bestStreak();
   const toNext=lvl.next?(lvl.next.minXP-xp):0;
+
+  // D1 — Journal notes
+  const notes=(S.notes||[]).sort((a,b)=>b.date.localeCompare(a.date)||b.time.localeCompare(a.time)).slice(0,10);
+
+  // D2 — Themes
+  const THEMES=[
+    {id:'midnight',label:'Midnight',desc:'Cyan sur noir (défaut)',preview:'#00D4FF'},
+    {id:'ocean',label:'Ocean',desc:'Bleu profond',preview:'#4A90E2'},
+    {id:'forest',label:'Forest',desc:'Vert nature',preview:'#2ECC71'},
+    {id:'sunset',label:'Sunset',desc:'Orange & rouge',preview:'#FF6B35'},
+  ];
+  const currentTheme=S.config.theme||'midnight';
+
   return `<div class="page">
     <div class="page-title" style="margin-bottom:16px">☰ Plus</div>
     <div class="v8-card v8-anim" style="margin-bottom:12px">
@@ -4451,6 +4610,39 @@ window.renderPlusV8=function(){
           <div style="font-size:15px;font-weight:500;color:var(--w)">${lbl}</div>
           <div style="margin-left:auto;color:var(--g2);font-size:18px">›</div>
         </div>`).join('')}
+      <div onclick="exportBackup()" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:12px;background:rgba(12,17,24,0.8);border:1px solid var(--b);cursor:pointer;margin-top:4px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:8px;background:rgba(0,212,255,.12);display:flex;align-items:center;justify-content:center">💾</div>
+          <span style="font-size:14px;font-weight:500;color:var(--w)">Exporter mes données</span>
+        </div>
+        <span style="color:var(--g1)">›</span>
+      </div>
+    </div>
+
+    <div class="v8-sec" style="margin-top:16px">Journal rapide</div>
+    <div class="v8-card" style="padding:12px">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <textarea id="note-input" placeholder="Capture une pensée, idée, réflexion..." rows="2" style="flex:1;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:8px 12px;color:var(--w);font-size:13px;resize:none;font-family:var(--font-body)"></textarea>
+        <button onclick="addNote()" style="background:var(--cyan);color:#000;border:none;border-radius:8px;padding:0 14px;font-weight:700;cursor:pointer;align-self:stretch">+</button>
+      </div>
+      ${notes.length?notes.map(n=>`<div style="padding:8px 0;border-bottom:1px solid var(--b)">
+        <div style="font-size:12px;color:var(--g1);margin-bottom:3px">${n.date} ${n.time||''}</div>
+        <div style="font-size:13px;color:var(--w);line-height:1.4">${n.text}</div>
+      </div>`).join(''):'<div style="color:var(--g1);font-size:13px;text-align:center;padding:8px">Aucune note encore</div>'}
+      ${(S.notes||[]).length>10?`<div style="text-align:center;margin-top:8px"><a href="#" onclick="showAllNotes()" style="color:var(--cyan);font-size:12px">Voir tout (${S.notes.length})</a></div>`:''}
+    </div>
+
+    <div class="v8-sec" style="margin-top:16px">Thème visuel</div>
+    <div class="v8-card" style="padding:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${THEMES.map(th=>`<div onclick="applyTheme('${th.id}')" style="padding:10px;border-radius:10px;border:2px solid ${currentTheme===th.id?th.preview:'var(--b)'};cursor:pointer;display:flex;align-items:center;gap:8px">
+          <div style="width:20px;height:20px;border-radius:50%;background:${th.preview};flex-shrink:0"></div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:${currentTheme===th.id?th.preview:'var(--w)'}">${th.label}</div>
+            <div style="font-size:10px;color:var(--g1)">${th.desc}</div>
+          </div>
+        </div>`).join('')}
+      </div>
     </div>
   </div>`;
 };
@@ -4540,6 +4732,7 @@ window.renderRightPanelV8=function(){
 
 // ── window.render V8 override ─────────────────────────────────────────────────
 window.render=function(){
+  if(window._applyThemeOnLoad){window._applyThemeOnLoad();window._applyThemeOnLoad=function(){};}
   renderSidebarV8();renderBnavV8();renderRightPanelV8();
   const root=document.getElementById('root');
   if(!root)return;
@@ -4705,6 +4898,70 @@ window.toggleSubtask=function(taskId,subIdx){
   }
   save();
   openTaskDetail(taskId);
+};
+
+
+// ── A3: homeQuickAdd ──────────────────────────────────────────────────────
+window.homeQuickAdd=function(){
+  const inp=document.getElementById('home-quick-input');
+  if(!inp||!inp.value.trim())return;
+  const t=parseTaskInput(inp.value);
+  if(!S.tasks)S.tasks=[];
+  S.tasks.push(t);
+  save();inp.value='';render();toast('Tâche ajoutée ✓','var(--green)');
+};
+
+// ── D1: addNote / showAllNotes ────────────────────────────────────────────
+window.addNote=function(){
+  const inp=document.getElementById('note-input');
+  if(!inp||!inp.value.trim())return;
+  if(!S.notes)S.notes=[];
+  const now=new Date();
+  S.notes.push({id:'n'+Date.now(),text:inp.value.trim(),date:iso(),time:now.toTimeString().slice(0,5),tags:[]});
+  save();inp.value='';render();toast('Note ajoutée ✓','var(--green)');
+};
+window.showAllNotes=function(){
+  const notes=(S.notes||[]).sort((a,b)=>b.date.localeCompare(a.date));
+  const html=`<h3 style="margin:0 0 16px;color:var(--w)">📔 Journal (${notes.length})</h3>
+    <div style="max-height:400px;overflow-y:auto">
+      ${notes.map(n=>`<div style="padding:10px 0;border-bottom:1px solid var(--b)">
+        <div style="font-size:11px;color:var(--g1)">${n.date} ${n.time||''}</div>
+        <div style="font-size:13px;color:var(--w);margin-top:3px;line-height:1.5">${n.text}</div>
+      </div>`).join('')}
+    </div>`;
+  openModal(html);
+};
+
+// ── D2: applyTheme / _applyThemeOnLoad ────────────────────────────────────
+window.applyTheme=function(id){
+  S.config.theme=id;save();
+  const themes={
+    midnight:{},
+    ocean:{'--cyan':'#4A90E2','--purp':'#2C3E50','--amber':'#F39C12'},
+    forest:{'--cyan':'#2ECC71','--purp':'#27AE60','--amber':'#F1C40F'},
+    sunset:{'--cyan':'#FF6B35','--purp':'#C0392B','--amber':'#E67E22'},
+  };
+  const vars=themes[id]||{};
+  document.documentElement.style.removeProperty('--cyan');
+  document.documentElement.style.removeProperty('--purp');
+  document.documentElement.style.removeProperty('--amber');
+  Object.entries(vars).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
+  render();toast('Thème '+id+' appliqué ✓','var(--green)');
+};
+window._applyThemeOnLoad=function(){
+  if(S.config.theme&&S.config.theme!=='midnight')applyTheme(S.config.theme);
+};
+
+// ── D3: exportBackup ──────────────────────────────────────────────────────
+window.exportBackup=function(){
+  const data=JSON.stringify(S,null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='cockpit-backup-'+iso()+'.json';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('Backup téléchargé ✓','var(--green)');
 };
 
 })(); // end V8 IIFE
