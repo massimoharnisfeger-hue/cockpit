@@ -4168,6 +4168,12 @@ window.saveCheckinRattrap=function(d){
 };
 
 // ── toggleHabitHome & toggleTaskV8 ────────────────────────────────────────────
+window.checkAllHabits=function(){
+  const d=iso();
+  if(!S.habits[d])S.habits[d]={};
+  H().forEach(h=>{if(!S.habits[d][h.id]){S.habits[d][h.id]=true;addXP(5,'habit check-all');}});
+  save();render();toast('Toutes les habitudes cochées ✓','var(--green)');
+};
 window.toggleHabitHome=function(d,hid,el){
   if(!S.habits[d])S.habits[d]={};
   const cur=S.habits[d][hid];
@@ -4200,6 +4206,7 @@ window.renderHomeV8=function(){
   const mx=Math.max(habs.length,1);
   const rawScore=scoreDay(day);
   const score=Math.round(rawScore/mx*100);
+  const habsDoneCount=habs.filter(h=>!!day[h.id]).length;
   const streak=currentStreak();
   const bal=getBankBalance();
   const xp=S.config.xp||0;
@@ -4209,6 +4216,7 @@ window.renderHomeV8=function(){
   const hour=new Date().getHours();
   const greeting=hour<12?'Bonjour':hour<18?'Bon après-midi':'Bonsoir';
   const name=(S.config.profile&&S.config.profile.name)?`, ${S.config.profile.name}`:'';
+  const perfEmoji=score>=80?'🔥':score>=50?'👊':'💪';
 
   // A2 — Mode matin/soir automatique
   const isMorning=hour<14;
@@ -4222,7 +4230,8 @@ window.renderHomeV8=function(){
       <div style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(${scoreColor} ${score}%,var(--b) ${score}%);display:flex;align-items:center;justify-content:center">
         <div style="width:90px;height:90px;border-radius:50%;background:var(--bg1);display:flex;flex-direction:column;align-items:center;justify-content:center">
           <div style="font-family:var(--font-mono);font-size:28px;font-weight:800;color:${scoreColor}">${score}<span style="font-size:14px">%</span></div>
-          <div style="font-size:10px;color:var(--g1)">Score</div>
+          <div style="font-size:10px;color:var(--g1)">Aujourd'hui</div>
+          ${habs.length>0?`<div style="font-size:9px;color:var(--g1);margin-top:2px">${habsDoneCount}/${habs.length} hab.</div>`:''}
         </div>
       </div>
     </div>
@@ -4320,7 +4329,7 @@ window.renderHomeV8=function(){
 
   return `<div class="page">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div class="page-title" style="margin:0">${greeting}${name} 👋</div>
+      <div class="page-title" style="margin:0">${greeting}${name} ${perfEmoji}</div>
       <div style="font-size:12px;color:var(--g1)">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'short'})} · ${timeLabel}</div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:16px">
@@ -4330,7 +4339,7 @@ window.renderHomeV8=function(){
       <button onclick="homeQuickAdd()" style="background:var(--cyan);color:#000;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer">+</button>
     </div>
     ${urgentTasks.length?`<div onclick="nav('taches')" style="background:rgba(255,58,92,.12);border:1px solid rgba(255,58,92,.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:13px;color:var(--red)">🔴 ${urgentTasks.length} tâche${urgentTasks.length>1?'s':''} urgente${urgentTasks.length>1?'s':''}</span>
+      <span style="font-size:13px;color:var(--red)">🔴 ${urgentTasks.length===1?urgentTasks[0].text.slice(0,45)+(urgentTasks[0].text.length>45?'…':''):urgentTasks.length+' tâches urgentes'}</span>
       <span style="color:var(--red)">→</span>
     </div>`:habitsTodo>0?`<div onclick="openRattrapage()" style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
       <span style="font-size:13px;color:var(--cyan)">${habitsTodo} habitude${habitsTodo>1?'s':''} à cocher aujourd'hui</span>
@@ -4338,23 +4347,34 @@ window.renderHomeV8=function(){
     </div>`:''}
     ${scoreRing}
     ${statCards}
-    <div class="v8-sec">Habitudes du jour</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="v8-sec" style="margin:0">Habitudes du jour <span style="font-size:12px;color:${habsDoneCount===habs.length&&habs.length>0?'var(--green)':'var(--g1)'};font-weight:400">${habs.length>0?habsDoneCount+'/'+habs.length:''}</span></div>
+      ${habsDoneCount<habs.length&&habs.length>0?`<button onclick="checkAllHabits()" style="font-size:11px;color:var(--cyan);background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:6px;padding:3px 10px;cursor:pointer">Tout cocher</button>`:''}
+    </div>
     <div class="v8-hab-grid v8-anim">${habCards}</div>
     ${isEvening?eveningBilan:''}
     ${isMorning?morningPriorities:''}
     <div class="v8-sec">7 derniers jours</div>
     <div class="v8-card v8-anim-1" style="padding:14px 12px;margin-bottom:16px">
-      <div style="position:relative;height:100px"><canvas id="chart-home-week" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas></div>
+      <div id="chart-home-week-wrap" style="position:relative;height:140px">
+        <div id="chart-home-fallback" style="display:flex;align-items:flex-end;gap:4px;height:100%;padding:4px 0">${weekScores.map((s,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="width:100%;background:${s>=80?'var(--green)':s>=50?'var(--amber)':s>0?'rgba(255,58,92,.7)':'rgba(30,45,61,.8)'};border-radius:4px 4px 0 0;height:${Math.max(4,Math.round(s*1.1))}px;transition:height .5s .${i}s"></div><div style="font-size:9px;color:var(--g1)">${weekLabels[i]||''}</div></div>`).join('')}</div>
+        <canvas id="chart-home-week" style="position:absolute;top:0;left:0;width:100%;height:100%;display:none"></canvas>
+      </div>
     </div>
-    <div class="v8-sec">Tâches en cours</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="v8-sec" style="margin:0">Tâches en cours ${tasks.length?`<span style="font-size:12px;color:var(--g1);font-weight:400">(${tasks.length})</span>`:''}</div>
+      ${tasks.length?`<a onclick="nav('taches')" style="font-size:12px;color:var(--cyan);cursor:pointer">Voir tout →</a>`:''}
+    </div>
     <div class="v8-card v8-anim-2" style="padding:12px 16px">
       ${taskRows}
       <div class="v8-task-add">
-        <input id="v8-task-input" type="text" placeholder="Nouvelle tâche..."/>
+        <input id="v8-task-input" type="text" placeholder="Nouvelle tâche... (ex: Appeler dentiste demain #sante urgent)"/>
         <button onclick="addTaskFromInput()">+</button>
       </div>
     </div>
-    <div style="margin-top:16px;padding:12px 16px;border-left:3px solid var(--b);color:var(--g1);font-size:12px;font-style:italic;line-height:1.5">"${quote}"</div>
+    <div style="margin-top:16px;background:var(--bg1);border-radius:10px;padding:12px 16px;border-left:3px solid var(--purp)">
+      <div style="color:var(--g1);font-size:12px;font-style:italic;line-height:1.6">"${quote}"</div>
+    </div>
   </div>
   <script>window._homeWeekScores=${JSON.stringify(weekScores)};window._homeWeekLabels=${JSON.stringify(weekLabels)};<\/script>`;
 };
@@ -4375,18 +4395,17 @@ window.initChartsHome=function(){
     const labels=window._homeWeekLabels||[];
     const barColors=scores.map(s=>s>=80?'rgba(0,229,160,.8)':s>=50?'rgba(255,184,0,.8)':s>0?'rgba(255,58,92,.7)':'rgba(30,45,61,.8)');
     try {
+      // Show canvas, hide CSS fallback
+      canvas.style.display='block';
+      const fallback=document.getElementById('chart-home-fallback');
+      if(fallback)fallback.style.display='none';
       canvas._chart=new Chart(canvas,{
         type:'bar',
         data:{labels,datasets:[{data:scores,backgroundColor:barColors,borderRadius:6,borderSkipped:false}]},
         options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},scales:{x:{grid:{display:false},ticks:{color:'#8B9BAD',font:{size:11}}},y:{display:false,max:110}},animation:{duration:600}}
       });
     } catch(e) {
-      canvas.parentElement.innerHTML = `<div style="display:flex;align-items:flex-end;gap:4px;height:140px;padding:8px 0">
-        ${scores.map((s,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
-          <div style="width:100%;background:${s>=80?'var(--green)':s>=50?'var(--amber)':'var(--red)'};border-radius:4px 4px 0 0;height:${Math.max(4,s*1.2)}px;transition:height .5s"></div>
-          <div style="font-size:9px;color:var(--g1)">${labels[i]||''}</div>
-        </div>`).join('')}
-      </div>`;
+      // Keep CSS fallback visible if Chart.js fails
     }
   });
 };
