@@ -8071,6 +8071,85 @@ window.renderObjectifs=function(){
 
 window.renderGoalBoard=function(){return renderObjectifs();};
 
+
+// ══════════════════════════════════════════════════════════════════════
+// Core V3 — sidebar objectifs + recap home-only + stats goals tab
+// ══════════════════════════════════════════════════════════════════════
+
+// Fix 1 — Add 'objectifs' to desktop sidebar after 'stats'
+if(typeof PAGES_V8!=='undefined'&&!PAGES_V8.includes('objectifs')){
+  PAGES_V8.splice(PAGES_V8.indexOf('stats')+1,0,'objectifs');
+}
+
+// Fix 2 — Only trigger evening/morning recap on home page
+(function(){
+  var _origRenderV3 = window.render;
+  window.render = function() {
+    _origRenderV3.apply(this, arguments);
+    if(typeof _page !== 'undefined' && _page !== 'home') {
+      var recap = document.getElementById('v3-recap-overlay');
+      var brief = document.getElementById('v3-brief-overlay');
+      if(recap) recap.remove();
+      if(brief) brief.remove();
+    }
+  };
+})();
+
+// Fix 3 — Stats page: Objectifs tab uses S.goals (new system)
+window.renderStatsGoalsTab = function() {
+  var goals = S.goals || [];
+  if (goals.length === 0) {
+    return "<div style=\"text-align:center;padding:40px 20px;color:var(--g1)\"><div style=\"font-size:40px;margin-bottom:12px\">🎯</div><div style=\"font-size:15px;font-weight:600;color:var(--w);margin-bottom:6px\">Aucun objectif</div><div style=\"font-size:13px\">Crée ton premier objectif dans l’onglet Objectifs</div><button onclick=\"nav('objectifs')\" style=\"margin-top:16px;background:var(--cyan);color:#000;border:none;border-radius:10px;padding:10px 24px;font-weight:700;cursor:pointer\">Voir Objectifs →</button></div>";
+  }
+  var statusLabel = {in_progress:'En cours', todo:'\u00C0 d\u00E9marrer', done:'Termin\u00E9'};
+  var statusColor = {in_progress:'var(--cyan)', todo:'var(--g1)', done:'var(--green)'};
+  var html = '';
+  var inProg = goals.filter(function(g){return g.status==='in_progress';}).length;
+  var done = goals.filter(function(g){return g.status==='done';}).length;
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">';
+  html += '<div class="v8-stat-card"><div class="v8-stat-val" style="color:var(--cyan)">'+goals.length+'</div><div class="v8-stat-lbl">Total</div></div>';
+  html += '<div class="v8-stat-card"><div class="v8-stat-val" style="color:var(--amber)">'+inProg+'</div><div class="v8-stat-lbl">En cours</div></div>';
+  html += '<div class="v8-stat-card"><div class="v8-stat-val" style="color:var(--green)">'+done+'</div><div class="v8-stat-lbl">Termin\u00E9s</div></div>';
+  html += '</div>';
+  goals.forEach(function(g) {
+    var pct = (typeof goalProgress === 'function') ? goalProgress(g) : 0;
+    var barColor = g.status==='done'?'var(--green)':g.type==='recurring'?'var(--purp)':'var(--cyan)';
+    var typeLabel = g.type==='recurring'?'Habitude':'Projet';
+    html += '<div class="v8-card v8-anim" style="margin-bottom:10px;padding:14px 16px;cursor:pointer" onclick="if(typeof openGoalDetail===\'function\')openGoalDetail(\''+g.id+'\')">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+    html += '<div style="font-size:14px;font-weight:700;color:var(--w)">'+( g.emoji||'\uD83C\uDFAF')+' '+g.title+'</div>';
+    html += '<div style="display:flex;gap:6px;align-items:center">';
+    html += '<span style="font-size:9px;font-weight:700;background:rgba(139,155,173,.15);color:var(--g1);padding:2px 7px;border-radius:5px">'+typeLabel+'</span>';
+    html += '<span style="font-size:9px;font-weight:700;background:'+statusColor[g.status]+'22;color:'+statusColor[g.status]+';padding:2px 7px;border-radius:5px">'+(statusLabel[g.status]||g.status)+'</span>';
+    html += '</div></div>';
+    html += '<div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:6px">';
+    html += '<div style="height:100%;background:'+barColor+';border-radius:2px;width:'+pct+'%;transition:width .4s"></div></div>';
+    html += '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--g1)"><span>'+pct+'% compl\u00E9t\u00E9</span>';
+    if(g.deadline) html += '<span>'+g.deadline+'</span>';
+    html += '</div>';
+    if(g.type==='project' && g.subGoals && g.subGoals.length) {
+      var sgDone = g.subGoals.filter(function(sg){return sg.status==='done';}).length;
+      html += '<div style="font-size:11px;color:var(--g1);margin-top:4px">'+sgDone+'/'+g.subGoals.length+' sous-objectifs</div>';
+    }
+    html += '</div>';
+  });
+  return html;
+};
+
+(function(){
+  var _origRenderStatsV3 = window.renderStatsV8;
+  window.renderStatsV8 = function() {
+    var tab = window._statsTab || 'analytics';
+    if (tab !== 'goals') return _origRenderStatsV3.apply(this, arguments);
+    var tabs = '<div class="v8-tabs">'
+      + '<button class="v8-tab" onclick="window._statsTab=\'analytics\';render()">Statistiques</button>'
+      + '<button class="v8-tab active" onclick="window._statsTab=\'goals\';render()">Objectifs</button>'
+      + '<button class="v8-tab" onclick="window._statsTab=\'badges\';render()">Badges</button>'
+      + '</div>';
+    return '<div class="page"><div class="page-title" style="margin-bottom:16px">\uD83D\uDCCA Stats</div>'+tabs+window.renderStatsGoalsTab()+'</div>';
+  };
+})();
+
 </script>
 </body>
 </html>
