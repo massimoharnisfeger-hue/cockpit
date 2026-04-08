@@ -3996,12 +3996,10 @@ window.closeQuickSheet=function(){
 window.confirmQuickDepense=function(){
   const amt=parseFloat(document.getElementById('qs-amount')?.value||0);
   const cat=document.getElementById('qs-cat')?.value||'Autre';
-  const lbl=document.getElementById('qs-label')?.value||cat;
+  const lbl=(document.getElementById('qs-label')?.value||cat).trim();
   if(!amt||amt<=0){toast('Montant invalide');return;}
-  const d=iso();
-  if(!S.days[d])S.days[d]={};
-  if(!S.days[d].expenses)S.days[d].expenses=[];
-  S.days[d].expenses.push({id:'e'+Date.now(),label:lbl,cat,amount:amt});
+  if(!S.finance)S.finance=[];
+  S.finance.push({id:'t'+Date.now(),date:iso(),desc:lbl,cat,amt:-amt,type:'Dépense',tags:[],pending:false,note:''});
   save();closeQuickSheet();render();toast('Dépense ajoutée ✓');
 };
 window.confirmQuickTask=function(){
@@ -4013,13 +4011,13 @@ window.confirmQuickTask=function(){
 // ── Rattrapage / check-in modal ───────────────────────────────────────────────
 window.openRattrapage=function(dateStr){
   const d=dateStr||iso();
-  const day=S.days[d]||{};
-  const habs=S.config.habits||[];
+  const day=S.habits[d]||{};
+  const habs=H();
   let rows=habs.map(h=>{
-    const done=day.habits&&day.habits[h.id];
+    const done=!!day[h.id];
     return `<div class="v8-task-item">
       <div class="v8-task-cb ${done?'done':''}" onclick="toggleHabitRattrap('${d}','${h.id}',this)">${done?'✓':''}</div>
-      <span class="v8-task-text">${h.emoji||'📌'} ${h.name}</span>
+      <span class="v8-task-text">${h.emoji||'📌'} ${h.label||h.name||''}</span>
     </div>`;
   }).join('');
   if(!rows)rows='<p style="color:var(--muted);text-align:center">Aucune habitude configurée</p>';
@@ -4034,13 +4032,12 @@ window.openRattrapage=function(dateStr){
   document.getElementById('v8-rattrap').classList.add('open');
 };
 window.toggleHabitRattrap=function(d,hid,el){
-  if(!S.days[d])S.days[d]={};
-  if(!S.days[d].habits)S.days[d].habits={};
-  const cur=S.days[d].habits[hid];
-  S.days[d].habits[hid]=cur?false:true;
+  if(!S.habits[d])S.habits[d]={};
+  const cur=S.habits[d][hid];
+  S.habits[d][hid]=cur?false:true;
   save();
-  el.classList.toggle('done');
-  el.textContent=S.days[d].habits[hid]?'✓':'';
+  el.classList.toggle('done',!!S.habits[d][hid]);
+  el.textContent=S.habits[d][hid]?'✓':'';
 };
 window.saveCheckinRattrap=function(d){
   save();
@@ -4051,12 +4048,13 @@ window.saveCheckinRattrap=function(d){
 // ── renderHomeV8 ──────────────────────────────────────────────────────────────
 window.renderHomeV8=function(){
   const d=iso();
-  const day=S.days[d]||{};
-  const habs=S.config.habits||[];
-  const score=scoreDay(d);
-  const streak=(()=>{let s=0,cur=new Date();for(let i=0;i<365;i++){const dd=cur.toISOString().slice(0,10);if(scoreDay(dd)>=50)s++;else break;cur.setDate(cur.getDate()-1);}return s;})();
+  const day=S.habits[d]||{};
+  const habs=H();
+  const mx=Math.max(habs.length,1);
+  const rawScore=scoreDay(day);
+  const score=Math.round(rawScore/mx*100);
+  const streak=currentStreak();
   const bal=getBankBalance();
-  const goal=parseFloat(S.config.savingsGoal||4000);
   const xp=S.config.xp||0;
   const lvl=getLevelInfo(xp);
 
@@ -4065,15 +4063,15 @@ window.renderHomeV8=function(){
     <div class="v8-stat"><div class="val">${score}%</div><div class="lbl">Score</div></div>
     <div class="v8-stat"><div class="val">${streak}🔥</div><div class="lbl">Streak</div></div>
     <div class="v8-stat" onclick="promptBalance()" style="cursor:pointer"><div class="val">${bal>0?bal.toFixed(0)+'€':'—'}</div><div class="lbl">Solde</div></div>
-    <div class="v8-stat"><div class="val">${lvl.name.slice(0,6)}</div><div class="lbl">Niv. ${lvl.lvl}</div></div>
+    <div class="v8-stat"><div class="val">${lvl.name.slice(0,6)}</div><div class="lbl">Niv.${lvl.lvl}</div></div>
   </div>`;
 
   // Habit cards
   const habCards=habs.length?habs.map(h=>{
-    const done=!!(day.habits&&day.habits[h.id]);
+    const done=!!(day[h.id]);
     return `<div class="v8-hab-card ${done?'done':''}" onclick="toggleHabitHome('${d}','${h.id}',this)">
       <div class="hc-icon">${h.emoji||'📌'}</div>
-      <div class="hc-name">${h.name}</div>
+      <div class="hc-name">${h.label||h.name||''}</div>
     </div>`;
   }).join(''):`<p style="color:var(--muted);font-size:13px">Aucune habitude — <a href="#" onclick="nav('config')">Configurer</a></p>`;
 
@@ -4081,7 +4079,8 @@ window.renderHomeV8=function(){
   const days7=[];for(let i=6;i>=0;i--){const dd=new Date();dd.setDate(dd.getDate()-i);days7.push(dd.toISOString().slice(0,10));}
   const dayLabels=['D','L','M','M','J','V','S'];
   const weekRibbon=days7.map(dd=>{
-    const sc=scoreDay(dd);
+    const raw=scoreDay(S.habits[dd]||{});
+    const sc=Math.round(raw/mx*100);
     const bg=sc>=80?'#00b894':sc>=50?'#fdcb6e':sc>0?'#e17055':'var(--border)';
     const lbl=dayLabels[new Date(dd+'T12:00:00').getDay()];
     return `<div class="v8-wday"><div class="wd-label">${lbl}</div><div class="wd-score" style="background:${bg};color:${sc>0?'#fff':'var(--muted)'}">${sc>0?sc:''}</div></div>`;
@@ -4106,13 +4105,12 @@ window.renderHomeV8=function(){
 };
 
 window.toggleHabitHome=function(d,hid,el){
-  if(!S.days[d])S.days[d]={};
-  if(!S.days[d].habits)S.days[d].habits={};
-  const cur=S.days[d].habits[hid];
-  S.days[d].habits[hid]=cur?false:true;
+  if(!S.habits[d])S.habits[d]={};
+  const cur=S.habits[d][hid];
+  S.habits[d][hid]=cur?false:true;
   save();
-  el.classList.toggle('done',S.days[d].habits[hid]);
-  addXP(S.days[d].habits[hid]?5:-2,'habit toggle');
+  el.classList.toggle('done',!!S.habits[d][hid]);
+  addXP(S.habits[d][hid]?5:-2,'habit toggle');
 };
 window.toggleTaskV8=function(id,el){
   const t=S.tasks.find(x=>x.id===id);
@@ -4132,21 +4130,20 @@ window.renderArgentV8=function(){
   const bal=getBankBalance();
   const goal=parseFloat(S.config.savingsGoal||4000);
   const pct=goal>0?Math.min(100,Math.round(bal/goal*100)):0;
-  const d=iso();
-  // collect recent expenses (last 30 days)
-  const expenses=[];
-  for(let i=0;i<30;i++){const dd=new Date();dd.setDate(dd.getDate()-i);const k=dd.toISOString().slice(0,10);const dy=S.days[k]||{};(dy.expenses||[]).forEach(e=>expenses.push({...e,date:k}));}
-  expenses.sort((a,b)=>b.date.localeCompare(a.date));
+  const mk=mKey();
+  // expenses from S.finance (negative amounts = dépenses)
+  const expenses=[...S.finance].filter(t=>t.type==='Dépense'||t.amt<0).sort((a,b)=>b.date.localeCompare(a.date));
   const expRows=expenses.slice(0,20).map(e=>{
-    const catDef=(S.config.categories||[]).find(c=>c.name===e.cat)||{emoji:'📦'};
+    const cats={Alimentation:'🍔',Transport:'🚗',Loisirs:'🎮',Santé:'💊',Logement:'🏠',Vêtements:'👕',Épargne:'💰',Revenu:'💵'};
+    const ico=cats[e.cat]||'📦';
     return `<div class="v8-expense-item">
-      <div class="v8-exp-cat" style="background:var(--border)">${catDef.emoji||'📦'}</div>
-      <div class="v8-exp-info"><div class="v8-exp-name">${e.label||e.cat}</div><div class="v8-exp-date">${e.date}</div></div>
-      <div class="v8-exp-amount">-${parseFloat(e.amount).toFixed(2)}€</div>
+      <div class="v8-exp-cat" style="background:var(--border)">${ico}</div>
+      <div class="v8-exp-info"><div class="v8-exp-name">${e.desc||e.cat}</div><div class="v8-exp-date">${e.date}</div></div>
+      <div class="v8-exp-amount">${e.amt<0?'-':''}${Math.abs(e.amt).toFixed(2)}€</div>
     </div>`;
   }).join('');
 
-  const totalMonth=(()=>{const m=iso().slice(0,7);let t=0;expenses.filter(e=>e.date.startsWith(m)).forEach(e=>t+=parseFloat(e.amount)||0);return t.toFixed(2);})();
+  const totalMonth=(()=>{let t=0;expenses.filter(e=>e.date.startsWith(mk)).forEach(e=>t+=Math.abs(e.amt));return t.toFixed(2);})();
 
   return `
     <div class="v8-balance-hero" onclick="promptBalance()" style="cursor:pointer">
@@ -4180,22 +4177,23 @@ window.renderStatsV8=function(){
   let body='';
   if(tab==='analytics'){
     // last 30 days score chart
+    const mx30=Math.max(H().length,1);
     const scores=[];const labels=[];
-    for(let i=29;i>=0;i--){const dd=new Date();dd.setDate(dd.getDate()-i);const k=dd.toISOString().slice(0,10);scores.push(scoreDay(k));labels.push(k.slice(5));}
+    for(let i=29;i>=0;i--){const dd=new Date();dd.setDate(dd.getDate()-i);const k=dd.toISOString().slice(0,10);const sc=Math.round(scoreDay(S.habits[k]||{})/mx30*100);scores.push(sc);labels.push(k.slice(5));}
     const avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
     const maxS=Math.max(...scores)||1;
-    const bars=scores.map((s,i)=>{const h=Math.round(s/maxS*60);const bg=s>=80?'#00b894':s>=50?'#fdcb6e':'#e17055';return `<div style="width:${100/30}%;height:${h}px;background:${bg};border-radius:2px 2px 0 0" title="${labels[i]}: ${s}%"></div>`;}).join('');
+    const bars=scores.map((s,i)=>{const h=Math.max(2,Math.round(s/maxS*60));const bg=s>=80?'#00b894':s>=50?'#fdcb6e':s>0?'#e17055':'var(--border)';return `<div style="width:${100/30}%;height:${h}px;background:${bg};border-radius:2px 2px 0 0" title="${labels[i]}: ${s}%"></div>`;}).join('');
     body=`
       <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:12px">
         <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:13px;font-weight:600">Score 30 jours</span><span style="font-size:13px;color:var(--accent);font-weight:700">Moy: ${avg}%</span></div>
         <div style="display:flex;align-items:flex-end;height:60px;gap:1px">${bars}</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        ${['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'].map((day,i)=>{
-          const scores30=[];for(let w=0;w<4;w++){const dd=new Date();const diff=((dd.getDay()-1-i+7)%7)+w*7;dd.setDate(dd.getDate()-diff);scores30.push(scoreDay(dd.toISOString().slice(0,10)));}
-          const avg2=Math.round(scores30.reduce((a,b)=>a+b,0)/scores30.length);
+        ${['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'].map((dayName,i)=>{
+          const sc30=[];for(let w=0;w<4;w++){const dd=new Date();const diff=((dd.getDay()-1-i+7)%7)+w*7;dd.setDate(dd.getDate()-diff);const k=dd.toISOString().slice(0,10);sc30.push(Math.round(scoreDay(S.habits[k]||{})/mx30*100));}
+          const avg2=Math.round(sc30.reduce((a,b)=>a+b,0)/sc30.length);
           const col=avg2>=70?'#00b894':avg2>=40?'#fdcb6e':'#e17055';
-          return `<div style="background:var(--card);border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--muted)">${day.slice(0,3)}</span><span style="font-size:15px;font-weight:700;color:${col}">${avg2}%</span></div>`;
+          return `<div style="background:var(--card);border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--muted)">${dayName.slice(0,3)}</span><span style="font-size:15px;font-weight:700;color:${col}">${avg2}%</span></div>`;
         }).join('')}
       </div>`;
   } else if(tab==='goals'){
