@@ -202,6 +202,32 @@ body.compact .habit-row{padding:7px 0}
 /* ── Rattrapage ── */
 .rattrapage-banner{background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.3);color:var(--amber);padding:8px 14px;border-radius:var(--r2);margin-bottom:12px;font-size:13px;font-weight:600;text-align:center}
 </style>
+<style>
+/* OBJECTIFS V2 */
+.og-focus-block{background:linear-gradient(135deg,rgba(0,212,255,.07),rgba(0,212,255,.02));border:1px solid rgba(0,212,255,.18);border-radius:14px;padding:14px 16px;margin-bottom:20px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.og-focus-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.og-focus-title{font-size:15px;font-weight:800;color:var(--w);flex:1;margin-right:8px;}
+.og-rhythm-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:5px;letter-spacing:.05em;flex-shrink:0;}
+.og-rhythm-ahead{background:rgba(0,229,160,.15);color:#00E5A0;}
+.og-rhythm-ontrack{background:rgba(0,212,255,.12);color:#00D4FF;}
+.og-rhythm-late{background:rgba(255,58,92,.15);color:#FF3A5C;}
+.og-focus-bar-wrap{height:4px;background:#1E2D3D;border-radius:2px;margin-bottom:6px;overflow:hidden;}
+.og-focus-bar{height:4px;border-radius:2px;}
+.og-focus-bar-meta{display:flex;justify-content:space-between;font-size:10px;color:#8B9BAD;margin-bottom:8px;}
+.og-focus-action{font-size:11px;color:#00D4FF;background:rgba(0,212,255,.08);border-radius:6px;padding:6px 10px;margin-bottom:6px;}
+.og-focus-tasks{font-size:10px;color:#F0F4F8;background:rgba(255,184,0,.1);border-radius:6px;padding:4px 10px;border-left:2px solid #FFB800;}
+.og-section-hdr{font-size:9px;font-weight:700;color:#8B9BAD;letter-spacing:.1em;margin:0 0 10px;display:flex;align-items:center;gap:6px;}
+.og-section-count{background:#1E2D3D;color:#8B9BAD;border-radius:4px;padding:1px 6px;font-size:8px;}
+.og-mini-bar-wrap{height:2px;background:#1E2D3D;border-radius:1px;margin-top:7px;overflow:hidden;}
+.og-mini-bar{height:2px;border-radius:1px;}
+.og-today-badge{background:rgba(255,184,0,.2);color:#FFB800;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:5px;vertical-align:middle;}
+.og-week-dots{display:flex;gap:5px;margin:5px 0 3px;}
+.og-week-dot{width:16px;height:16px;border-radius:50%;background:#0C1118;border:1.5px solid #1E2D3D;flex-shrink:0;}
+.og-week-dot.done{background:#A855F7;border-color:#A855F7;}
+.og-week-dot.today{border-color:#00D4FF;}
+.og-projects-section{margin-bottom:4px;}
+.og-recurring-section{margin-top:20px;}
+</style>
 </head>
 <body>
 <div id="app">
@@ -7864,6 +7890,181 @@ fetchWeather();
 if(S.config.openaiKey)fetchAICoach();
 if(S.config.gcalKey&&S.config.gcalId)fetchCalendar();
 if(S.config.telegramToken&&S.config.telegramChatId)scheduleCheckinReminderTg();
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   OBJECTIFS V2 — renderObjectifs, renderGoalRow + helpers redesign
+   ══════════════════════════════════════════════════════════════════════ */
+
+window.ogRhythm=function(g){
+  if(!g.deadline||!g.createdAt||g.type!=='project')return 'neutral';
+  var pct=goalProgress(g);
+  var now=new Date();
+  var created=new Date(g.createdAt);
+  var dl=new Date(g.deadline);
+  var total=dl-created;
+  if(total<=0)return 'neutral';
+  var elapsed=now-created;
+  var expected=Math.min(100,Math.round(elapsed/total*100));
+  if(pct>=expected+10)return 'ahead';
+  if(pct<expected-20)return 'late';
+  return 'ontrack';
+};
+
+window.ogTodayTasks=function(g){
+  var today=iso();
+  var count=0;
+  (g.subGoals||[]).forEach(function(sg){
+    (sg.linkedTaskIds||[]).forEach(function(tid){
+      var t=(S.tasks||[]).find(function(x){return x.id===tid;});
+      if(t&&t.dueDate===today&&t.status!=='done')count++;
+    });
+  });
+  return count;
+};
+
+window.ogFocusBlock=function(goals){
+  var projects=goals.filter(function(g){return g.type==='project'&&g.status==='in_progress';});
+  if(projects.length===0)return '';
+  projects.sort(function(a,b){
+    if(!a.deadline&&!b.deadline)return 0;
+    if(!a.deadline)return 1;if(!b.deadline)return -1;
+    return a.deadline<b.deadline?-1:1;
+  });
+  var g=projects[0];
+  var pct=goalProgress(g);
+  var rhythm=ogRhythm(g);
+  var rhythmColor=rhythm==='late'?'#FF3A5C':rhythm==='ahead'?'#00E5A0':'#00D4FF';
+  var rhythmLabel=rhythm==='late'?'En retard':rhythm==='ahead'?'En avance':rhythm==='ontrack'?'Dans les temps':'';
+  var timeStr='';
+  if(g.deadline){
+    var daysLeft=Math.round((new Date(g.deadline)-new Date())/86400000);
+    if(daysLeft<0)timeStr='Deadline dépassée';
+    else if(daysLeft===0)timeStr='Deadline aujourd’hui';
+    else if(daysLeft<7)timeStr=daysLeft+' jour'+(daysLeft>1?'s':'')+' restant'+(daysLeft>1?'s':'');
+    else if(daysLeft<60){var w=Math.round(daysLeft/7);timeStr=w+' sem. restante'+(w>1?'s':'');}
+    else{var mo=Math.round(daysLeft/30);timeStr=mo+' mois restant'+(mo>1?'s':'');}
+  }
+  var nextAction=goalNextAction(g);
+  var todayCount=ogTodayTasks(g);
+  var h='<div class="og-focus-block" onclick="openGoalDetail(\''+g.id+'\')" data-goal-id="'+g.id+'">';
+  h+='<div class="og-focus-top">';
+  h+='<div class="og-focus-title">'+(g.emoji||'🎯')+' '+g.title+'</div>';
+  if(rhythmLabel)h+='<div class="og-rhythm-badge og-rhythm-'+rhythm+'">'+rhythmLabel+'</div>';
+  h+='</div>';
+  h+='<div class="og-focus-bar-wrap"><div class="og-focus-bar" style="width:'+pct+'%;background:'+rhythmColor+'"></div></div>';
+  h+='<div class="og-focus-bar-meta"><span>'+pct+'% complété</span>';
+  if(timeStr)h+='<span style="color:'+(rhythm==='late'?'#FF3A5C':'#8B9BAD')+'">'+timeStr+'</span>';
+  h+='</div>';
+  if(nextAction)h+='<div class="og-focus-action">→ '+nextAction+'</div>';
+  if(todayCount>0)h+='<div class="og-focus-tasks">⚡ '+todayCount+' tâche'+(todayCount>1?'s':'')+' liée'+(todayCount>1?'s':'')+' pour aujourd’hui</div>';
+  h+='</div>';
+  return h;
+};
+
+window.ogRecurringRow=function(g){
+  var bounds=ogWeekBounds();
+  var today=iso();
+  var doneCount=(g.completions||[]).filter(function(c){return c.date>=bounds.mon&&c.date<=bounds.sun;}).length;
+  var done=g.status==='done';
+  var h='<div class="og-row'+(done?' done':'')+'" onclick="openGoalDetail(\''+g.id+'\')" data-goal-id="'+g.id+'">';
+  h+='<div class="og-row-body">';
+  h+='<div class="og-row-title">'+(g.emoji||'🎯')+' '+g.title+'</div>';
+  h+='<div class="og-week-dots">';
+  for(var i=0;i<7;i++){
+    var d=new Date(bounds.mon);d.setDate(d.getDate()+i);
+    var ds=iso(d);
+    var hasDone=(g.completions||[]).some(function(c){return c.date===ds;});
+    var isToday=ds===today;
+    h+='<div class="og-week-dot'+(hasDone?' done':'')+(isToday&&!hasDone?' today':'')+'"></div>';
+  }
+  h+='</div>';
+  h+='<div class="og-row-sub">'+doneCount+'/'+g.recurringTarget+'x cette semaine</div>';
+  h+='</div>';
+  h+='<div class="og-row-chevron">›</div>';
+  h+='</div>';
+  return h;
+};
+
+window.renderGoalRow=function(g){
+  if(g.type==='recurring')return ogRecurringRow(g);
+  var pct=goalProgress(g);
+  var done=g.status==='done';
+  var nextAction=goalNextAction(g);
+  var rhythm=ogRhythm(g);
+  var barColor=rhythm==='late'?'#FF3A5C':rhythm==='ahead'?'#00E5A0':rhythm==='ontrack'?'#00D4FF':'#1E2D3D';
+  var todayCount=ogTodayTasks(g);
+  var h='<div class="og-row'+(done?' done':'')+'" onclick="openGoalDetail(\''+g.id+'\')" data-goal-id="'+g.id+'">';
+  h+='<div class="og-row-body">';
+  h+='<div class="og-row-title">'+(g.emoji||'🎯')+' '+g.title;
+  if(todayCount>0)h+='<span class="og-today-badge">⚡'+todayCount+'</span>';
+  h+='</div>';
+  if(nextAction)h+='<div class="og-row-sub">'+nextAction+'</div>';
+  h+='<div class="og-mini-bar-wrap"><div class="og-mini-bar" style="width:'+pct+'%;background:'+barColor+'"></div></div>';
+  h+='</div>';
+  h+='<div class="og-row-chevron">›</div>';
+  h+='</div>';
+  return h;
+};
+
+window.renderObjectifs=function(){
+  if(!S)return '';
+  if(!S.goals)S.goals=[];
+  var goals=S.goals.slice();
+  var h='<div class="og-page">';
+  if(goals.length===0){
+    h+='<div class="og-header"><div><div class="og-title">Objectifs</div>';
+    h+='<div class="og-subtitle">Lance-toi — crée ton premier objectif</div></div>';
+    h+='<button class="og-add-btn" onclick="openNewGoal()">+</button></div>';
+    h+='<div class="og-empty">';
+    h+='<div class="og-empty-ring">'+ogGoalRing(0,80,'#1E2D3D')+'</div>';
+    h+='<div class="og-empty-title">Aucun objectif pour l\u0027instant</div>';
+    h+='<div class="og-empty-sub">D\u00e9finis ce que tu veux accomplir. Le cockpit t\u0027aide \u00e0 y arriver.</div>';
+    h+='<button class="btn btn-primary" onclick="openNewGoal()">Créer un objectif →</button>';
+    h+='</div></div>';
+    return h;
+  }
+  var inProg=goals.filter(function(g){return g.status==='in_progress';}).length;
+  h+='<div class="og-header"><div><div class="og-title">Objectifs</div>';
+  h+='<div class="og-subtitle">'+inProg+' objectif'+(inProg>1?'s':'')+' en cours</div></div>';
+  h+='<button class="og-add-btn" onclick="openNewGoal()">+</button></div>';
+  // Focus bloc
+  h+=ogFocusBlock(goals);
+  // Projects
+  var pOrder={urgente:4,haute:3,moyenne:2,basse:1};
+  var projects=goals.filter(function(g){return g.type==='project';});
+  projects.sort(function(a,b){
+    var sA=a.status==='in_progress'?0:a.status==='todo'?1:2;
+    var sB=b.status==='in_progress'?0:b.status==='todo'?1:2;
+    if(sA!==sB)return sA-sB;
+    if(!a.deadline&&!b.deadline)return(pOrder[b.priority]||2)-(pOrder[a.priority]||2);
+    if(!a.deadline)return 1;if(!b.deadline)return -1;
+    if(a.deadline!==b.deadline)return a.deadline<b.deadline?-1:1;
+    return(pOrder[b.priority]||2)-(pOrder[a.priority]||2);
+  });
+  if(projects.length>0){
+    var activeP=projects.filter(function(g){return g.status!=='done';}).length;
+    h+='<div class="og-projects-section">';
+    h+='<div class="og-section-hdr">PROJETS<span class="og-section-count">'+activeP+'</span></div>';
+    h+='<div class="og-list">';
+    projects.forEach(function(g){h+=renderGoalRow(g);});
+    h+='</div></div>';
+  }
+  // Recurring
+  var recurring=goals.filter(function(g){return g.type==='recurring';});
+  if(recurring.length>0){
+    h+='<div class="og-recurring-section">';
+    h+='<div class="og-section-hdr">HABITUDES</div>';
+    h+='<div class="og-list">';
+    recurring.forEach(function(g){h+=renderGoalRow(g);});
+    h+='</div></div>';
+  }
+  h+='</div>';
+  return h;
+};
+
+window.renderGoalBoard=function(){return renderObjectifs();};
+
 </script>
 </body>
 </html>
