@@ -136,6 +136,42 @@ input[type=checkbox]{width:auto;accent-color:var(--cyan)}
 body.compact{font-size:13px}
 body.compact .card{padding:10px;margin-bottom:8px}
 body.compact .habit-row{padding:7px 0}
+/* ── Celebrations ── */
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.confetti-piece{position:fixed;width:10px;height:10px;border-radius:2px;pointer-events:none;z-index:9999;animation:confettiFall 2.5s ease-in forwards}
+@keyframes recordPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,0.4)}50%{box-shadow:0 0 0 16px rgba(0,212,255,0)}}
+.record-pulse{animation:recordPulse 0.8s ease 3}
+/* ── Swipe hint ── */
+.habit-row{transition:background 0.15s}
+.habit-row.swipe-active{background:rgba(0,229,160,0.08)}
+/* ── Empty state ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--g1)}
+.empty-state .es-emoji{font-size:48px;display:block;margin-bottom:12px}
+.empty-state h3{font-family:var(--font-display);font-size:18px;color:var(--w);margin-bottom:8px}
+/* ── Print / PDF ── */
+@media print{
+  #sidebar,#right-panel,#bnav,#fab,#toast,#overlay,.tabs,.btn{display:none!important}
+  #root{overflow:visible!important}
+  body{background:#fff!important;color:#000!important}
+  .card{border:1px solid #ddd!important;background:#fff!important;break-inside:avoid}
+  .stat-num,.tx-amt{color:#000!important}
+}
+/* ── Balance curve ── */
+.bal-positive{color:var(--green)}
+.bal-negative{color:var(--red)}
+/* ── Onboarding ── */
+.ob-step{display:none}.ob-step.active{display:block}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:var(--bg3);transition:background var(--t)}
+.ob-dot.active{background:var(--cyan)}
+/* ── Catch-up ── */
+.catchup-day{display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--bg2);border-radius:var(--r2);margin-bottom:6px}
+/* ── Category colors ── */
+:root{
+  --cat-alimentation:#00E5A0;--cat-transport:#00D4FF;--cat-logement:#A855F7;
+  --cat-sante:#FF3A5C;--cat-sport:#FFB800;--cat-loisirs:#FF6B6B;
+  --cat-shopping:#FF9F43;--cat-abonnements:#6C5CE7;--cat-factures:#FD79A8;
+  --cat-divers:#636E72;--cat-salaire:#00E5A0;--cat-epargne:#A855F7;
+}
 </style>
 </head>
 <body>
@@ -164,6 +200,12 @@ const SK='mcp_v5';
 const CY=new Date().getFullYear();
 let _gid=0;
 const DEF_HAB_COLORS=['#00D4FF','#00E5A0','#FFB800','#A855F7','#FF3A5C'];
+const CAT_COLORS={
+  'Alimentation':'#00E5A0','Transport':'#00D4FF','Logement':'#A855F7',
+  'Santé':'#FF3A5C','Sport':'#FFB800','Loisirs':'#FF6B6B',
+  'Shopping':'#FF9F43','Abonnements':'#6C5CE7','Factures':'#FD79A8',
+  'Divers':'#636E72','Salaire':'#00E5A0','Revenus divers':'#00D4FF','Épargne':'#A855F7'
+};
 const QUOTES_BY_TIER=[
   ['Chaque grand voyage commence par un premier pas. 🚶','Lance-toi, c\'est maintenant ! 🎯','Le début est toujours le plus dur. 💪'],
   ['7 jours c\'est une semaine entière. Tu tiens ! 🔥','La régularité bat le talent. Continue. ⚡','Une semaine de done. Garde le cap. 🚀'],
@@ -184,6 +226,8 @@ let _anaFrom='',_anaTo='';
 let _snapSlot=0;
 let _ciNoteExpanded=null;
 let _quickAdd='';
+let _obStep=0;
+let _catchupDays={};
 
 function dc(x){return JSON.parse(JSON.stringify(x));}
 
@@ -202,7 +246,7 @@ function load(){
     weekStart:1,density:'comfortable',profile:{name:'Massimo',emoji:'⚡'},
     catColors:{},homeModules:{streak:true,kpis:true,weekBars:true,checkin:true,finAlert:true,goals:true},
     freezeJokers:{},goals:[],dayTemplates:{},customCats:[],challenges:[],
-    lastBreakModal:'',snapshots:{}};
+    lastBreakModal:'',snapshots:{},notifEnabled:false,soundEnabled:false,onboardingDone:false};
   S.config=Object.assign(defCfg,S.config||{});
   if(!S.config.profile)S.config.profile={name:'Massimo',emoji:'⚡'};
   if(!S.config.homeModules)S.config.homeModules={streak:true,kpis:true,weekBars:true,checkin:true,finAlert:true,goals:true};
@@ -228,6 +272,338 @@ function applyTheme(){
 }
 function save(){localStorage.setItem(SK,JSON.stringify(S));}
 function allCats(){return [...CATS,...(S.config.customCats||[])];}
+function catColor(cat){return CAT_COLORS[cat]||'#636E72';}
+
+/* ── PWA MANIFEST ──────────────────────────────────────────────────────── */
+function injectManifest(){
+  const m={name:'Cockpit — Massimo',short_name:'Cockpit',start_url:'.',display:'standalone',
+    background_color:'#06090D',theme_color:'#06090D',
+    icons:[{src:'https://via.placeholder.com/192x192/00D4FF/06090D?text=M',sizes:'192x192',type:'image/png'}],
+    shortcuts:[{name:'Check-in',short_name:'Check-in',url:'./#checkin',description:'Faire mon check-in'},
+               {name:'Finances',short_name:'Finances',url:'./#finances',description:'Voir mes finances'}]};
+  const blob=new Blob([JSON.stringify(m)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('link');link.rel='manifest';link.href=url;
+  document.head.appendChild(link);
+}
+
+/* ── NOTIFICATIONS ─────────────────────────────────────────────────────── */
+function requestNotifPermission(){
+  if(!('Notification' in window)){toast('Notifications non supportées');return;}
+  Notification.requestPermission().then(p=>{
+    S.config.notifEnabled=(p==='granted');
+    save();
+    if(p==='granted'){toast('🔔 Notifications activées !');scheduleCheckinReminder();}
+    else toast('Notifications refusées');
+    render();
+  });
+}
+function scheduleCheckinReminder(){
+  if(!S.config.notifEnabled)return;
+  // Check if already done today
+  const today=iso();
+  if(S.habits[today]&&scoreDay(S.habits[today])>0)return;
+  // Schedule for 22h or now+5s for demo
+  const now=new Date();
+  const target=new Date();target.setHours(22,0,0,0);
+  let delay=target-now;
+  if(delay<0)delay=0;
+  if(delay>0&&delay<1000*60*60*24){
+    setTimeout(()=>{
+      if(!S.habits[iso()]||scoreDay(S.habits[iso()]||{})<H().length){
+        new Notification('Cockpit — Check-in manquant 🔥',{
+          body:`Tu n'as pas encore fait ton check-in aujourd'hui. Streak en danger !`,
+          icon:'https://via.placeholder.com/64x64/FFB800/06090D?text=!',
+          tag:'checkin-reminder'
+        });
+      }
+    },delay);
+  }
+}
+function sendWeeklySummary(){
+  if(!S.config.notifEnabled)return;
+  const today=new Date();if(today.getDay()!==0)return; // Sunday only
+  const lastSent=S.config.lastWeeklySummary;
+  if(lastSent===iso())return;
+  const wr=weeklyReport();
+  if(!wr)return;
+  new Notification('📊 Résumé semaine — Cockpit',{
+    body:`Habitudes: ${wr.avgRate}% · Net finances: ${fmtAmt(wr.wNet)} · Streak: ${currentStreak()} jours`,
+    tag:'weekly-summary'
+  });
+  S.config.lastWeeklySummary=iso();save();
+}
+function checkNotifOnLoad(){
+  if(S.config.notifEnabled){scheduleCheckinReminder();sendWeeklySummary();}
+}
+
+/* ── SOUND FEEDBACK ────────────────────────────────────────────────────── */
+function playSound(type='check'){
+  if(!S.config.soundEnabled)return;
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    if(type==='check'){osc.frequency.value=880;gain.gain.setValueAtTime(0.1,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.15);osc.start();osc.stop(ctx.currentTime+0.15);}
+    else if(type==='record'){
+      [523,659,784,1047].forEach((f,i)=>{
+        const o2=ctx.createOscillator();const g2=ctx.createGain();o2.connect(g2);g2.connect(ctx.destination);
+        o2.frequency.value=f;g2.gain.setValueAtTime(0.08,ctx.currentTime+i*0.1);g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.2);
+        o2.start(ctx.currentTime+i*0.1);o2.stop(ctx.currentTime+i*0.1+0.2);
+      });
+    }else if(type==='save'){osc.frequency.value=440;gain.gain.setValueAtTime(0.05,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.2);osc.start();osc.stop(ctx.currentTime+0.2);}
+  }catch(e){}
+}
+
+/* ── CELEBRATIONS ──────────────────────────────────────────────────────── */
+function celebrate(type='confetti'){
+  const colors=['#00D4FF','#00E5A0','#FFB800','#A855F7','#FF3A5C','#fff'];
+  const n=type==='record'?60:30;
+  for(let i=0;i<n;i++){
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.cssText=`left:${Math.random()*100}vw;top:-20px;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;border-radius:${Math.random()>0.5?'50%':'2px'};animation-delay:${Math.random()*1}s;animation-duration:${2+Math.random()*1.5}s`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),(3500));
+  }
+  playSound(type==='record'?'record':'check');
+}
+
+/* ── RUNNING BALANCE ───────────────────────────────────────────────────── */
+function runningBalanceData(){
+  const sorted=[...S.finance].sort((a,b)=>a.date.localeCompare(b.date));
+  if(!sorted.length)return[];
+  let bal=0;
+  const points=[];
+  sorted.forEach(t=>{bal+=t.amt;points.push({date:t.date,bal:Math.round(bal*100)/100});});
+  return points;
+}
+function balanceCurve(points){
+  if(points.length<2)return '';
+  const W=320,H=100;
+  const vals=points.map(p=>p.bal);
+  const max=Math.max(...vals,0),min=Math.min(...vals,0);
+  const range=Math.max(max-min,1);
+  const zero=H-10-Math.round((0-min)/range*(H-20));
+  const pts=points.map((p,i)=>{
+    const x=i/(points.length-1)*(W-20)+10;
+    const y=H-10-Math.round((p.bal-min)/range*(H-20));
+    return`${x},${y}`;
+  });
+  const gid='bc'+(_gid++);
+  const lastBal=vals[vals.length-1];
+  const lineColor=lastBal>=0?'#00E5A0':'#FF3A5C';
+  return`<svg viewBox="0 0 ${W} ${H+12}" style="width:100%;height:${H+12}px">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${lineColor}" stop-opacity="0.3"/><stop offset="100%" stop-color="${lineColor}" stop-opacity="0"/></linearGradient></defs>
+    ${min<0&&max>0?`<line x1="10" y1="${zero}" x2="${W-10}" y2="${zero}" stroke="var(--b2)" stroke-width="1" stroke-dasharray="4,4"/>`:''}
+    <polygon points="${pts.join(' ')} ${W-10},${H-10} 10,${H-10}" fill="url(#${gid})"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round"/>
+    <text x="${W-12}" y="${Math.max(16,Math.min(H-4,parseFloat(pts[pts.length-1].split(',')[1])-4))}" text-anchor="end" fill="${lineColor}" font-size="10" font-family="JetBrains Mono,monospace" font-weight="700">${lastBal>=0?'+':''}${lastBal}€</text>
+  </svg>`;
+}
+
+/* ── BETTER PREDICTION ─────────────────────────────────────────────────── */
+function smartPrediction(mk){
+  const now=new Date();
+  const curMk=mKey();
+  if(mk!==curMk)return null;
+  const d=now.getDate();
+  const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const txs=txByMonth(mk);
+  const sofar=txs.reduce((a,t)=>a+t.amt,0);
+  // Use last 3 same months historically for pattern
+  const pastMonths=[];
+  for(let i=1;i<=3;i++){
+    const pm=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const pmk=`${pm.getFullYear()}-${String(pm.getMonth()+1).padStart(2,'0')}`;
+    const pNet=monthNet(pmk);
+    if(pNet!==0)pastMonths.push(pNet);
+  }
+  const historicalAvg=pastMonths.length?pastMonths.reduce((a,v)=>a+v,0)/pastMonths.length:null;
+  // Linear extrapolation weighted with historical
+  const linearProj=d>0?Math.round(sofar/d*daysInMonth):sofar;
+  if(historicalAvg!==null){
+    const w=Math.min(0.5,d/daysInMonth); // more weight on linear as month progresses
+    return Math.round(linearProj*w+historicalAvg*(1-w));
+  }
+  return linearProj;
+}
+
+/* ── SWIPE GESTURES ────────────────────────────────────────────────────── */
+function addSwipeToHabits(){
+  const rows=document.querySelectorAll('.habit-row[data-hid]');
+  rows.forEach(row=>{
+    let sx=0,sy=0;
+    row.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+    row.addEventListener('touchend',e=>{
+      const dx=e.changedTouches[0].clientX-sx;
+      const dy=e.changedTouches[0].clientY-sy;
+      if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){
+        const hid=row.dataset.hid;
+        const date=row.dataset.date||_ciDate;
+        if(!S.habits[date])S.habits[date]={};
+        S.habits[date][hid]=dx>0?true:false;
+        save();
+        row.classList.add('swipe-active');
+        playSound('check');
+        setTimeout(()=>render(),200);
+      }
+    },{passive:true});
+  });
+}
+
+/* ── CATCH-UP MODE ─────────────────────────────────────────────────────── */
+function detectMissedDays(n=5){
+  const today=iso();
+  const missed=[];
+  for(let i=1;i<=n;i++){
+    const d=isoPlus(today,-i);
+    if(!S.habits[d]||scoreDay(S.habits[d])===0)missed.push(d);
+  }
+  return missed;
+}
+function showCatchupModal(){
+  const missed=detectMissedDays(7);
+  if(!missed.length){toast('Aucun jour manquant cette semaine 👌');return;}
+  _catchupDays={};
+  H().forEach(hb=>_catchupDays[hb.id]=false);
+  const hbToggles=H().map(hb=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0">
+    <span>${hb.emoji} ${hb.label}</span>
+    <button class="habit-toggle${_catchupDays[hb.id]?' on':''}" id="cu-${hb.id}" onclick="toggleCatchup('${hb.id}')"></button>
+  </div>`).join('');
+  openModal(`<button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">Mode rattrapage 📅</div>
+    <div style="font-size:13px;color:var(--g1);margin-bottom:12px">${missed.length} jour${missed.length>1?'s':''} manquant${missed.length>1?'s':''} — applique les mêmes habitudes :</div>
+    <div style="background:var(--bg2);border-radius:var(--r2);padding:10px;margin-bottom:12px">${hbToggles}</div>
+    <div style="font-size:11px;color:var(--g2);margin-bottom:12px">Jours : ${missed.map(d=>fmtDate(d)).join(', ')}</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="applyCatchup(${JSON.stringify(missed).replace(/"/g,"'")})">Appliquer à ${missed.length} jour${missed.length>1?'s':''}</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+    </div>`);
+}
+function toggleCatchup(hid){
+  _catchupDays[hid]=!_catchupDays[hid];
+  const btn=document.getElementById('cu-'+hid);
+  if(btn)btn.classList.toggle('on',_catchupDays[hid]);
+}
+function applyCatchup(days){
+  days.forEach(d=>{
+    if(!S.habits[d])S.habits[d]={};
+    Object.entries(_catchupDays).forEach(([hid,v])=>{S.habits[d][hid]=v;});
+  });
+  save();closeModal();render();toast(`Rattrapage appliqué à ${days.length} jour${days.length>1?'s':''} ✓`);
+}
+
+/* ── ONBOARDING ────────────────────────────────────────────────────────── */
+function checkOnboarding(){
+  if(S.config.onboardingDone)return;
+  showOnboarding();
+}
+function showOnboarding(){
+  _obStep=0;renderObStep();
+  document.getElementById('overlay').classList.add('open');
+}
+function renderObStep(){
+  const steps=[
+    {title:'Bienvenue dans Cockpit 👋',desc:`Ton tableau de bord personnel pour les habitudes et les finances. 3 minutes pour tout configurer.`,cta:'Commencer →'},
+    {title:'Tes habitudes 🎯',desc:`Tu as déjà ${H().length} habitudes pré-configurées (sport, TFE, lecture, nutrition, sommeil). Tu pourras les personnaliser dans Config.`,cta:'Super →'},
+    {title:'Tes finances 💰',desc:`Importe ton relevé ING depuis Config → Données → Importer CSV ING. L'app détecte les marchands et catégorise automatiquement.`,cta:'Compris →'},
+    {title:'Notifications 🔔',desc:`Reçois un rappel à 22h si tu n'as pas fait ton check-in, et un résumé le dimanche.`,cta:'Activer les notifications',extra:'skip'},
+    {title:`C'est parti, ${S.config.profile.name} ⚡`,desc:`Check-in quotidien → streak → momentum. Ouvre l'app chaque jour et regarde tes stats progresser.`,cta:`Lancer Cockpit →`}
+  ];
+  const s=steps[_obStep];
+  document.getElementById('modal').innerHTML=`
+    <div style="text-align:center;padding:8px 0">
+      <div style="display:flex;justify-content:center;gap:8px;margin-bottom:20px">
+        ${steps.map((_,i)=>`<div class="ob-dot${i===_obStep?' active':''}"></div>`).join('')}
+      </div>
+      <div style="font-size:32px;margin-bottom:12px">${['👋','🎯','💰','🔔','⚡'][_obStep]}</div>
+      <div style="font-family:var(--font-display);font-size:20px;font-weight:800;margin-bottom:10px">${s.title}</div>
+      <div style="font-size:14px;color:var(--g1);margin-bottom:24px;line-height:1.6">${s.desc}</div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="obNext()">${s.cta}</button>
+      ${s.extra?`<button class="btn btn-ghost" style="width:100%" onclick="obNext()">Passer</button>`:''}
+    </div>`;
+}
+function obNext(){
+  if(_obStep===3){requestNotifPermission();}
+  _obStep++;
+  if(_obStep>=5){
+    S.config.onboardingDone=true;save();closeModal();render();
+    return;
+  }
+  renderObStep();
+}
+
+/* ── ANNUAL ARCHIVE ────────────────────────────────────────────────────── */
+function checkAnnualArchive(){
+  const now=new Date();
+  if(now.getMonth()!==0||now.getDate()>7)return; // Only first week of January
+  const prevYear=now.getFullYear()-1;
+  const archKey=`archive_${prevYear}`;
+  if(S.config[archKey])return;
+  const prevHabits={};const prevFinance=[];
+  Object.entries(S.habits).forEach(([d,v])=>{if(d.startsWith(prevYear))prevHabits[d]=v;});
+  S.finance.forEach(t=>{if(t.date.startsWith(prevYear))prevFinance.push(t);});
+  if(!Object.keys(prevHabits).length&&!prevFinance.length)return;
+  openModal(`<button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">📦 Archive ${prevYear}</div>
+    <div style="font-size:13px;color:var(--g1);margin-bottom:12px">
+      ${Object.keys(prevHabits).length} jours d'habitudes et ${prevFinance.length} transactions de ${prevYear} peuvent être archivées.
+    </div>
+    <div style="background:var(--bg2);border-radius:var(--r2);padding:10px;margin-bottom:12px;font-size:12px;color:var(--g2)">
+      ✅ Les données restent consultables dans l'onglet Analytics.<br>
+      ✅ L'archive est sauvegardée dans le JSON export.
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="doArchive(${prevYear})">Archiver ${prevYear}</button>
+      <button class="btn btn-ghost" onclick="S.config['archive_${prevYear}']=true;save();closeModal()">Plus tard</button>
+    </div>`);
+}
+function doArchive(year){
+  S.config[`archive_${year}`]=true;
+  S.config[`archived_habits_${year}`]=Object.fromEntries(Object.entries(S.habits).filter(([d])=>d.startsWith(year)));
+  S.config[`archived_finance_${year}`]=S.finance.filter(t=>t.date.startsWith(year));
+  save();closeModal();toast(`📦 ${year} archivé avec succès ✓`);
+}
+
+/* ── PDF EXPORT ────────────────────────────────────────────────────────── */
+function exportPDF(){
+  const mk=mKey();
+  const bilan=annualBilan();
+  const wr=weeklyReport();
+  const printWin=window.open('','_blank');
+  printWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>Rapport Cockpit — ${new Date().toLocaleDateString('fr-BE')}</title>
+    <style>body{font-family:Arial,sans-serif;padding:24px;color:#111;max-width:700px;margin:0 auto}
+    h1{color:#00D4FF;font-size:22px;margin-bottom:4px}h2{font-size:16px;color:#333;border-bottom:2px solid #eee;padding-bottom:4px;margin:20px 0 10px}
+    table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 10px;border:1px solid #eee;text-align:left}
+    th{background:#f5f5f5}.pos{color:green}.neg{color:red}.chip{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;background:#eee}
+    @media print{button{display:none}}</style></head><body>
+    <h1>📊 Cockpit — Rapport mensuel</h1>
+    <p style="color:#888;font-size:13px">Généré le ${new Date().toLocaleDateString('fr-BE')} pour ${S.config.profile.name}</p>
+    <button onclick="window.print()" style="padding:8px 16px;background:#00D4FF;border:none;border-radius:6px;cursor:pointer;margin-bottom:20px">🖨️ Imprimer</button>
+    <h2>Habitudes — ${new Date().toLocaleDateString('fr-BE',{month:'long',year:'numeric'})}</h2>
+    <table><tr><th>Habitude</th><th>Ce mois</th><th>Global</th></tr>
+    ${H().map(hb=>{
+      const allD=Object.keys(S.habits);
+      const mD=allD.filter(d=>d.startsWith(mk));
+      const mDone=mD.filter(d=>S.habits[d][hb.id]===true).length;
+      const gDone=allD.filter(d=>S.habits[d]&&S.habits[d][hb.id]===true).length;
+      return`<tr><td>${hb.emoji} ${hb.label}</td><td>${mDone}/${mD.length} (${mD.length?Math.round(mDone/mD.length*100):0}%)</td><td>${gDone}/${allD.length} (${allD.length?Math.round(gDone/allD.length*100):0}%)</td></tr>`;
+    }).join('')}
+    </table>
+    ${bilan?`<h2>Finances — Bilan</h2><table>
+    <tr><th>Revenus</th><th>Dépenses</th><th>Épargne</th><th>Taux épargne</th></tr>
+    <tr><td class="pos">+${Math.round(bilan.totalRev)}€</td><td class="neg">-${Math.round(bilan.totalDep)}€</td><td>+${Math.round(bilan.totalSav)}€</td><td>${bilan.savRate}%</td></tr>
+    </table>`:''}
+    <h2>Transactions récentes</h2>
+    <table><tr><th>Date</th><th>Description</th><th>Catégorie</th><th>Montant</th></tr>
+    ${[...S.finance].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20).map(t=>`<tr><td>${fmtDate(t.date)}</td><td>${t.desc}</td><td>${t.cat}</td><td class="${t.amt>=0?'pos':'neg'}">${fmtAmt(t.amt)}</td></tr>`).join('')}
+    </table>
+    </body></html>`);
+  printWin.document.close();
+}
 
 /* ── UTILS ─────────────────────────────────────────────────────────────── */
 function iso(d){const dt=d||new Date();return dt.toISOString().slice(0,10);}
@@ -560,7 +936,12 @@ function closeModal(){
 }
 
 /* ── ROUTER ────────────────────────────────────────────────────────────── */
-function nav(p){_page=p;render();}
+function nav(p){
+  _page=p;
+  render();
+  const root=document.getElementById('root');
+  if(root)root.scrollTop=0;
+}
 
 function renderSidebar(){
   const icons={
@@ -610,7 +991,11 @@ function renderRightPanel(){
   rp.innerHTML=`
     <div class="right-section" style="display:flex;justify-content:space-between;align-items:center">
       <span style="font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--cyan)">Cockpit</span>
-      <button class="theme-toggle" onclick="toggleTheme()" title="Changer de thème">${themeIcon}</button>
+      <div style="display:flex;gap:4px">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Changer de thème">${themeIcon}</button>
+        <button class="theme-toggle" onclick="toggleSound()" title="Son" style="${S.config.soundEnabled?'border-color:var(--cyan);color:var(--cyan)':''}">${S.config.soundEnabled?'🔊':'🔇'}</button>
+        <button class="theme-toggle" onclick="${S.config.notifEnabled?'':' requestNotifPermission()'}" title="Notifications" style="${S.config.notifEnabled?'border-color:var(--green);color:var(--green)':''}">${S.config.notifEnabled?'🔔':'🔕'}</button>
+      </div>
     </div>
     <div class="right-section">
       <div class="right-title">Streak</div>
@@ -640,6 +1025,11 @@ function toggleTheme(){
   S.config.theme=S.config.theme==='dark'?'light':'dark';
   document.getElementById('html-root').classList.toggle('light',S.config.theme==='light');
   save();renderRightPanel();
+}
+function toggleSound(){
+  S.config.soundEnabled=!S.config.soundEnabled;
+  save();renderRightPanel();
+  if(S.config.soundEnabled)playSound('check');
 }
 
 /* ── HOME PAGE ─────────────────────────────────────────────────────────── */
@@ -738,17 +1128,27 @@ function renderHome(){
         <div class="section-label">Aujourd'hui — ${score}/${mx}</div>
         ${svgRing(score,mx,scoreColor(score,mx),44)}
       </div>
-      ${H().map(hb=>{
+      ${score===0&&!S.habits[today]?`<div class="empty-state" style="padding:20px 0">
+        <span class="es-emoji">🌅</span>
+        <h3>Bonne journée, ${S.config.profile.name} !</h3>
+        <p style="font-size:13px;margin-bottom:12px">Lance ton check-in du jour pour maintenir ta série.</p>
+        <button class="btn btn-primary" onclick="nav('checkin')">Commencer le check-in →</button>
+      </div>`:`${H().map(hb=>{
         const v=day[hb.id];
         const hstr=habitStreak(hb.id);
-        return `<div class="habit-row" style="border-left:3px solid ${hb.color||'var(--b)'}">
+        const mProg=habitMonthProgress(hb.id,mk);
+        const mTarget=hb.monthTarget||0;
+        return `<div class="habit-row" style="border-left:3px solid ${hb.color||'var(--b)'}" data-hid="${hb.id}" data-date="${today}">
           <span style="font-size:20px">${hb.emoji}</span>
-          <span style="flex:1;font-size:14px;font-weight:500">${hb.label}</span>
-          ${hstr>0?`<span style="font-size:10px;color:var(--amber);margin-right:6px">🔥${hstr}</span>`:''}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:500">${hb.label}</div>
+            ${mTarget>0?`<div style="font-size:10px;color:var(--g2)">${mProg}/${mTarget} ce mois</div>`:''}
+          </div>
+          ${hstr>0?`<span style="font-size:10px;color:var(--amber);margin-right:4px">🔥${hstr}</span>`:''}
           <button class="habit-toggle${v===true?' on':''}" style="${v===true?'background:'+hb.color+';border-color:'+hb.color:''}" onclick="toggleHabitToday('${hb.id}')"></button>
         </div>`;
       }).join('')}
-      <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="nav('checkin')">Check-in complet →</button>
+      <button class="btn btn-primary" style="width:100%;margin-top:12px${score===mx?';box-shadow:0 0 16px rgba(0,229,160,0.4)':''}" onclick="nav('checkin')">${score===mx?'🔥 Parfait ! ':''} Check-in complet →</button>`}
     </div>`:''}
 
     ${(S.config.goals||[]).length>0&&hm.goals!==false?`<div class="card">
@@ -768,6 +1168,16 @@ function renderHome(){
     </div>`:''}
 
     ${weekHtml}
+
+    ${(()=>{
+      const missed=detectMissedDays(3);
+      if(!missed.length)return'';
+      return`<div style="background:rgba(255,184,0,0.08);border:1px solid rgba(255,184,0,0.25);border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:13px;color:var(--amber)">📅 ${missed.length} jour${missed.length>1?'s':''}  manquant${missed.length>1?'s':''} cette semaine</div>
+        <button class="btn btn-ghost btn-sm" onclick="showCatchupModal()" style="color:var(--amber);border-color:rgba(255,184,0,0.3)">Rattrapage →</button>
+      </div>`;
+    })()}
+
   </div>`;
 }
 
@@ -779,8 +1189,18 @@ function getScoreEmoji(score,mx){
 function toggleHabitToday(hid){
   const d=iso();
   if(!S.habits[d])S.habits[d]={};
-  S.habits[d][hid]=!S.habits[d][hid];
-  save();render();
+  const wasOff=!S.habits[d][hid];
+  S.habits[d][hid]=wasOff;
+  save();
+  if(wasOff){
+    playSound('check');
+    const newScore=scoreDay(S.habits[d]);
+    const prev=bestStreak();
+    const cur=currentStreak();
+    if(newScore===H().length){celebrate('confetti');}
+    if(cur>prev){celebrate('record');toast('🏆 Nouveau record de streak !');playSound('record');}
+  }
+  render();
 }
 function useStreakJoker(){
   const mk=iso().slice(0,7);
@@ -869,8 +1289,11 @@ function renderCheckin(){
 function setCiDate(v){_ciDate=v;render();}
 function toggleHabit(date,hid){
   if(!S.habits[date])S.habits[date]={};
-  S.habits[date][hid]=!S.habits[date][hid];
-  save();render();
+  const wasOff=!S.habits[date][hid];
+  S.habits[date][hid]=wasOff;
+  save();
+  if(wasOff)playSound('check');
+  render();
 }
 function saveNote(val){
   if(!S.habits[_ciDate])S.habits[_ciDate]={};
@@ -956,10 +1379,11 @@ function renderFinHistory(){
 
 function renderTxRow(t){
   const c=TCH[t.type]||'var(--g1)';
+  const cc=catColor(t.cat);
   const tags=(t.tags||[]).map(tg=>`<span class="tag-badge" onclick="event.stopPropagation();_fTagFilter='${esc(tg)}';render()" style="cursor:pointer">${esc(tg)}</span>`).join('');
   const pendingBadge=t.pending?`<span style="font-size:10px;background:#FFB80020;color:var(--amber);border:1px solid #FFB80044;padding:1px 6px;border-radius:8px;margin-left:4px;cursor:pointer" onclick="togglePending('${t.id}')">⏳ en attente</span>`:'';
   return `<div class="tx-row" style="${t.pending?'opacity:0.6':''}">
-    <div class="tx-icon" style="background:${c}22">${catEmoji(t.cat)}</div>
+    <div class="tx-icon" style="background:${cc}22">${catEmoji(t.cat)}</div>
     <div style="flex:1;min-width:0">
       <div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.desc)}${pendingBadge}</div>
       <div style="font-size:11px;color:var(--g1)">${esc(t.cat)} · ${fmtDate(t.date)}</div>
@@ -1128,9 +1552,10 @@ function renderFinAnalyse(){
       <div class="section-label">Dépenses par catégorie (tout)</div>
       ${topCats.map(([cat,amt])=>{
         const p=Math.round(amt/totalDep*100);
+        const cc=catColor(cat);
         return `<div class="budget-row">
           <div class="budget-label"><span>${catEmoji(cat)} ${cat}</span><span style="font-family:var(--font-mono)">${amt.toFixed(0)}€ · ${p}%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:var(--red)"></div></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${cc}"></div></div>
         </div>`;
       }).join('')}
     </div>
@@ -1215,8 +1640,8 @@ function renderAnalHabits(){
             ${trendHtml}
             <span style="font-family:var(--font-mono);font-size:12px;color:var(--g1)">${hb.rate}% global</span>
           </div>
-          <div style="font-size:11px;color:var(--g2);margin-bottom:4px">Ce mois: ${monthRate}% · Pondéré: ${weightedScoreMonth(hb.id,mk)}/${maxW}</div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${monthRate}%;background:${scoreColor(monthDone,monthDates.length||1)}"></div></div>
+          <div style="font-size:11px;color:var(--g2);margin-bottom:4px">Ce mois: ${monthDone}/${monthDates.length} (${monthRate}%)${hb.monthTarget?` · Objectif: ${hb.monthTarget}`:''}</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${hb.monthTarget?Math.min(100,Math.round(monthDone/hb.monthTarget*100)):monthRate}%;background:${hb.color||scoreColor(monthDone,monthDates.length||1)}"></div></div>
         </div>`;
       }).join('')}
     </div>
@@ -1310,8 +1735,21 @@ function renderAnalFinances(){
 
   const bilan=annualBilan();
 
+  const balPoints=runningBalanceData();
+  const lastBal=balPoints.length?balPoints[balPoints.length-1].bal:0;
+  const balColor=lastBal>=0?'var(--green)':'var(--red)';
+  const smartProj=smartPrediction(mKey());
+
   return `
     ${bilan?renderBilan(bilan):''}
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+        <div class="section-label">Solde cumulé</div>
+        <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:${balColor}">${lastBal>=0?'+':''}${lastBal}€</div>
+      </div>
+      ${balanceCurve(balPoints)}
+      ${smartProj!==null?`<div style="font-size:12px;color:var(--g2);margin-top:6px">Prévision fin de mois: <span style="font-family:var(--font-mono);color:${smartProj>=0?'var(--green)':'var(--red)'}">${smartProj>=0?'+':''}${smartProj}€</span> <span style="color:var(--g2);font-size:10px">(basé sur historique)</span></div>`:''}
+    </div>
     <div class="card">
       <div class="section-label">Revenus par mois</div>
       ${barChart(revData,labels,'var(--green)')}
@@ -1400,12 +1838,28 @@ function generateInsightText(corr){
   if(corr.high.n>0&&corr.low.n>0&&corr.high.avgNet!==null&&corr.low.avgNet!==null){
     const diff=corr.high.avgNet-corr.low.avgNet;
     if(Math.abs(diff)>10){
-      rows.push(`<div style="padding:8px;background:var(--bg2);border-radius:var(--r2);font-size:13px;margin-bottom:8px">
-        Lors de tes semaines à haute discipline, ton bilan est en moyenne <strong style="color:${diff>0?'var(--green)':'var(--red)'}">${diff>0?'+':''}${Math.round(diff)}€</strong> ${diff>0?'meilleur':'moins bon'} que lors de tes semaines faibles.
+      rows.push(`<div style="padding:10px;background:var(--bg2);border-radius:var(--r2);font-size:13px;margin-bottom:8px;line-height:1.6">
+        💡 Les semaines où tu complètes <strong style="color:var(--green)">70%+ de tes habitudes</strong>, ton bilan financier est en moyenne <strong style="color:${diff>0?'var(--green)':'var(--red)'}">${diff>0?'+':''}${Math.round(diff)}€</strong> ${diff>0?'meilleur':'moins bon'} que tes semaines faibles.
+        ${diff>0?`<br><span style="color:var(--g2);font-size:12px">La discipline crée de bonnes décisions financières.</span>`:''}
       </div>`);
     }
   }
-  rows.push(`<div style="font-size:12px;color:var(--g1)">Données basées sur ${Object.keys(S.habits).length} jours enregistrés.</div>`);
+  // Best sport-spend correlation
+  const sportHab=H().find(h=>h.id==='sport'||h.label.toLowerCase().includes('sport'));
+  if(sportHab){
+    const sportDays=Object.keys(S.habits).filter(d=>S.habits[d]&&S.habits[d][sportHab.id]===true);
+    const noSportDays=Object.keys(S.habits).filter(d=>S.habits[d]&&S.habits[d][sportHab.id]===false);
+    if(sportDays.length>5&&noSportDays.length>5){
+      const spendOn=d=>S.finance.filter(t=>t.date===d&&t.type==='Dépense').reduce((a,t)=>a+Math.abs(t.amt),0);
+      const avgSport=sportDays.map(spendOn).reduce((a,v)=>a+v,0)/sportDays.length;
+      const avgNoSport=noSportDays.map(spendOn).reduce((a,v)=>a+v,0)/noSportDays.length;
+      const diff2=avgSport-avgNoSport;
+      if(Math.abs(diff2)>0.5)rows.push(`<div style="padding:10px;background:var(--bg2);border-radius:var(--r2);font-size:13px;margin-bottom:8px;line-height:1.6">
+        🏋 Les jours où tu fais du sport, tu dépenses en moyenne <strong style="color:${diff2<0?'var(--green)':'var(--red)'}">${diff2<0?'':'+'}${Math.round(diff2)}€</strong> ${diff2<0?'de moins':'de plus'} que les autres jours.
+      </div>`);
+    }
+  }
+  rows.push(`<div style="font-size:12px;color:var(--g1);padding:8px 0">Analyse basée sur <strong>${Object.keys(S.habits).length}</strong> jours et <strong>${S.finance.length}</strong> transactions.</div>`);
   return rows.join('');
 }
 
@@ -1431,17 +1885,35 @@ function renderCfgHabits(){
       <input type="number" value="${S.config.savingsGoal}" min="0" step="50" onchange="S.config.savingsGoal=parseInt(this.value)||0;save();render()" style="width:120px">
     </div>
     <div class="section-label">Habitudes & poids</div>
-    ${H().map(hb=>`<div class="habit-row">
-      <span style="font-size:18px">${hb.emoji}</span>
-      <span style="flex:1;font-size:14px">${hb.label}</span>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:11px;color:var(--g1)">Poids:</span>
-        <select style="width:60px;padding:4px" onchange="setWeight('${hb.id}',parseInt(this.value))">
-          <option value="1"${(S.config.weights[hb.id]||1)===1?' selected':''}>1</option>
-          <option value="2"${(S.config.weights[hb.id]||1)===2?' selected':''}>2</option>
-          <option value="3"${(S.config.weights[hb.id]||1)===3?' selected':''}>3</option>
-        </select>
+    ${H().map(hb=>`<div style="padding:10px 0;border-bottom:1px solid var(--b)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:18px">${hb.emoji}</span>
+        <span style="flex:1;font-size:14px;font-weight:500">${hb.label}</span>
+        <span style="width:12px;height:12px;border-radius:50%;background:${hb.color||'var(--b)'};display:inline-block"></span>
         <button onclick="removeHabit('${hb.id}')" class="btn btn-ghost btn-sm" style="color:var(--red)">✕</button>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div style="flex:1">
+          <label style="font-size:11px">Poids score</label>
+          <select style="width:60px;padding:4px" onchange="setWeight('${hb.id}',parseInt(this.value))">
+            <option value="1"${(S.config.weights[hb.id]||1)===1?' selected':''}>1</option>
+            <option value="2"${(S.config.weights[hb.id]||1)===2?' selected':''}>2</option>
+            <option value="3"${(S.config.weights[hb.id]||1)===3?' selected':''}>3</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label style="font-size:11px">Objectif/mois</label>
+          <input type="number" value="${hb.monthTarget||0}" min="0" max="31" style="width:60px;padding:4px" onchange="setMonthTarget('${hb.id}',parseInt(this.value)||0)">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:11px">Groupe</label>
+          <select style="width:80px;padding:4px" onchange="setHabitGroup('${hb.id}',this.value)">
+            <option value="">—</option>
+            <option value="morning"${hb.group==='morning'?' selected':''}>Matin</option>
+            <option value="evening"${hb.group==='evening'?' selected':''}>Soir</option>
+            <option value="weekly"${hb.group==='weekly'?' selected':''}>Semaine</option>
+          </select>
+        </div>
       </div>
     </div>`).join('')}
     <div style="margin-top:12px;display:flex;gap:8px">
@@ -1452,6 +1924,8 @@ function renderCfgHabits(){
 }
 
 function setWeight(hid,w){S.config.weights[hid]=w;save();}
+function setMonthTarget(hid,v){const h=S.hcfg.find(x=>x.id===hid);if(h){h.monthTarget=v;save();}}
+function setHabitGroup(hid,g){const h=S.hcfg.find(x=>x.id===hid);if(h){h.group=g||null;save();}}
 function addHabit(){
   const label=document.getElementById('nh-label').value.trim();
   if(!label)return;
@@ -1709,6 +2183,7 @@ function renderCfgData(){
     <div class="section-label">Export / Import</div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <button class="btn btn-ghost" onclick="exportJSON()">📤 Exporter JSON</button>
+      <button class="btn btn-ghost" onclick="exportPDF()">🖨️ Rapport mensuel PDF</button>
       <button class="btn btn-ghost" onclick="document.getElementById('json-import').click()">📥 Importer JSON</button>
       <input type="file" id="json-import" accept=".json" style="display:none" onchange="importJSON(this)">
       <button class="btn btn-ghost" onclick="document.getElementById('csv-import').click()">📊 Importer CSV ING</button>
@@ -1901,8 +2376,41 @@ function importCSV(input){
   input.value='';
 }
 function confirmImportCSV(){
-  _csvParsed.forEach(r=>{S.finance.push({id:uid(),...r,tags:[]});});
-  save();closeModal();render();toast(`${_csvParsed.length} transactions importées ✓`);_csvParsed=[];
+  _csvParsed.forEach(r=>{S.finance.push({id:uid(),...r,tags:[],pending:false,note:''});});
+  save();
+  // Auto-suggest recurring transactions
+  const detected=detectRecurring();
+  const newRec=detected.filter(d=>{
+    const key=d.desc.toLowerCase().slice(0,20);
+    return!(S.config.recurring||[]).some(r=>r.desc.toLowerCase().slice(0,20)===key);
+  });
+  _csvParsed=[];
+  if(newRec.length){
+    openModal(`<button class="modal-close" onclick="closeModal();render()">×</button>
+      <div class="modal-title">🔄 Récurrents détectés</div>
+      <div style="font-size:13px;color:var(--g1);margin-bottom:12px">${newRec.length} transaction${newRec.length>1?'s':''} semblent récurrentes. Les ajouter ?</div>
+      ${newRec.map((r,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--bg2);border-radius:var(--r2);margin-bottom:6px">
+        <input type="checkbox" id="rec-${i}" checked style="width:auto">
+        <div style="flex:1"><div style="font-size:13px;font-weight:500">${esc(r.desc)}</div>
+        <div style="font-size:11px;color:var(--g2)">${r.type} · ${r.cat} · ${r.months.size} mois</div></div>
+        <span style="font-family:var(--font-mono);font-size:13px;color:${TCH[r.type]}">${fmtAmt(r.amt)}</span>
+      </div>`).join('')}
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-primary" style="flex:1" onclick="addSuggestedRecurring(${JSON.stringify(newRec).replace(/"/g,"'")},${newRec.length})">Ajouter sélection</button>
+        <button class="btn btn-ghost" onclick="closeModal();render()">Ignorer</button>
+      </div>`);
+  }else{render();toast(`${S.finance.length} transactions au total ✓`);}
+}
+function addSuggestedRecurring(recs,n){
+  let added=0;
+  for(let i=0;i<n;i++){
+    const cb=document.getElementById('rec-'+i);
+    if(cb&&cb.checked){
+      S.config.recurring.push({id:uid(),desc:recs[i].desc,type:recs[i].type,cat:recs[i].cat,amt:recs[i].amt});
+      added++;
+    }
+  }
+  save();closeModal();render();toast(`${added} récurrent${added>1?'s':''} ajouté${added>1?'s':''} ✓`);
 }
 function resetData(){
   if(!confirm('Réinitialiser toutes les données ? Cette action est irréversible.'))return;
@@ -1973,11 +2481,17 @@ function render(){
   // FAB: hide on checkin page
   const fab=document.getElementById('fab');
   if(fab)fab.style.display=_page==='checkin'?'none':'flex';
+  // Swipe gestures on habit rows
+  setTimeout(addSwipeToHabits,100);
 }
 
 /* ── INIT ──────────────────────────────────────────────────────────────── */
 load();
 render();
+injectManifest();
+checkNotifOnLoad();
+checkOnboarding();
+checkAnnualArchive();
 </script>
 </body>
 </html>
