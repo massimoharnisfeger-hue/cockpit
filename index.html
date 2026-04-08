@@ -4394,19 +4394,23 @@ window.initChartsHome=function(){
     const scores=window._homeWeekScores||[];
     const labels=window._homeWeekLabels||[];
     const barColors=scores.map(s=>s>=80?'rgba(0,229,160,.8)':s>=50?'rgba(255,184,0,.8)':s>0?'rgba(255,58,92,.7)':'rgba(30,45,61,.8)');
-    try {
-      // Show canvas, hide CSS fallback
-      canvas.style.display='block';
-      const fallback=document.getElementById('chart-home-fallback');
+    // Show canvas, hide CSS fallback — wait for reflow first
+    canvas.style.display='block';
+    const fallback=document.getElementById('chart-home-fallback');
+    requestAnimationFrame(function(){
       if(fallback)fallback.style.display='none';
-      canvas._chart=new Chart(canvas,{
-        type:'bar',
-        data:{labels,datasets:[{data:scores,backgroundColor:barColors,borderRadius:6,borderSkipped:false}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},scales:{x:{grid:{display:false},ticks:{color:'#8B9BAD',font:{size:11}}},y:{display:false,max:110}},animation:{duration:600}}
-      });
-    } catch(e) {
-      // Keep CSS fallback visible if Chart.js fails
-    }
+      try {
+        canvas._chart=new Chart(canvas,{
+          type:'bar',
+          data:{labels,datasets:[{data:scores,backgroundColor:barColors,borderRadius:6,borderSkipped:false}]},
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},scales:{x:{grid:{display:false},ticks:{color:'#8B9BAD',font:{size:11}}},y:{display:false,max:110}},animation:{duration:600}}
+        });
+      } catch(e) {
+        // Restore CSS fallback if Chart.js fails
+        if(fallback)fallback.style.display='flex';
+        canvas.style.display='none';
+      }
+    });
   });
 };
 
