@@ -228,6 +228,79 @@ body.compact .habit-row{padding:7px 0}
 .og-projects-section{margin-bottom:4px;}
 .og-recurring-section{margin-top:20px;}
 </style>
+<style id="tv3r-css">
+/* TACHES V3 REDESIGN */
+.tv3r-page{padding:0 0 80px;min-height:100vh;background:var(--bg);}
+.tv3r-header{padding:16px 16px 0;position:sticky;top:0;z-index:10;background:var(--bg);padding-bottom:12px;}
+.tv3r-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.tv3r-title{font-size:22px;font-weight:800;color:var(--w);}
+.tv3r-actions{display:flex;gap:8px;}
+.tv3r-icon-btn{width:36px;height:36px;border-radius:10px;background:var(--bg1);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--w);font-size:16px;}
+.tv3r-progress-wrap{background:var(--bg1);border-radius:12px;padding:12px 14px;margin-bottom:12px;border:1px solid var(--b);}
+.tv3r-progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.tv3r-progress-label{font-size:13px;font-weight:700;color:var(--w);}
+.tv3r-progress-count{font-size:12px;color:var(--g1);}
+.tv3r-prog-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.tv3r-prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width .4s;}
+.tv3r-filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+.tv3r-filters::-webkit-scrollbar{display:none;}
+.tv3r-chip{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--b);background:var(--bg1);color:var(--g1);cursor:pointer;transition:all .2s;}
+.tv3r-chip.active{background:var(--cyan);border-color:var(--cyan);color:#000;}
+.tv3r-chip.urgent-chip.active{background:var(--red);border-color:var(--red);color:#fff;}
+.tv3r-section{margin:0 16px 6px;font-size:10px;font-weight:700;color:var(--g1);letter-spacing:.1em;display:flex;align-items:center;justify-content:space-between;}
+.tv3r-section-count{background:var(--bg1);color:var(--g1);border-radius:4px;padding:1px 6px;font-size:9px;}
+.tv3r-task{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid var(--b);cursor:pointer;transition:background .15s;position:relative;}
+.tv3r-task:active{background:var(--bg1);}
+.tv3r-task.done-task{opacity:.45;}
+.tv3r-task.done-task .tv3r-task-text{text-decoration:line-through;color:var(--g1);}
+.tv3r-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--b);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px;}
+.tv3r-check.urgente{border-color:#FF3A5C;}
+.tv3r-check.haute{border-color:#FFB800;}
+.tv3r-check.moyenne{border-color:#00D4FF;}
+.tv3r-check.basse{border-color:#8B9BAD;}
+.tv3r-check.checked{background:var(--green);border-color:var(--green);}
+.tv3r-check svg{display:none;}
+.tv3r-check.checked svg{display:block;}
+.tv3r-task-body{flex:1;min-width:0;}
+.tv3r-task-text{font-size:14px;color:var(--w);line-height:1.4;margin-bottom:4px;}
+.tv3r-task-meta{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+.tv3r-pri-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.tv3r-tag{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:600;}
+.tv3r-goal-tag{background:rgba(168,85,247,.15);color:#A855F7;}
+.tv3r-date-tag{color:var(--g1);}
+.tv3r-date-tag.overdue{color:var(--red);font-weight:700;}
+.tv3r-date-tag.today{color:var(--amber);font-weight:700;}
+.tv3r-focus-card{margin:0 16px 16px;background:linear-gradient(135deg,rgba(255,58,92,.1),rgba(255,58,92,.04));border:1px solid rgba(255,58,92,.3);border-radius:14px;padding:14px 16px;cursor:pointer;}
+.tv3r-focus-label{font-size:9px;font-weight:700;color:#FF3A5C;letter-spacing:.1em;margin-bottom:6px;}
+.tv3r-focus-text{font-size:15px;font-weight:700;color:var(--w);line-height:1.3;margin-bottom:6px;}
+.tv3r-focus-meta{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--g1);}
+.tv3r-quick-add{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--b);}
+.tv3r-qa-input{flex:1;background:var(--bg1);border:1px solid var(--b);border-radius:10px;padding:8px 12px;color:var(--w);font-size:13px;outline:none;}
+.tv3r-qa-input:focus{border-color:var(--cyan);}
+.tv3r-qa-btn{width:32px;height:32px;border-radius:8px;background:var(--cyan);border:none;color:#000;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+.tv3r-cal-section{padding:0 16px;margin-bottom:8px;}
+.tv3r-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.tv3r-cal-month{font-size:15px;font-weight:800;color:var(--w);}
+.tv3r-cal-nav{width:32px;height:32px;border-radius:8px;background:var(--bg1);border:1px solid var(--b);color:var(--w);cursor:pointer;font-size:16px;}
+.tv3r-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:12px;}
+.tv3r-cal-dow{text-align:center;font-size:10px;color:var(--g1);font-weight:700;padding:4px 0;}
+.tv3r-cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .15s;border:1.5px solid transparent;}
+.tv3r-cal-day:active{transform:scale(.92);}
+.tv3r-cal-day.other-month{opacity:.3;}
+.tv3r-cal-day.today-day{border-color:var(--cyan);}
+.tv3r-cal-day.selected-day{background:var(--cyan);color:#000;}
+.tv3r-cal-day.has-tasks::after{content:'';position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:var(--amber);}
+.tv3r-cal-day.has-urgent::after{background:var(--red);}
+.tv3r-cal-num{font-size:13px;font-weight:600;}
+.tv3r-cal-task-count{font-size:8px;color:var(--g1);margin-top:1px;}
+.selected-day .tv3r-cal-task-count{color:rgba(0,0,0,.6);}
+.tv3r-empty{text-align:center;padding:40px 20px;color:var(--g1);}
+.tv3r-empty-icon{font-size:36px;margin-bottom:10px;}
+.tv3r-bulk-bar{position:sticky;top:0;z-index:20;background:var(--bg1);border-bottom:2px solid var(--cyan);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}
+.tv3r-bulk-info{font-size:13px;font-weight:700;color:var(--cyan);}
+.tv3r-bulk-actions{display:flex;gap:8px;}
+.tv3r-bulk-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;}
+</style>
 </head>
 <body>
 <div id="app">
@@ -8150,6 +8223,338 @@ window.renderStatsGoalsTab = function() {
   };
 })();
 
-</script>
+
+// tv3-redesign-v3
+(function(){
+
+window._tv3rFilter = window._tv3rFilter || 'today';
+window._tv3rBulkMode = window._tv3rBulkMode || false;
+window._tv3rBulkSelected = window._tv3rBulkSelected || [];
+window._tv3rCalMonth = (window._tv3rCalMonth != null) ? window._tv3rCalMonth : null;
+window._tv3rCalYear = (window._tv3rCalYear != null) ? window._tv3rCalYear : null;
+window._tv3rCalDay = window._tv3rCalDay || null;
+
+window.tv3rFindTaskGoal = function(taskId) {
+  if(!S.goals) return null;
+  for(var i=0;i<S.goals.length;i++){
+    var g = S.goals[i];
+    if(!g.subGoals) continue;
+    for(var j=0;j<g.subGoals.length;j++){
+      var sg = g.subGoals[j];
+      if(sg.linkedTaskIds && sg.linkedTaskIds.indexOf(taskId)!==-1) return g;
+    }
+  }
+  return null;
+};
+
+window.tv3rToggleDone = function(id) {
+  var t = (S.tasks||[]).find(function(x){return x.id===id;});
+  if(!t) return;
+  if(t.status==='done'){t.status='todo';t.completedAt=undefined;}
+  else{t.status='done';t.completedAt=iso();if(typeof addXP==='function')addXP(t.xpReward||10,'Tâche terminée');}
+  save(); render();
+};
+
+window.tv3rQuickAdd = function() {
+  var inp = document.getElementById('tv3r-qa');
+  if(!inp || !inp.value.trim()) return;
+  var id = 't_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  if(!S.tasks) S.tasks = [];
+  S.tasks.push({id:id, text:inp.value.trim(), status:'todo', priority:'moyenne', dueDate:iso(), createdAt:iso(), xpReward:10, notes:'', subtasks:[]});
+  save(); render();
+  toast('Tâche ajoutée ✓', 'var(--green)');
+};
+
+window.tv3rSetFilter = function(f) {
+  window._tv3rFilter = f;
+  window._tv3rBulkMode = false;
+  window._tv3rBulkSelected = [];
+  render();
+};
+
+window.tv3rCalNav = function(dir) {
+  var now = new Date();
+  var m = (window._tv3rCalMonth !== null) ? window._tv3rCalMonth : now.getMonth();
+  var y = (window._tv3rCalYear !== null) ? window._tv3rCalYear : now.getFullYear();
+  m += dir;
+  if(m < 0){m=11;y--;}
+  if(m > 11){m=0;y++;}
+  window._tv3rCalMonth = m;
+  window._tv3rCalYear = y;
+  render();
+};
+
+window.tv3rCalSelect = function(day) {
+  window._tv3rCalDay = day;
+  render();
+};
+
+window.tv3rToggleBulk = function(id) {
+  var idx = window._tv3rBulkSelected.indexOf(id);
+  if(idx === -1) window._tv3rBulkSelected.push(id);
+  else window._tv3rBulkSelected.splice(idx,1);
+  var bar = document.getElementById('tv3r-bulk-bar');
+  if(bar){var info=bar.querySelector('.tv3r-bulk-info');if(info)info.textContent=window._tv3rBulkSelected.length+' sélectionnée(s)';}
+  document.querySelectorAll('.tv3r-task').forEach(function(el){
+    var tid = el.getAttribute('data-id');
+    if(!tid) return;
+    var cb = el.querySelector('.tv3r-bulk-cb');
+    if(cb) cb.checked = window._tv3rBulkSelected.indexOf(tid) !== -1;
+  });
+};
+
+window.tv3rBulkDone = function() {
+  (window._tv3rBulkSelected||[]).forEach(function(id){
+    var t = (S.tasks||[]).find(function(x){return x.id===id;});
+    if(t && t.status !== 'done'){
+      t.status='done'; t.completedAt=iso();
+      if(typeof addXP==='function') addXP(t.xpReward||10,'Tâche terminée');
+    }
+  });
+  window._tv3rBulkMode = false;
+  window._tv3rBulkSelected = [];
+  save(); render();
+};
+
+window.tv3rBulkDelete = function() {
+  if(!confirm('Supprimer '+window._tv3rBulkSelected.length+' tâche(s) ?')) return;
+  S.tasks = (S.tasks||[]).filter(function(t){ return window._tv3rBulkSelected.indexOf(t.id)===-1; });
+  window._tv3rBulkMode = false;
+  window._tv3rBulkSelected = [];
+  save(); render();
+};
+
+window.tv3rExitBulk = function() {
+  window._tv3rBulkMode = false;
+  window._tv3rBulkSelected = [];
+  render();
+};
+
+window.tv3rInitLongPress = function() {
+  var timer = null;
+  document.querySelectorAll('.tv3r-task').forEach(function(el){
+    var id = el.getAttribute('data-id');
+    if(!id) return;
+    var startBulk = function(){
+      timer = setTimeout(function(){
+        window._tv3rBulkMode = true;
+        if(window._tv3rBulkSelected.indexOf(id)===-1) window._tv3rBulkSelected.push(id);
+        render();
+      }, 500);
+    };
+    var cancel = function(){ clearTimeout(timer); };
+    el.addEventListener('touchstart', startBulk, {passive:true});
+    el.addEventListener('touchend', cancel);
+    el.addEventListener('touchmove', cancel);
+    el.addEventListener('mousedown', startBulk);
+    el.addEventListener('mouseup', cancel);
+    el.addEventListener('mouseleave', cancel);
+  });
+};
+
+function tv3rEsc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function tv3rTaskCard(t) {
+  var isDone = t.status === 'done';
+  var today = iso();
+  var isOverdue = t.dueDate && t.dueDate < today && !isDone;
+  var isToday = t.dueDate === today;
+  var priColors = {urgente:'#FF3A5C', haute:'#FFB800', moyenne:'#00D4FF', basse:'#8B9BAD'};
+  var priColor = priColors[t.priority] || priColors.moyenne;
+  var checkCls = 'tv3r-check ' + (t.priority||'moyenne') + (isDone?' checked':'');
+  var cardCls = 'tv3r-task' + (isDone?' done-task':'');
+  var isSel = window._tv3rBulkSelected.indexOf(t.id) !== -1;
+  var goal = null;
+  if(t.linkedGoalId && S.goals) goal = (S.goals||[]).find(function(g){return g.id===t.linkedGoalId;})||null;
+  if(!goal) goal = tv3rFindTaskGoal(t.id);
+  var goalBadge = goal ? '<span class="tv3r-tag tv3r-goal-tag">'+(goal.emoji||'\uD83C\uDFAF')+' '+tv3rEsc((goal.title||'').slice(0,15))+'</span>' : '';
+  var dateBadge = '';
+  if(t.dueDate) {
+    var dcls = 'tv3r-date-tag' + (isOverdue?' overdue':(isToday?' today':''));
+    var dlabel = isOverdue ? '\u26A0 '+t.dueDate : (isToday ? 'Aujourd\u2019hui' : t.dueDate);
+    dateBadge = '<span class="tv3r-tag '+dcls+'">'+dlabel+'</span>';
+  }
+  var catBadge = t.category ? '<span class="tv3r-tag" style="background:var(--bg3);color:var(--g1)">'+tv3rEsc(t.category)+'</span>' : '';
+  var tid = JSON.stringify(t.id);
+  var bulkCb = window._tv3rBulkMode
+    ? '<input type="checkbox" class="tv3r-bulk-cb" '+(isSel?'checked':'')+' onclick="event.stopPropagation();tv3rToggleBulk('+tid+')" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:var(--cyan);">'
+    : '';
+  var checkClick = window._tv3rBulkMode
+    ? 'event.stopPropagation();tv3rToggleBulk('+tid+')'
+    : 'event.stopPropagation();tv3rToggleDone('+tid+')';
+  var cardClick = window._tv3rBulkMode
+    ? 'tv3rToggleBulk('+tid+')'
+    : 'openTaskDetail('+tid+')';
+  return '<div class="'+cardCls+'" data-id="'+tv3rEsc(t.id)+'" onclick="'+cardClick+'">'
+    + bulkCb
+    + '<div class="'+checkCls+'" onclick="'+checkClick+'">'
+    + '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    + "</div>"
+    + '<div class="tv3r-task-body">'
+    + '<div class="tv3r-task-text" style="'+(t.priority==='urgente'&&!isDone?'font-weight:700;':'')+'">'+tv3rEsc(t.text)+'</div>'
+    + '<div class="tv3r-task-meta">'
+    + '<span class="tv3r-pri-dot" style="background:'+priColor+'"></span>'
+    + dateBadge + catBadge + goalBadge
+    + "</div></div></div>";
+}
+
+function tv3rRenderCalendar(tasks) {
+  var now = new Date();
+  var m = (window._tv3rCalMonth !== null) ? window._tv3rCalMonth : now.getMonth();
+  var y = (window._tv3rCalYear !== null) ? window._tv3rCalYear : now.getFullYear();
+  window._tv3rCalMonth = m; window._tv3rCalYear = y;
+  var todayStr = iso();
+  var selDay = window._tv3rCalDay || todayStr;
+  var monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var firstDay = new Date(y, m, 1);
+  var lastDay = new Date(y, m+1, 0);
+  var startDow = (firstDay.getDay() + 6) % 7;
+  var tasksByDay = {};
+  tasks.forEach(function(t){
+    if(!t.dueDate) return;
+    if(!tasksByDay[t.dueDate]) tasksByDay[t.dueDate] = [];
+    tasksByDay[t.dueDate].push(t);
+  });
+  var html = '<div class="tv3r-cal-section">'
+    + '<div class="tv3r-cal-header">'
+    + '<button class="tv3r-cal-nav" onclick="tv3rCalNav(-1)">‹</button>'
+    + '<span class="tv3r-cal-month">'+monthNames[m]+' '+y+'</span>'
+    + '<button class="tv3r-cal-nav" onclick="tv3rCalNav(1)">›</button>'
+    + '</div><div class="tv3r-cal-grid">';
+  ['L','M','M','J','V','S','D'].forEach(function(d){ html += '<div class="tv3r-cal-dow">'+d+'</div>'; });
+  for(var p=0; p<startDow; p++){ html += '<div class="tv3r-cal-day other-month"></div>'; }
+  for(var d=1; d<=lastDay.getDate(); d++){
+    var pad = d<10?'0'+d:''+d;
+    var mpad = (m+1)<10?'0'+(m+1):''+(m+1);
+    var dateStr = y+'-'+mpad+'-'+pad;
+    var dt = tasksByDay[dateStr] || [];
+    var hasUrgent = dt.some(function(t){return t.priority==='urgente'&&t.status!=='done';});
+    var cls = 'tv3r-cal-day'+(dateStr===todayStr?' today-day':'')+(dateStr===selDay?' selected-day':'')+(dt.length?(hasUrgent?' has-urgent':' has-tasks'):'');
+    var cnt = dt.length ? '<div class="tv3r-cal-task-count">'+dt.length+'</div>' : '';
+    html += '<div class="'+cls+'" onclick="tv3rCalSelect('+JSON.stringify(dateStr)+')">'+'<span class="tv3r-cal-num">'+d+'</span>'+cnt+'</div>';
+  }
+  html += '</div></div>';
+  var selTodo = (tasksByDay[selDay]||[]).filter(function(t){return t.status!=='done';});
+  var selDone = (tasksByDay[selDay]||[]).filter(function(t){return t.status==='done';});
+  if(selTodo.length || selDone.length) {
+    var lbl = selDay===todayStr ? 'Aujourd’hui' : selDay;
+    html += '<div class="tv3r-section"><span>'+lbl.toUpperCase()+'</span><span class="tv3r-section-count">'+selTodo.length+' à faire</span></div>';
+    selTodo.forEach(function(t){ html += tv3rTaskCard(t); });
+    if(selDone.length){
+      html += '<div class="tv3r-section" style="margin-top:8px"><span>TERMINÉES</span><span class="tv3r-section-count">'+selDone.length+'</span></div>';
+      selDone.forEach(function(t){ html += tv3rTaskCard(t); });
+    }
+  } else {
+    html += '<div class="tv3r-empty"><div class="tv3r-empty-icon">🍃</div><div>Aucune tâche ce jour</div></div>';
+  }
+  return html;
+}
+
+window.renderTachesV8 = function() {
+  var tasks = S.tasks || [];
+  var today = iso();
+  var nowD = new Date();
+  var dow = (nowD.getDay()+6)%7;
+  var ws = new Date(nowD); ws.setDate(nowD.getDate()-dow);
+  var we = new Date(ws); we.setDate(ws.getDate()+6);
+  function toDS(d){ return d.toISOString().slice(0,10); }
+  var wsStr = toDS(ws), weStr = toDS(we);
+  var yestD = new Date(nowD); yestD.setDate(nowD.getDate()-1);
+  var yest = toDS(yestD);
+  var todayTasks = tasks.filter(function(t){ return t.dueDate===today; });
+  var doneCnt = todayTasks.filter(function(t){ return t.status==='done'; }).length;
+  var ipCnt = todayTasks.filter(function(t){ return t.status==='in_progress'; }).length;
+  var urgentAll = tasks.filter(function(t){ return t.priority==='urgente' && t.status!=='done'; });
+  var pct = todayTasks.length > 0 ? Math.round(doneCnt/todayTasks.length*100) : 0;
+  var progLabel = doneCnt+' tâches faites aujourd’hui · '+ipCnt+' en cours · '+urgentAll.length+' urgentes';
+  var filter = window._tv3rFilter || 'today';
+  var chips = [
+    {id:'today', label:'Aujourd’hui', extra:''},
+    {id:'urgent', label:'🔴 Urgentes', extra:'urgent-chip'},
+    {id:'week', label:'Cette semaine', extra:''},
+    {id:'calendar', label:'📅 Calendrier', extra:''},
+    {id:'all', label:'Toutes', extra:''},
+    {id:'done', label:'Terminées', extra:''}
+  ];
+  var html = '<div class="tv3r-page">';
+  if(window._tv3rBulkMode) {
+    html += '<div class="tv3r-bulk-bar" id="tv3r-bulk-bar">'
+      + '<span class="tv3r-bulk-info">'+window._tv3rBulkSelected.length+' sélectionnée(s)</span>'
+      + '<div class="tv3r-bulk-actions">'
+      + '<button class="tv3r-bulk-btn" style="background:var(--green);color:#000;" onclick="tv3rBulkDone()">✓ Terminer</button>'
+      + '<button class="tv3r-bulk-btn" style="background:var(--red);color:#fff;" onclick="tv3rBulkDelete()">🗑 Supprimer</button>'
+      + '<button class="tv3r-bulk-btn" style="background:var(--bg3);color:var(--w);" onclick="tv3rExitBulk()">✕</button>'
+      + '</div></div>';
+  }
+  html += '<div class="tv3r-header">'
+    + '<div class="tv3r-top"><span class="tv3r-title">📋 Tâches</span>'
+    + '<div class="tv3r-actions"><div class="tv3r-icon-btn" onclick="if(typeof openQuickCapture===\'function\')openQuickCapture()">+</div></div></div>'
+    + '<div class="tv3r-progress-wrap"><div class="tv3r-progress-top">'
+    + '<span class="tv3r-progress-label">'+progLabel+'</span>'
+    + '<span class="tv3r-progress-count">'+pct+'%</span>'
+    + '</div><div class="tv3r-prog-bar"><div class="tv3r-prog-fill" style="width:'+pct+'%"></div></div></div>'
+    + '<div class="tv3r-filters">';
+  chips.forEach(function(c){
+    var a = filter===c.id?' active':'';
+    var ex = c.extra?' '+c.extra:'';
+    html += '<div class="tv3r-chip'+ex+a+'" onclick="tv3rSetFilter('+JSON.stringify(c.id)+')">' + c.label + '</div>';
+  });
+  html += '</div></div>';
+  if(filter !== 'done' && filter !== 'calendar' && urgentAll.length > 0) {
+    var ft = urgentAll[0];
+    html += '<div class="tv3r-focus-card" onclick="openTaskDetail('+JSON.stringify(ft.id)+')">'
+      + '<div class="tv3r-focus-label">🔴 PRIORITÉ ABSOLUE</div>'
+      + '<div class="tv3r-focus-text">'+tv3rEsc(ft.text)+'</div>'
+      + '<div class="tv3r-focus-meta">'
+      + (ft.dueDate?'<span>📅 '+ft.dueDate+'</span>':'')
+      + (ft.category?'<span>🏷 '+tv3rEsc(ft.category)+'</span>':'')
+      + '</div></div>';
+  }
+  if(filter !== 'done' && filter !== 'calendar') {
+    html += '<div class="tv3r-quick-add">'
+      + '<input id="tv3r-qa" class="tv3r-qa-input" type="text" placeholder="Nouvelle tâche..." onkeydown="if(event.key===\'Enter\')tv3rQuickAdd()">'
+      + '<button class="tv3r-qa-btn" onclick="tv3rQuickAdd()">+</button></div>';
+  }
+  if(filter === 'calendar') {
+    html += tv3rRenderCalendar(tasks);
+  } else {
+    var main = [], late = [], secLabel = '';
+    if(filter==='today'){
+      main = tasks.filter(function(t){ return t.dueDate===today && t.status!=='done'; });
+      late = tasks.filter(function(t){ return t.dueDate && t.dueDate<today && t.status!=='done'; });
+      secLabel = 'AUJOURD’HUI';
+    } else if(filter==='urgent'){
+      main = urgentAll;
+      secLabel = 'URGENTES';
+    } else if(filter==='week'){
+      main = tasks.filter(function(t){ return t.dueDate && t.dueDate>=wsStr && t.dueDate<=weStr && t.status!=='done'; });
+      main.sort(function(a,b){return a.dueDate<b.dueDate?-1:1;});
+      secLabel = 'CETTE SEMAINE';
+    } else if(filter==='done'){
+      main = tasks.filter(function(t){ return t.status==='done' && (t.completedAt===today||t.completedAt===yest); });
+      secLabel = 'TERMINÉES';
+    } else {
+      main = tasks.filter(function(t){ return t.status!=='done'; });
+      main.sort(function(a,b){ var po={urgente:0,haute:1,moyenne:2,basse:3}; return (po[a.priority]||2)-(po[b.priority]||2); });
+      secLabel = 'TOUTES';
+    }
+    if(late.length){
+      html += '<div class="tv3r-section" style="color:var(--red)"><span>EN RETARD</span><span class="tv3r-section-count" style="color:var(--red)">'+late.length+'</span></div>';
+      late.forEach(function(t){ html += tv3rTaskCard(t); });
+    }
+    if(main.length){
+      html += '<div class="tv3r-section"><span>'+secLabel+'</span><span class="tv3r-section-count">'+main.length+'</span></div>';
+      main.forEach(function(t){ html += tv3rTaskCard(t); });
+    } else if(!late.length){
+      html += '<div class="tv3r-empty"><div class="tv3r-empty-icon">✅</div><div>Aucune tâche ici !</div></div>';
+    }
+  }
+  html += '</div>';
+  setTimeout(function(){ if(typeof tv3rInitLongPress==='function') tv3rInitLongPress(); }, 100);
+  return html;
+};
+
+})();
+</script></script>
 </body>
 </html>
