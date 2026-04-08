@@ -5445,9 +5445,9 @@ window.renderSidebarV8=function(){
 
 window.renderBnavV8=function(){
   const el=document.getElementById('bnav');if(!el)return;
-  // Pages: home, taches, [FAB], argent, plus
+  // Pages: home, taches, [FAB], argent, objectifs, stats
   const LEFT=['home','taches'];
-  const RIGHT=['argent','objectifs'];
+  const RIGHT=['argent','objectifs','stats'];
   function btn(p){return `<button class="bn${_page===p?' active':''}" onclick="nav('${p}')">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">${PAGE_ICONS_V8[p]}</svg>
     ${PAGE_LABELS_V8[p]}
@@ -6069,7 +6069,7 @@ function ogApplyStatusTransitions(goal){
   sgs.forEach(function(sg){
     if(sg.subtasks&&sg.subtasks.length>0){
       const allDone=sg.subtasks.every(function(st){return st.done;});
-      if(allDone&&sg.status!=='done')sg.status='in_progress'; // only auto-done via subtasks
+      if(allDone&&sg.status!=='done')sg.status='done'; // auto-done when all subtasks done
     }
   });
   if(sgs.length>0&&sgs.every(function(sg){return sg.status==='done';})){
@@ -6083,6 +6083,46 @@ function ogApplyStatusTransitions(goal){
   var raw=localStorage.getItem('mcp_v5');
   if(!raw)return;
   try{var s=JSON.parse(raw);if(!s.goals){s.goals=[];localStorage.setItem('mcp_v5',JSON.stringify(s));}}catch(e){}
+})();
+
+// Demo seed — only if goals empty and not already seeded
+(function ogSeed(){
+  var raw=localStorage.getItem('mcp_v5');
+  if(!raw)return;
+  try{
+    var s=JSON.parse(raw);
+    if(s.goals&&s.goals.length>0)return;
+    if(localStorage.getItem('og_seeded'))return;
+    var today=new Date().toISOString().slice(0,10);
+    var d30=new Date();d30.setDate(d30.getDate()+30);var d30s=d30.toISOString().slice(0,10);
+    var d14=new Date();d14.setDate(d14.getDate()+14);var d14s=d14.toISOString().slice(0,10);
+    var d60=new Date();d60.setDate(d60.getDate()+60);var d60s=d60.toISOString().slice(0,10);
+    var d7=new Date();d7.setDate(d7.getDate()+7);var d7s=d7.toISOString().slice(0,10);
+    s.goals=[
+      {id:'g_demo1',title:'Lancer mon app',emoji:'\ud83d\ude80',type:'project',status:'in_progress',deadline:d60s,priority:'haute',createdAt:today,order:1,
+        subGoals:[
+          {id:'sg_demo1a',title:'Design UI',status:'done',deadline:d7s,priority:'urgente',description:'Maquettes Figma pour les \u00e9crans principaux',subtasks:[{text:'Analyse concurrence',done:true},{text:'Charte graphique',done:true},{text:'Maquettes Figma \u2014 5 \u00e9crans',done:true}],linkedTaskIds:[]},
+          {id:'sg_demo1b',title:'D\u00e9veloppement backend',status:'in_progress',deadline:d30s,priority:'haute',description:'API REST + base de donn\u00e9es',subtasks:[{text:'Mod\u00e8les de donn\u00e9es',done:true},{text:'Endpoints API',done:false},{text:'Tests unitaires',done:false}],linkedTaskIds:[]},
+          {id:'sg_demo1c',title:'Tests & QA',status:'todo',deadline:d60s,priority:'moyenne',description:'',subtasks:[],linkedTaskIds:[]},
+          {id:'sg_demo1d',title:'Lancement & marketing',status:'todo',deadline:d60s,priority:'moyenne',description:'',subtasks:[],linkedTaskIds:[]}
+        ]},
+      {id:'g_demo2',title:'Forme physique',emoji:'\ud83d\udcaa',type:'recurring',status:'in_progress',deadline:null,priority:'moyenne',createdAt:today,order:2,recurringTarget:3,recurringPeriod:'week',completions:[{date:today}]},
+      {id:'g_demo3',title:'Lire 12 livres',emoji:'\ud83d\udcda',type:'project',status:'in_progress',deadline:d60s,priority:'basse',createdAt:today,order:3,
+        subGoals:[
+          {id:'sg_demo3a',title:'Atomic Habits',status:'done',deadline:null,priority:'basse',description:'',subtasks:[{text:'Chapitres 1-5',done:true},{text:'Chapitres 6-10',done:true},{text:'Notes de lecture',done:true}],linkedTaskIds:[]},
+          {id:'sg_demo3b',title:'Deep Work',status:'in_progress',deadline:d14s,priority:'moyenne',description:'',subtasks:[{text:'Chapitres 1-4',done:true},{text:'Chapitres 5-8',done:false}],linkedTaskIds:[]},
+          {id:'sg_demo3c',title:'The Lean Startup',status:'todo',deadline:null,priority:'basse',description:'',subtasks:[],linkedTaskIds:[]}
+        ]},
+      {id:'g_demo4',title:'M\u00e9ditation quotidienne',emoji:'\ud83e\uddd8',type:'recurring',status:'in_progress',deadline:null,priority:'moyenne',createdAt:today,order:4,recurringTarget:5,recurringPeriod:'week',completions:[{date:today}]},
+      {id:'g_demo5',title:'Apprendre l\u0027espagnol',emoji:'\ud83c\uddea\ud83c\uddf8',type:'project',status:'todo',deadline:d60s,priority:'basse',createdAt:today,order:5,
+        subGoals:[
+          {id:'sg_demo5a',title:'Niveau A1 complet',status:'todo',deadline:d30s,priority:'moyenne',description:'',subtasks:[{text:'Duolingo 30 jours',done:false},{text:'Vocabulaire de base 500 mots',done:false}],linkedTaskIds:[]},
+          {id:'sg_demo5b',title:'Premi\u00e8re conversation',status:'todo',deadline:d60s,priority:'basse',description:'',subtasks:[],linkedTaskIds:[]}
+        ]}
+    ];
+    localStorage.setItem('mcp_v5',JSON.stringify(s));
+    localStorage.setItem('og_seeded','1');
+  }catch(e){}
 })();
 
 
