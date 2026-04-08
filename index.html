@@ -172,6 +172,34 @@ body.compact .habit-row{padding:7px 0}
   --cat-shopping:#FF9F43;--cat-abonnements:#6C5CE7;--cat-factures:#FD79A8;
   --cat-divers:#636E72;--cat-salaire:#00E5A0;--cat-epargne:#A855F7;
 }
+/* ── Pomodoro ── */
+.pomo-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.pomo-ring{transform-origin:50% 50%}
+.pomo-time{font-family:var(--font-mono,monospace);font-size:36px;font-weight:700;letter-spacing:-1px}
+.pomo-label{font-size:12px;color:var(--g1,#8B9BAD);text-transform:uppercase;letter-spacing:.1em}
+/* ── AI Coach ── */
+.ai-bubble{background:linear-gradient(135deg,rgba(168,85,247,.12),rgba(0,212,255,.06));border:1px solid rgba(168,85,247,.3);border-radius:var(--r,12px);padding:14px;font-size:13px;line-height:1.65;color:var(--w,#F0F4F8)}
+.ai-bubble .ai-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+/* ── Weather ── */
+.weather-card{display:flex;align-items:center;gap:12px}
+.weather-temp{font-family:var(--font-mono,monospace);font-size:24px;font-weight:700;color:var(--cyan,#00D4FF)}
+/* ── Focus/Calendar ── */
+.event-pill{background:var(--bg2,#111820);border-left:3px solid var(--cyan,#00D4FF);padding:8px 12px;border-radius:0 var(--r2,8px) var(--r2,8px) 0;margin-bottom:6px;font-size:13px}
+.event-pill .ev-time{font-size:11px;color:var(--g1,#8B9BAD);font-family:var(--font-mono,monospace)}
+/* ── Trend arrows ── */
+.up{color:var(--green,#00E5A0);font-size:12px;font-weight:700}
+.dn{color:var(--red,#FF3A5C);font-size:12px;font-weight:700}
+/* ── Rec btn ── */
+.rec-btn{background:var(--bg2);border:1px solid var(--b);border-radius:var(--r2);padding:7px 12px;cursor:pointer;font-size:13px;color:var(--w);transition:all var(--t);text-align:left}
+.rec-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+/* ── Ann grid ── */
+.ann-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+@media(min-width:500px){.ann-grid{grid-template-columns:repeat(3,1fr)}}
+.ann-stat{background:var(--bg2);border:1px solid var(--b);border-radius:var(--r2);padding:10px;text-align:center}
+.ann-num{font-family:var(--font-mono);font-size:16px;font-weight:700}
+.ann-lbl{font-size:11px;color:var(--g1);margin-top:2px}
+/* ── Rattrapage ── */
+.rattrapage-banner{background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.3);color:var(--amber);padding:8px 14px;border-radius:var(--r2);margin-bottom:12px;font-size:13px;font-weight:600;text-align:center}
 </style>
 </head>
 <body>
@@ -1521,7 +1549,10 @@ function addRecurring(rid){
 }
 
 function deleteTx(id){
-  S.finance=S.finance.filter(t=>t.id!==id);
+  const t=S.finance.find(x=>x.id===id);
+  if(!t)return;
+  if(!confirm(`Supprimer "${t.desc}" (${fmtAmt(t.amt)}) ?`))return;
+  S.finance=S.finance.filter(x=>x.id!==id);
   save();render();
 }
 function togglePending(id){
@@ -1935,7 +1966,9 @@ function addHabit(){
   save();render();toast('Habitude ajoutée');
 }
 function removeHabit(id){
-  S.hcfg=S.hcfg.filter(h=>h.id!==id);
+  const h=S.hcfg.find(x=>x.id===id);
+  if(!h||!confirm(`Supprimer l'habitude "${h.label}" ? L'historique sera conservé.`))return;
+  S.hcfg=S.hcfg.filter(x=>x.id!==id);
   save();render();toast('Habitude supprimée');
 }
 
@@ -2053,7 +2086,11 @@ function addGoal(){
   S.config.goals.push({id:uid(),label,target,current:0,deadline,emoji});
   save();render();toast('Objectif ajouté ✓');
 }
-function deleteGoal(i){S.config.goals.splice(i,1);save();render();}
+function deleteGoal(i){
+  const g=S.config.goals[i];
+  if(!g||!confirm(`Supprimer l'objectif "${g.label}" ?`))return;
+  S.config.goals.splice(i,1);save();render();
+}
 function addChallenge(){
   const label=document.getElementById('ch-label').value.trim();
   const habitId=document.getElementById('ch-habit').value;
@@ -2061,6 +2098,7 @@ function addChallenge(){
   const endDate=document.getElementById('ch-end').value;
   const target=parseInt(document.getElementById('ch-target').value)||30;
   if(!label||!startDate||!endDate){toast('Remplis tous les champs');return;}
+  if(startDate>endDate){toast('La date de fin doit être après le début');return;}
   S.config.challenges.push({id:uid(),label,habitId,startDate,endDate,target});
   save();render();toast('Challenge démarré 🏆');
 }
@@ -2467,31 +2505,681 @@ document.addEventListener('keydown',handleKey);
 
 /* ── MAIN RENDER ───────────────────────────────────────────────────────── */
 function render(){
-  renderSidebar();
-  renderBnav();
-  renderRightPanel();
+  renderSidebarV6();
+  renderBnavV6();
+  renderRightPanelV6();
   const root=document.getElementById('root');
   switch(_page){
     case 'home':root.innerHTML=renderHome();break;
     case 'checkin':root.innerHTML=renderCheckin();break;
     case 'finances':root.innerHTML=renderFinances();break;
     case 'analytics':root.innerHTML=renderAnalytics();break;
-    case 'config':root.innerHTML=renderConfig();break;
+    case 'focus':root.innerHTML=renderFocus();break;
+    case 'config':root.innerHTML=renderConfigV6();break;
+    default:root.innerHTML=renderHome();
   }
-  // FAB: hide on checkin page
+  // FAB: hide on checkin/focus pages
   const fab=document.getElementById('fab');
-  if(fab)fab.style.display=_page==='checkin'?'none':'flex';
+  if(fab)fab.style.display=(_page==='checkin'||_page==='focus')?'none':'flex';
   // Swipe gestures on habit rows
   setTimeout(addSwipeToHabits,100);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   INTÉGRATION 1 — MÉTÉO (Open-Meteo, gratuit, aucune clé requise)
+   ══════════════════════════════════════════════════════════════════════════ */
+let _weather=null;
+async function fetchWeather(){
+  try{
+    const lat=S.config.weatherLat||50.85;
+    const lon=S.config.weatherLon||4.35;
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation&timezone=auto&forecast_days=1&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum`;
+    const r=await fetch(url);
+    const d=await r.json();
+    _weather={
+      temp:Math.round(d.current.temperature_2m),
+      feels:Math.round(d.current.apparent_temperature),
+      code:d.current.weather_code,
+      wind:Math.round(d.current.wind_speed_10m),
+      precip:d.current.precipitation,
+      maxT:Math.round(d.daily.temperature_2m_max[0]),
+      minT:Math.round(d.daily.temperature_2m_min[0]),
+      rainDay:d.daily.precipitation_sum[0]
+    };
+    S.config._weatherCache={data:_weather,ts:Date.now()};
+    save();
+    renderRightPanel();
+    const el=document.getElementById('weather-home');
+    if(el)el.innerHTML=renderWeatherCard(true);
+  }catch(e){console.warn('Weather fetch failed',e);}
+}
+function weatherIcon(code){
+  if(code===0)return'☀️';
+  if(code<=2)return'⛅';
+  if(code<=3)return'☁️';
+  if(code<=49)return'🌫️';
+  if(code<=57)return'🌧️';
+  if(code<=67)return'🌨️';
+  if(code<=77)return'❄️';
+  if(code<=82)return'🌧️';
+  if(code<=86)return'❄️';
+  if(code<=99)return'⛈️';
+  return'🌡️';
+}
+function weatherDesc(code){
+  if(code===0)return'Ciel dégagé';
+  if(code<=2)return'Partiellement nuageux';
+  if(code<=3)return'Couvert';
+  if(code<=49)return'Brouillard';
+  if(code<=57)return'Pluie légère';
+  if(code<=67)return'Pluie';
+  if(code<=77)return'Neige';
+  if(code<=82)return'Averses';
+  if(code<=99)return'Orage';
+  return'Variable';
+}
+function renderWeatherCard(full=false){
+  if(!_weather){
+    if(S.config._weatherCache&&Date.now()-S.config._weatherCache.ts<3600000){
+      _weather=S.config._weatherCache.data;
+    }else{
+      fetchWeather();
+      return`<div style="font-size:12px;color:var(--g1)">Chargement météo...</div>`;
+    }
+  }
+  const w=_weather;
+  const sportOk=w.code<45&&w.precip===0&&w.temp>5;
+  if(!full)return`<div class="weather-card">
+    <span style="font-size:28px">${weatherIcon(w.code)}</span>
+    <div>
+      <div class="weather-temp">${w.temp}°<span style="font-size:14px;color:var(--g1)"> / ${w.maxT}° ${w.minT}°</span></div>
+      <div style="font-size:11px;color:var(--g2)">${weatherDesc(w.code)} · 💨${w.wind}km/h</div>
+    </div>
+  </div>`;
+  return`<div class="card">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">
+      <span style="font-size:40px">${weatherIcon(w.code)}</span>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:32px;font-weight:700;color:var(--cyan)">${w.temp}°C</div>
+        <div style="font-size:13px;color:var(--g1)">${weatherDesc(w.code)} · Ressenti ${w.feels}°</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:12px;text-align:center">
+      <div style="background:var(--bg2);border-radius:var(--r2);padding:8px"><div style="font-weight:700;color:var(--w)">${w.maxT}°/${w.minT}°</div><div style="color:var(--g2)">Min/Max</div></div>
+      <div style="background:var(--bg2);border-radius:var(--r2);padding:8px"><div style="font-weight:700;color:var(--w)">${w.wind} km/h</div><div style="color:var(--g2)">Vent</div></div>
+      <div style="background:var(--bg2);border-radius:var(--r2);padding:8px"><div style="font-weight:700;color:var(--w)">${w.rainDay}mm</div><div style="color:var(--g2)">Pluie</div></div>
+    </div>
+    ${sportOk?`<div style="margin-top:10px;padding:8px 12px;background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.3);border-radius:var(--r2);font-size:12px;color:var(--green)">✅ Bonnes conditions pour le sport dehors aujourd'hui !</div>`:`<div style="margin-top:10px;padding:8px 12px;background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.3);border-radius:var(--r2);font-size:12px;color:var(--amber)">⚠️ Sport en intérieur recommandé</div>`}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INTÉGRATION 2 — AI COACH (OpenAI GPT-4o-mini ou Claude)
+   ══════════════════════════════════════════════════════════════════════════ */
+let _aiTip=null;
+let _aiLoading=false;
+async function fetchAICoach(forceRefresh=false){
+  const apiKey=S.config.openaiKey;
+  if(!apiKey){return;}
+  // Cache: refresh max once per day
+  const today=iso();
+  if(!forceRefresh&&S.config._aiCache&&S.config._aiCache.date===today){
+    _aiTip=S.config._aiCache.tip;
+    renderAIInUI();
+    return;
+  }
+  _aiLoading=true;
+  renderAIInUI();
+  // Build context
+  const streak=currentStreak();
+  const mk=mKey();
+  const rev=monthRevenu(mk),dep=monthDepense(mk),sav=monthEpargne(mk);
+  const habitRates=H().map(h=>{
+    const days=Object.keys(S.habits);
+    const done=days.filter(d=>S.habits[d]&&S.habits[d][h.id]===true).length;
+    return`${h.label}: ${days.length?Math.round(done/days.length*100):0}%`;
+  }).join(', ');
+  const lastWeekRates=Array.from({length:7},(_,i)=>{const d=isoPlus(today,-i);return S.habits[d]?scoreDay(S.habits[d]):0;});
+  const weekAvg=Math.round(lastWeekRates.reduce((a,v)=>a+v,0)/(7*H().length)*100);
+  const goals=(S.config.goals||[]).map(g=>`${g.label}: ${g.current||0}/${g.target}€`).join(', ');
+  const prompt=`Tu es le coach personnel de ${S.config.profile.name}. Voici ses données:
+HABITUDES: Streak actuel ${streak} jours. Cette semaine ${weekAvg}% de complétion. Taux global par habitude: ${habitRates}.
+FINANCES ce mois: Revenus ${rev.toFixed(0)}€, Dépenses ${dep.toFixed(0)}€, Épargne ${sav.toFixed(0)}€.
+OBJECTIFS: ${goals||'Aucun défini'}.
+Donne 2-3 phrases de coaching très personnalisé, direct et motivant. Identifie son point fort ET son point à améliorer. Termine par une action concrète pour aujourd'hui. Max 80 mots. Pas de bullet points, juste du texte naturel. Tutoie.`;
+  try{
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+      body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'user',content:prompt}],max_tokens:150,temperature:0.8})
+    });
+    const d=await r.json();
+    if(d.error){_aiTip='Erreur API: '+d.error.message;_aiLoading=false;renderAIInUI();return;}
+    _aiTip=d.choices[0].message.content.trim();
+    S.config._aiCache={date:today,tip:_aiTip};
+    save();
+  }catch(e){_aiTip='Connexion impossible au coach IA.';}
+  _aiLoading=false;
+  renderAIInUI();
+}
+function renderAIInUI(){
+  const els=['ai-home','ai-focus','ai-right'];
+  els.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.innerHTML=renderAICard(id==='ai-right');
+  });
+}
+function renderAICard(compact=false){
+  if(!S.config.openaiKey)return`<div style="font-size:12px;color:var(--g2);text-align:center;padding:8px">Configure ta clé OpenAI dans Config → Intégrations</div>`;
+  if(_aiLoading)return`<div style="font-size:12px;color:var(--g1);text-align:center;padding:8px">🤖 Analyse en cours...</div>`;
+  if(!_aiTip)return`<button class="btn btn-ghost btn-sm" onclick="fetchAICoach(true)" style="width:100%">🤖 Obtenir coaching IA</button>`;
+  const today=iso();
+  const cacheOk=S.config._aiCache&&S.config._aiCache.date===today;
+  return`<div style="${compact?'':''}">
+    ${compact?'':`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--purp);text-transform:uppercase;letter-spacing:.08em">🤖 Coach IA</div>
+      <button class="btn btn-ghost btn-sm" onclick="fetchAICoach(true)" style="font-size:10px">↺ Refresh</button>
+    </div>`}
+    <div style="font-size:13px;line-height:1.65;color:var(--w);font-style:italic">"${esc(_aiTip)}"</div>
+    ${!compact?`<div style="font-size:10px;color:var(--g2);margin-top:8px">${cacheOk?'Mis à jour aujourd\'hui':'Ancien cache'} · GPT-4o-mini</div>`:''}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INTÉGRATION 3 — POMODORO TIMER
+   ══════════════════════════════════════════════════════════════════════════ */
+const POMO_WORK=25*60;
+const POMO_BREAK=5*60;
+let _pomoState={active:false,mode:'work',remaining:POMO_WORK,interval:null,sessions:0};
+function pomoTick(){
+  _pomoState.remaining--;
+  if(_pomoState.remaining<=0){
+    clearInterval(_pomoState.interval);
+    _pomoState.interval=null;
+    _pomoState.active=false;
+    if(_pomoState.mode==='work'){
+      _pomoState.sessions++;
+      toast(`🍅 Pomodoro terminé ! Pause ${_pomoState.sessions%4===0?'longue (15 min)':'courte (5 min)'} 🎉`);
+      playSound('record');
+      celebrate('confetti');
+      _pomoState.mode='break';
+      _pomoState.remaining=_pomoState.sessions%4===0?15*60:POMO_BREAK;
+    }else{
+      toast('☕ Pause terminée, on reprend !');
+      playSound('check');
+      _pomoState.mode='work';
+      _pomoState.remaining=POMO_WORK;
+    }
+  }
+  updatePomoDisplay();
+}
+function pomoStart(){
+  if(_pomoState.active)return;
+  _pomoState.active=true;
+  _pomoState.interval=setInterval(pomoTick,1000);
+  updatePomoDisplay();
+  toast(`${_pomoState.mode==='work'?'🍅 Focus démarré':'☕ Pause démarrée'} !`);
+}
+function pomoPause(){
+  if(!_pomoState.active)return;
+  clearInterval(_pomoState.interval);
+  _pomoState.interval=null;
+  _pomoState.active=false;
+  updatePomoDisplay();
+}
+function pomoReset(){
+  clearInterval(_pomoState.interval);
+  _pomoState={active:false,mode:'work',remaining:POMO_WORK,interval:null,sessions:_pomoState.sessions};
+  updatePomoDisplay();
+}
+function pomoCycleMode(){
+  pomoReset();
+  _pomoState.mode=_pomoState.mode==='work'?'break':'work';
+  _pomoState.remaining=_pomoState.mode==='work'?POMO_WORK:POMO_BREAK;
+  updatePomoDisplay();
+}
+function updatePomoDisplay(){
+  const el=document.getElementById('pomo-display');
+  if(el)el.innerHTML=renderPomoInner();
+}
+function renderPomoInner(){
+  const total=_pomoState.mode==='work'?POMO_WORK:(_pomoState.sessions%4===0&&_pomoState.mode==='break'?15*60:POMO_BREAK);
+  const r=_pomoState.remaining;
+  const min=Math.floor(r/60),sec=r%60;
+  const pct=1-(r/total);
+  const size=140,cx=70,cy=70,radius=56,circ=2*Math.PI*radius;
+  const dash=circ*pct;
+  const color=_pomoState.mode==='work'?'#FF3A5C':'#00E5A0';
+  return`<div style="display:flex;flex-direction:column;align-items:center;gap:16px">
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      <circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="var(--bg3)" stroke-width="8"/>
+      <circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="${color}" stroke-width="8"
+        stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${circ/4}" stroke-linecap="round"
+        style="transform-origin:${cx}px ${cy}px;transform:rotate(-90deg);transition:stroke-dasharray .5s linear"/>
+      <text x="${cx}" y="${cy}-6" text-anchor="middle" dy="0.1em" fill="${color}" font-size="28" font-weight="700" font-family="JetBrains Mono,monospace">${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}</text>
+      <text x="${cx}" y="${cy}+18" text-anchor="middle" dy="1.6em" fill="var(--g1)" font-size="11" font-family="Inter,sans-serif">${_pomoState.mode==='work'?'FOCUS':'PAUSE'} · Session ${_pomoState.sessions+1}</text>
+    </svg>
+    <div style="display:flex;gap:8px">
+      ${_pomoState.active
+        ?`<button class="btn btn-ghost" onclick="pomoPause()">⏸ Pause</button>`
+        :`<button class="btn btn-primary" onclick="pomoStart()" style="background:${color};color:#06090D">▶ ${_pomoState.remaining===(_pomoState.mode==='work'?POMO_WORK:POMO_BREAK)?'Démarrer':'Reprendre'}</button>`}
+      <button class="btn btn-ghost" onclick="pomoReset()">↺ Reset</button>
+      <button class="btn btn-ghost" onclick="pomoCycleMode()">${_pomoState.mode==='work'?'☕':'🍅'}</button>
+    </div>
+    <div style="font-size:11px;color:var(--g2)">🍅 × ${_pomoState.sessions} complétés aujourd'hui</div>
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INTÉGRATION 4 — TELEGRAM BOT (notifications fiables)
+   ══════════════════════════════════════════════════════════════════════════ */
+async function sendTelegram(msg){
+  const tok=S.config.telegramToken;
+  const cid=S.config.telegramChatId;
+  if(!tok||!cid)return false;
+  try{
+    const r=await fetch(`https://api.telegram.org/bot${tok}/sendMessage`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:cid,text:msg,parse_mode:'HTML'})
+    });
+    const d=await r.json();
+    return d.ok;
+  }catch(e){return false;}
+}
+async function sendDailyBriefing(){
+  const today=iso();
+  if(S.config._lastTgBriefing===today)return;
+  const streak=currentStreak();
+  const mk=mKey();
+  const rev=monthRevenu(mk),dep=monthDepense(mk);
+  const profile=S.config.profile?.name||'Massimo';
+  const wr=weeklyReport();
+  const msg=`🚀 <b>Bonjour ${profile} !</b> — ${new Date().toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long'})}
+
+📅 <b>Habitudes</b>
+🔥 Streak: <b>${streak} jours</b>
+📊 Cette semaine: ${wr?wr.avgRate+'%':'—'}
+
+💰 <b>Finances ${MN[parseInt(mk.split('-')[1])-1]}</b>
+💚 Revenus: ${rev.toFixed(0)}€
+🔴 Dépenses: ${dep.toFixed(0)}€
+
+${_aiTip?`🤖 <i>${_aiTip.slice(0,120)}...</i>`:''}
+
+Ouvre Cockpit: https://massimoharnisfeger-hue.github.io/cockpit/`;
+  const ok=await sendTelegram(msg);
+  if(ok){S.config._lastTgBriefing=today;save();}
+}
+async function testTelegram(){
+  const ok=await sendTelegram('✅ <b>Cockpit connecté !</b> Tes notifications Telegram fonctionnent.');
+  toast(ok?'✅ Telegram OK !':'❌ Erreur Telegram — vérifie token + chat ID');
+}
+async function sendCheckinReminder(){
+  const today=iso();
+  if(S.habits[today]&&scoreDay(S.habits[today])===H().length)return;
+  const streak=currentStreak();
+  await sendTelegram(`⚠️ <b>Check-in manquant !</b>
+Ton streak de ${streak} jours est en danger. Prends 2 minutes →
+https://massimoharnisfeger-hue.github.io/cockpit/`);
+}
+function scheduleCheckinReminderTg(){
+  const now=new Date();
+  const target=new Date();
+  target.setHours(S.config.reminderHour||22,0,0,0);
+  let delay=target-now;
+  if(delay<0)delay+=86400000;
+  setTimeout(()=>{
+    sendCheckinReminder();
+    setInterval(sendCheckinReminder,86400000);
+  },delay);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INTÉGRATION 5 — GOOGLE CALENDAR (API key + Calendar ID)
+   ══════════════════════════════════════════════════════════════════════════ */
+let _calEvents=[];
+async function fetchCalendar(){
+  const key=S.config.gcalKey;
+  const calId=S.config.gcalId;
+  if(!key||!calId)return;
+  try{
+    const now=new Date();
+    const end=new Date(now);end.setDate(end.getDate()+7);
+    const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events?key=${key}&timeMin=${now.toISOString()}&timeMax=${end.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=10`;
+    const r=await fetch(url);
+    const d=await r.json();
+    if(d.error){console.warn('Calendar API error:',d.error.message);return;}
+    _calEvents=(d.items||[]).map(ev=>({
+      id:ev.id,
+      title:ev.summary||'Sans titre',
+      start:ev.start?.dateTime||ev.start?.date,
+      end:ev.end?.dateTime||ev.end?.date,
+      allDay:!ev.start?.dateTime,
+      location:ev.location||'',
+      color:ev.colorId?['#00D4FF','#00E5A0','#FFB800','#A855F7','#FF3A5C','#FF9F43','#00D4FF','#00E5A0','#FFB800','#A855F7','#FF3A5C'][parseInt(ev.colorId)-1]||'#00D4FF':'#00D4FF'
+    }));
+    S.config._calCache={events:_calEvents,ts:Date.now()};
+    save();
+    renderRightPanel();
+    const el=document.getElementById('cal-focus');
+    if(el)el.innerHTML=renderCalendarEvents();
+  }catch(e){console.warn('Calendar fetch failed',e);}
+}
+function renderCalendarEvents(limit=5){
+  if(!S.config.gcalKey)return`<div style="font-size:12px;color:var(--g2);text-align:center;padding:8px">Configure Google Calendar dans Config → Intégrations</div>`;
+  if(!_calEvents.length){
+    if(S.config._calCache&&Date.now()-S.config._calCache.ts<1800000){
+      _calEvents=S.config._calCache.events||[];
+    }else{
+      fetchCalendar();
+      return`<div style="font-size:12px;color:var(--g1)">Chargement calendrier...</div>`;
+    }
+  }
+  if(!_calEvents.length)return`<div style="font-size:12px;color:var(--g1)">Aucun événement à venir</div>`;
+  const today=iso();
+  return _calEvents.slice(0,limit).map(ev=>{
+    const start=new Date(ev.start);
+    const isToday=ev.start.slice(0,10)===today;
+    const isTomorrow=ev.start.slice(0,10)===isoPlus(today,1);
+    const dayLabel=isToday?'Aujourd\'hui':isTomorrow?'Demain':start.toLocaleDateString('fr-BE',{weekday:'short',day:'numeric',month:'short'});
+    const timeLabel=ev.allDay?'Toute la journée':start.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
+    return`<div class="event-pill" style="border-left-color:${ev.color}">
+      <div style="font-size:13px;font-weight:600;color:var(--w)">${esc(ev.title)}</div>
+      <div class="ev-time">${dayLabel} · ${timeLabel}${ev.location?` · 📍${esc(ev.location.slice(0,30))}`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PAGE FOCUS (nouvelle page — combine timer + calendar + goals + AI)
+   ══════════════════════════════════════════════════════════════════════════ */
+function renderFocus(){
+  const today=iso();
+  const chal=activeChallenge();
+  const chalProg=chal?challengeProgress(chal):0;
+  return`<div class="page">
+    <div class="page-title">Focus</div>
+
+    <!-- Pomodoro -->
+    <div class="card">
+      <div class="section-label">⏱ Pomodoro</div>
+      <div id="pomo-display">${renderPomoInner()}</div>
+    </div>
+
+    <!-- Météo détaillée -->
+    <div id="weather-home">${renderWeatherCard(true)}</div>
+
+    <!-- Calendrier -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="section-label">📅 Agenda (7 jours)</div>
+        <button class="btn btn-ghost btn-sm" onclick="fetchCalendar()">↺</button>
+      </div>
+      <div id="cal-focus">${renderCalendarEvents()}</div>
+    </div>
+
+    <!-- AI Coach -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="section-label">🤖 Coach IA</div>
+        <button class="btn btn-ghost btn-sm" onclick="fetchAICoach(true)">↺ Refresh</button>
+      </div>
+      <div id="ai-focus">${renderAICard(false)}</div>
+    </div>
+
+    <!-- Objectifs -->
+    ${(S.config.goals||[]).length>0?`<div class="card">
+      <div class="section-label">🎯 Objectifs</div>
+      ${(S.config.goals||[]).map(g=>{
+        const p=Math.min(100,Math.round((g.current||0)/g.target*100));
+        const daysLeft=g.deadline?Math.max(0,Math.round((new Date(g.deadline)-new Date())/86400000)):null;
+        const barColor=p>=100?'var(--green)':p>=60?'var(--cyan)':p>=30?'var(--amber)':'var(--red)';
+        return`<div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+            <div style="font-size:14px;font-weight:600">${g.emoji||'🎯'} ${esc(g.label)}</div>
+            <div style="font-size:12px;color:var(--g1);font-family:var(--font-mono)">${g.current||0}€ / ${g.target}€</div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${barColor}"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <div style="font-size:11px;color:var(--g2)">${p}% atteint</div>
+            ${daysLeft!==null?`<div style="font-size:11px;color:${daysLeft<30?'var(--amber)':'var(--g2)'}">J-${daysLeft}</div>`:''}
+          </div>
+          <input type="number" value="${g.current||0}" min="0" max="${g.target}" step="10"
+            onchange="updateGoalProgress('${g.id}',parseFloat(this.value)||0)"
+            style="margin-top:6px;font-size:12px;padding:4px 8px" placeholder="Montant actuel (€)">
+        </div>`;
+      }).join('')}
+    </div>`:''}
+
+    <!-- Challenge actif -->
+    ${chal?`<div class="card" style="border-color:var(--purp)">
+      <div class="section-label">🏆 Challenge actif</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">${esc(chal.label)}</div>
+      <div style="font-size:12px;color:var(--g1);margin-bottom:8px">${H().find(h=>h.id===chal.habitId)?.emoji||''} ${H().find(h=>h.id===chal.habitId)?.label||chal.habitId} · ${chal.startDate} → ${chal.endDate}</div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+        <span style="font-weight:700;color:var(--purp)">${chalProg} / ${chal.target} jours</span>
+        <span style="color:var(--g1)">${Math.round(chalProg/chal.target*100)}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,Math.round(chalProg/chal.target*100))}%;background:var(--purp)"></div></div>
+    </div>`:''}
+
+  </div>`;
+}
+
+function updateGoalProgress(gid,val){
+  const g=(S.config.goals||[]).find(x=>x.id===gid);
+  if(g){g.current=val;save();}
+  // Don't re-render, just save (avoids losing focus on input)
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MISE À JOUR — ROUTER + SIDEBAR pour inclure la page Focus
+   ══════════════════════════════════════════════════════════════════════════ */
+// Override PAGES array and nav functions (declared above but need Focus)
+const PAGES_V6=['home','checkin','finances','analytics','focus','config'];
+const PAGE_ICONS_V6={
+  home:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10"/>',
+  checkin:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+  finances:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+  analytics:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
+  focus:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+  config:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>'
+};
+const PAGE_LABELS_V6={home:'Accueil',checkin:'Check-in',finances:'Finances',analytics:'Stats',focus:'Focus',config:'Config'};
+const PAGE_SHORTCUTS_V6={home:'1',checkin:'2',finances:'3',analytics:'4',focus:'5',config:'6'};
+
+function renderSidebarV6(){
+  const el=document.getElementById('sidebar');
+  if(!el)return;
+  el.innerHTML=`<div class="logo">M</div>`+
+    PAGES_V6.map(p=>`<button class="sn${_page===p?' active':''}" onclick="nav('${p}')" title="${PAGE_LABELS_V6[p]} (${PAGE_SHORTCUTS_V6[p]})">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="22" height="22">${PAGE_ICONS_V6[p]}</svg>
+      <span class="sk-hint">${PAGE_SHORTCUTS_V6[p]}</span>
+    </button>`).join('');
+}
+function renderBnavV6(){
+  document.getElementById('bnav').innerHTML=PAGES_V6.map(p=>`
+    <button class="bn${_page===p?' active':''}" onclick="nav('${p}')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">${PAGE_ICONS_V6[p]}</svg>
+      ${PAGE_LABELS_V6[p]}
+    </button>`).join('');
+}
+
+/* Extend right panel with weather + calendar + AI */
+function renderRightPanelV6(){
+  const mk=mKey();
+  const streak=currentStreak();
+  const best=bestStreak();
+  const goal=S.config.streakGoal;
+  const sav=monthEpargne(mk);
+  const savGoal=S.config.savingsGoal;
+  const savPct=pct(sav,savGoal);
+  const savColor=savPct>=100?'var(--green)':savPct>=70?'var(--amber)':'var(--red)';
+  const rp=document.getElementById('right-panel');
+  if(!rp)return;
+  rp.innerHTML=`
+    <div class="right-section" style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-family:var(--font-d);font-size:14px;font-weight:800;color:var(--cyan)">Cockpit</span>
+      <div style="display:flex;gap:4px">
+        <button style="background:none;border:1px solid var(--b);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:14px;color:var(--w);transition:all var(--t)" onclick="toggleTheme()" title="Thème">${S.config.theme==='dark'?'☀️':'🌙'}</button>
+        <button style="background:none;border:1px solid var(--b${S.config.soundEnabled?';border-color:var(--cyan)':''});border-radius:6px;padding:4px 8px;cursor:pointer;font-size:14px;transition:all var(--t)" onclick="toggleSound()" title="Son">${S.config.soundEnabled?'🔊':'🔇'}</button>
+      </div>
+    </div>
+    <div class="right-section">
+      <div class="right-title">Streak</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px">
+        <span style="font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--amber)">${streak}</span>
+        <span style="font-size:12px;color:var(--g1)">jours · Record ${best}</span>
+      </div>
+      <div class="streak-bar"><div class="streak-fill" style="width:${pct(streak,goal)}%"></div></div>
+      <div style="font-size:11px;color:var(--g2);margin-top:3px">${streak}/${goal} objectif</div>
+    </div>
+    <div class="right-section">
+      <div class="right-title">Épargne ${MN[parseInt(mk.split('-')[1])-1]}</div>
+      <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:${savColor}">${sav.toFixed(0)}€</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${savPct}%;background:${savColor}"></div></div>
+      <div style="font-size:11px;color:var(--g2);margin-top:3px">${savPct}% · ${savGoal}€ objectif · Net: <span style="color:var(--cyan)">${monthNet(mk).toFixed(0)}€</span></div>
+    </div>
+    <div class="right-section">
+      <div class="right-title">Météo</div>
+      ${renderWeatherCard(false)}
+    </div>
+    ${_calEvents.length?`<div class="right-section">
+      <div class="right-title">Prochain événement</div>
+      ${renderCalendarEvents(2)}
+    </div>`:''}
+    <div class="right-section">
+      <div class="right-title">Coach IA</div>
+      <div id="ai-right">${renderAICard(true)}</div>
+    </div>`;
+}
+
+/* Override Config to add Intégrations tab */
+function renderConfigV6(){
+  const tabs=['Habitudes','Budgets','Récurrents','Objectifs','Profil','Intégrations','Données'];
+  return`<div class="page">
+    <div class="page-title">Configuration</div>
+    <div class="tabs">${tabs.map((t,i)=>`<button class="tab${_atabC===i?' active':''}" onclick="_atabC=${i};render()" style="min-width:70px">${t}</button>`).join('')}</div>
+    ${_atabC===0?renderCfgHabits():_atabC===1?renderCfgBudgets():_atabC===2?renderCfgRecurring():_atabC===3?renderCfgGoals():_atabC===4?renderCfgProfile():_atabC===5?renderCfgIntegrations():renderCfgData()}
+  </div>`;
+}
+function renderCfgIntegrations(){
+  return`
+  <!-- Météo -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-size:24px">🌤</span>
+      <div><div style="font-weight:700">Météo Open-Meteo</div><div style="font-size:12px;color:var(--g2)">Gratuit · Sans clé API · Données en temps réel</div></div>
+      <span class="chip chip-green" style="margin-left:auto">Actif</span>
+    </div>
+    <div class="grid2">
+      <div class="form-group">
+        <label>Latitude</label>
+        <input type="number" step="0.01" value="${S.config.weatherLat||50.85}" onchange="S.config.weatherLat=parseFloat(this.value);save()" placeholder="50.85 (Bruxelles)">
+      </div>
+      <div class="form-group">
+        <label>Longitude</label>
+        <input type="number" step="0.01" value="${S.config.weatherLon||4.35}" onchange="S.config.weatherLon=parseFloat(this.value);save()" placeholder="4.35 (Bruxelles)">
+      </div>
+    </div>
+    <button class="btn btn-ghost" style="width:100%" onclick="fetchWeather();toast('Météo mise à jour ✓')">↺ Actualiser la météo</button>
+  </div>
+
+  <!-- AI Coach -->
+  <div class="card" style="margin-top:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-size:24px">🤖</span>
+      <div><div style="font-weight:700">Coach IA (OpenAI)</div><div style="font-size:12px;color:var(--g2)">GPT-4o-mini · Analyse habitudes + finances · ~0.001€/analyse</div></div>
+      <span class="chip ${S.config.openaiKey?'chip-green':'chip-gray'}" style="margin-left:auto">${S.config.openaiKey?'Configuré':'Non configuré'}</span>
+    </div>
+    <div class="form-group">
+      <label>Clé API OpenAI (sk-...)</label>
+      <input type="password" value="${S.config.openaiKey||''}" placeholder="sk-proj-..." onchange="S.config.openaiKey=this.value.trim();save()">
+    </div>
+    <div style="font-size:11px;color:var(--g2);margin-bottom:10px">Obtenir une clé sur platform.openai.com → API keys</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="fetchAICoach(true)">🤖 Analyser maintenant</button>
+      <button class="btn btn-ghost" onclick="S.config.openaiKey='';S.config._aiCache=null;save();render();toast('Clé supprimée')">Effacer</button>
+    </div>
+    <div id="ai-focus-cfg" style="margin-top:10px">${_aiTip?`<div style="font-size:12px;color:var(--g1);font-style:italic;padding:8px;background:var(--bg2);border-radius:var(--r2)">"${esc(_aiTip.slice(0,120))}..."</div>`:''}</div>
+  </div>
+
+  <!-- Telegram -->
+  <div class="card" style="margin-top:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-size:24px">✈️</span>
+      <div><div style="font-weight:700">Telegram Bot</div><div style="font-size:12px;color:var(--g2)">Briefing matinal + rappel check-in + alertes</div></div>
+      <span class="chip ${S.config.telegramToken&&S.config.telegramChatId?'chip-green':'chip-gray'}" style="margin-left:auto">${S.config.telegramToken&&S.config.telegramChatId?'Configuré':'Non configuré'}</span>
+    </div>
+    <div style="background:var(--bg2);border-radius:var(--r2);padding:10px;margin-bottom:12px;font-size:12px;color:var(--g2);line-height:1.6">
+      1. Ouvre Telegram → cherche <strong style="color:var(--w)">@BotFather</strong><br>
+      2. Tape <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">/newbot</code> → suis les instructions<br>
+      3. Copie le token et envoie un message à ton bot<br>
+      4. Cherche <strong style="color:var(--w)">@userinfobot</strong> → tape <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">/start</code> → copie ton ID
+    </div>
+    <div class="form-group">
+      <label>Token du bot</label>
+      <input type="password" value="${S.config.telegramToken||''}" placeholder="123456789:ABCdef..." onchange="S.config.telegramToken=this.value.trim();save()">
+    </div>
+    <div class="form-group">
+      <label>Ton Chat ID</label>
+      <input type="text" value="${S.config.telegramChatId||''}" placeholder="123456789" onchange="S.config.telegramChatId=this.value.trim();save()">
+    </div>
+    <div class="grid2">
+      <div class="form-group">
+        <label>Heure rappel (h)</label>
+        <input type="number" value="${S.config.reminderHour||22}" min="0" max="23" onchange="S.config.reminderHour=parseInt(this.value)||22;save()">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="testTelegram()">✉️ Tester</button>
+      <button class="btn btn-ghost" onclick="sendDailyBriefing().then(()=>toast('Briefing envoyé ✓'))">📨 Briefing maintenant</button>
+    </div>
+  </div>
+
+  <!-- Google Calendar -->
+  <div class="card" style="margin-top:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-size:24px">📅</span>
+      <div><div style="font-weight:700">Google Calendar</div><div style="font-size:12px;color:var(--g2)">Tes événements intégrés dans Focus + panneau droit</div></div>
+      <span class="chip ${S.config.gcalKey&&S.config.gcalId?'chip-green':'chip-gray'}" style="margin-left:auto">${S.config.gcalKey&&S.config.gcalId?'Configuré':'Non configuré'}</span>
+    </div>
+    <div style="background:var(--bg2);border-radius:var(--r2);padding:10px;margin-bottom:12px;font-size:12px;color:var(--g2);line-height:1.6">
+      1. Va sur <strong style="color:var(--w)">console.cloud.google.com</strong><br>
+      2. Crée un projet → Active "Google Calendar API"<br>
+      3. Identifiants → Créer une clé API → Restreindre à Calendar API<br>
+      4. Dans Calendar.google.com → Paramètres du calendrier → ID du calendrier
+    </div>
+    <div class="form-group">
+      <label>Clé API Google</label>
+      <input type="password" value="${S.config.gcalKey||''}" placeholder="AIzaSy..." onchange="S.config.gcalKey=this.value.trim();save()">
+    </div>
+    <div class="form-group">
+      <label>ID du calendrier</label>
+      <input type="text" value="${S.config.gcalId||''}" placeholder="massimo@gmail.com ou xyz@group.calendar.google.com" onchange="S.config.gcalId=this.value.trim();save()">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="fetchCalendar().then(()=>toast('Calendrier synchronisé ✓'))">📅 Synchroniser</button>
+      <button class="btn btn-ghost" onclick="S.config.gcalKey='';S.config.gcalId='';S.config._calCache=null;_calEvents=[];save();render();toast('Calendrier déconnecté')">Déconnecter</button>
+    </div>
+  </div>`;
+}
+
 /* ── INIT ──────────────────────────────────────────────────────────────── */
 load();
+// Patch PAGES to include focus
+Object.assign(window,{PAGES:PAGES_V6});
 render();
 injectManifest();
 checkNotifOnLoad();
 checkOnboarding();
 checkAnnualArchive();
+// Load integrations
+fetchWeather();
+if(S.config.openaiKey)fetchAICoach();
+if(S.config.gcalKey&&S.config.gcalId)fetchCalendar();
+if(S.config.telegramToken&&S.config.telegramChatId)scheduleCheckinReminderTg();
 </script>
 </body>
 </html>
