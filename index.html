@@ -5448,8 +5448,7 @@ window.bulkSnooze = function(days){
 window.importTasksText = function(){
   var ta = document.getElementById('tv3-import-ta');
   if(!ta||!ta.value.trim()) return;
-  var lines = ta.value.split('
-').map(function(l){return l.trim();}).filter(Boolean);
+  var lines = ta.value.split(/[\r\n]+/).map(function(l){return l.trim();}).filter(Boolean);
   var added = 0;
   lines.forEach(function(line){
     var t = parseTaskInput(line);
