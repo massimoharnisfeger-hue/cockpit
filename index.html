@@ -4394,8 +4394,14 @@ window.initChartsHome=function(){
     const canvas=document.getElementById('chart-home-week');
     if(!canvas)return;
     if(canvas._chart){canvas._chart.destroy();}
-    const scores=window._homeWeekScores||[];
-    const labels=window._homeWeekLabels||[];
+    // Compute week data directly (reliable vs. global vars)
+    const habs=H();
+    const mx=Math.max(habs.length,1);
+    const days7=[];
+    for(let i=6;i>=0;i--){const dd=new Date();dd.setDate(dd.getDate()-i);days7.push(dd.toISOString().slice(0,10));}
+    const dayNames=['D','L','M','M','J','V','S'];
+    const scores=days7.map(dd=>Math.round(scoreDay(S.habits[dd]||{})/mx*100));
+    const labels=days7.map(dd=>dayNames[new Date(dd+'T12:00:00').getDay()]);
     const barColors=scores.map(s=>s>=80?'rgba(0,229,160,.8)':s>=50?'rgba(255,184,0,.8)':s>0?'rgba(255,58,92,.7)':'rgba(30,45,61,.8)');
     // Show canvas, hide CSS fallback — wait for reflow first
     canvas.style.display='block';
@@ -4409,7 +4415,6 @@ window.initChartsHome=function(){
           options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},scales:{x:{grid:{display:false},ticks:{color:'#8B9BAD',font:{size:11}}},y:{display:false,max:110}},animation:{duration:600}}
         });
       } catch(e) {
-        // Restore CSS fallback if Chart.js fails
         if(fallback)fallback.style.display='flex';
         canvas.style.display='none';
       }
