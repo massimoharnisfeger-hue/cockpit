@@ -4356,6 +4356,116 @@ const v8css=`
 .tv4-search-overlay{position:fixed;top:0;left:0;right:0;background:var(--bg);z-index:700;padding:14px;border-bottom:1px solid var(--b);animation:pageIn .15s ease;}
 .tv4-search-input{width:100%;background:var(--bg1);border:1px solid var(--b);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--w);outline:none;box-sizing:border-box;}
 .tv4-search-results{margin-top:12px;max-height:60vh;overflow-y:auto;}
+/* ── OBJECTIFS ─────────────────────────────────────────────────────────── */
+.og-page{padding:12px 14px 90px;}
+.og-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.og-title{font-size:18px;font-weight:800;color:var(--w);}
+.og-subtitle{font-size:11px;color:var(--g1);margin-top:2px;}
+.og-add-btn{width:34px;height:34px;background:var(--cyan);border-radius:50%;border:none;color:#000;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.og-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center;}
+.og-empty-ring{opacity:.25;margin-bottom:16px;}
+.og-empty-title{font-size:15px;font-weight:700;color:var(--w);margin-bottom:6px;}
+.og-empty-sub{font-size:12px;color:var(--g1);margin-bottom:20px;}
+.og-list{display:flex;flex-direction:column;}
+.og-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--b);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.og-row:last-child{border-bottom:none;}
+.og-ring{position:relative;flex-shrink:0;}
+.og-ring svg{display:block;}
+.og-ring-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;font-weight:800;color:var(--w);}
+.og-row-body{flex:1;min-width:0;}
+.og-row-title{font-size:14px;font-weight:700;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.og-row-sub{font-size:11px;color:var(--g1);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.og-row-chevron{color:var(--b2);font-size:18px;flex-shrink:0;}
+.og-row.done{opacity:.45;}
+.og-toggle{display:flex;justify-content:center;margin-top:18px;}
+.og-toggle-inner{display:flex;background:var(--bg1);border:1px solid var(--b);border-radius:8px;padding:3px;}
+.og-toggle-btn{padding:5px 16px;font-size:10px;border-radius:6px;cursor:pointer;border:none;background:none;color:var(--g1);}
+.og-toggle-btn.active{background:var(--b);color:var(--w);font-weight:600;}
+/* Board */
+.og-board{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:4px 0;}
+.og-col-hdr{font-size:8px;font-weight:700;letter-spacing:.08em;text-align:center;margin-bottom:8px;}
+.og-card{background:var(--bg1);border:1px solid var(--b);border-radius:10px;padding:9px 10px;margin-bottom:6px;cursor:pointer;}
+.og-card-title{font-size:11px;font-weight:700;color:var(--w);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.og-card-dl{font-size:9px;color:var(--g1);margin-top:4px;}
+/* Detail overlay */
+.og-overlay{position:fixed;inset:0;z-index:700;background:var(--bg);overflow-y:auto;padding:0 0 40px;}
+.og-overlay-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 14px 0;}
+.og-close-btn{background:var(--bg1);border:1px solid var(--b);border-radius:8px;padding:6px 10px;color:var(--g1);cursor:pointer;font-size:14px;}
+.og-detail-hero{display:flex;align-items:center;gap:14px;padding:16px 14px 12px;}
+.og-detail-info{flex:1;}
+.og-detail-title{font-size:17px;font-weight:800;color:var(--w);margin-bottom:4px;}
+.og-detail-meta{font-size:11px;color:var(--g1);}
+.og-detail-section{padding:0 14px;margin-bottom:16px;}
+.og-section-label{font-size:9px;font-weight:700;color:var(--g1);letter-spacing:.09em;margin-bottom:8px;}
+.og-sg-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #0C1118;cursor:pointer;}
+.og-sg-circle{width:22px;height:22px;border-radius:50%;border:2px solid #2A3D50;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.og-sg-circle.in_progress{border-color:var(--cyan);}
+.og-sg-circle.done{background:#00E5A022;border-color:var(--green);color:var(--green);font-size:10px;}
+.og-sg-dot{width:7px;height:7px;background:var(--cyan);border-radius:50%;}
+.og-sg-title{font-size:12px;color:var(--w);flex:1;}
+.og-sg-dl{font-size:10px;color:var(--g1);}
+.og-sg-dl.urgent{color:var(--red);}
+.og-sg-expanded{padding:10px 0 10px 34px;}
+.og-sg-desc{font-size:11px;color:var(--g1);margin-bottom:10px;line-height:1.6;cursor:pointer;}
+.og-checklist{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.og-check-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg1);border-radius:7px;cursor:pointer;}
+.og-check-box{width:15px;height:15px;border:1.5px solid #2A3D50;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;}
+.og-check-box.done{background:#00E5A022;border-color:var(--green);color:var(--green);}
+.og-check-text{font-size:11px;color:var(--w);flex:1;}
+.og-check-text.done{color:var(--g2);text-decoration:line-through;}
+.og-check-add{display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;}
+.og-check-add-box{width:15px;height:15px;border:1.5px dashed #2A3D50;border-radius:3px;flex-shrink:0;}
+.og-linked-block{background:var(--bg1);border-radius:8px;padding:9px 11px;}
+.og-linked-label{font-size:9px;color:var(--g1);font-weight:600;margin-bottom:6px;}
+.og-linked-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.og-linked-circle{width:9px;height:9px;border-radius:50%;border:1.5px solid #2A3D50;flex-shrink:0;}
+.og-linked-circle.doing{border-color:var(--cyan);}
+.og-linked-text{font-size:11px;color:var(--w);flex:1;}
+.og-linked-dl{font-size:9px;color:var(--g1);}
+.og-linked-remove{font-size:11px;color:var(--g2);cursor:pointer;padding:2px 4px;}
+.og-link-btn{font-size:10px;color:var(--cyan);margin-top:7px;cursor:pointer;}
+.og-add-sg-row{display:flex;align-items:center;gap:12px;padding:10px 0;cursor:pointer;}
+.og-add-sg-circle{width:22px;height:22px;border-radius:50%;border:1.5px dashed #2A3D50;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#4A5A6A;}
+.og-add-sg-text{font-size:12px;color:var(--g2);}
+/* Recurring grid */
+.og-rec-grid{display:flex;justify-content:space-between;margin:8px 0;}
+.og-rec-day{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.og-rec-lbl{font-size:9px;color:var(--g1);}
+.og-rec-dot{width:26px;height:26px;border-radius:50%;background:var(--bg1);border:2px solid var(--b);display:flex;align-items:center;justify-content:center;font-size:10px;}
+.og-rec-dot.done{background:var(--purp);border-color:var(--purp);color:#fff;}
+.og-rec-dot.today{border-color:var(--cyan);}
+.og-mark-btn{width:100%;background:var(--purp);color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;}
+/* Form modal */
+.og-form{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;}
+.og-form-inner{background:var(--bg1);border-radius:16px 16px 0 0;padding:20px 16px 40px;width:100%;max-height:85vh;overflow-y:auto;}
+.og-form-title{font-size:16px;font-weight:800;color:var(--w);margin-bottom:16px;}
+.og-field{margin-bottom:12px;}
+.og-field label{font-size:10px;font-weight:700;color:var(--g1);letter-spacing:.07em;display:block;margin-bottom:5px;}
+.og-input{width:100%;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--w);outline:none;box-sizing:border-box;}
+.og-type-row{display:flex;gap:6px;}
+.og-type-btn{flex:1;padding:9px;border-radius:8px;border:1px solid var(--b);background:var(--bg);color:var(--g1);font-size:12px;cursor:pointer;text-align:center;}
+.og-type-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.08);}
+.og-form-btns{display:flex;gap:8px;margin-top:16px;}
+.og-form-save{flex:1;background:var(--cyan);color:#000;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;}
+.og-form-cancel{flex:1;background:var(--bg);border:1px solid var(--b);border-radius:10px;padding:12px;font-size:14px;color:var(--g1);cursor:pointer;}
+/* Link task sheet */
+.og-link-sheet{position:fixed;inset:0;z-index:810;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;}
+.og-link-sheet-inner{background:var(--bg1);border-radius:16px 16px 0 0;padding:16px 16px 40px;width:100%;max-height:70vh;display:flex;flex-direction:column;}
+.og-link-search{width:100%;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--w);outline:none;box-sizing:border-box;margin-bottom:10px;}
+.og-link-list{overflow-y:auto;flex:1;}
+.og-link-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--b);cursor:pointer;}
+.og-link-item-text{font-size:12px;color:var(--w);flex:1;}
+.og-link-item-dl{font-size:10px;color:var(--g1);}
+/* Context menu */
+.og-ctx{position:fixed;z-index:900;background:var(--bg1);border:1px solid var(--b);border-radius:10px;padding:4px;min-width:140px;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.og-ctx-btn{display:block;width:100%;text-align:left;padding:9px 14px;font-size:13px;color:var(--w);background:none;border:none;cursor:pointer;border-radius:7px;}
+.og-ctx-btn:hover{background:var(--b);}
+.og-ctx-btn.danger{color:var(--red);}
+.og-ctx-confirm{padding:9px 14px;font-size:12px;color:var(--g1);}
+/* Status selector in detail */
+.og-status-row{display:flex;gap:5px;margin-top:10px;}
+.og-status-btn{flex:1;padding:6px 4px;border-radius:7px;border:1px solid var(--b);background:var(--bg);color:var(--g1);font-size:10px;cursor:pointer;text-align:center;}
+.og-status-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.08);}
 
 `;
 
@@ -5320,9 +5430,9 @@ const PAGE_ICONS_V8={
   taches:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
   argent:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
   stats:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
-  plus:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>',
+  plus:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>',objectifs:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
 };
-const PAGE_LABELS_V8={home:'Home',taches:'Tâches',argent:'Argent',stats:'Stats',plus:'Plus'};
+const PAGE_LABELS_V8={home:'Home',taches:'Tâches',argent:'Argent',stats:'Stats',plus:'Plus',objectifs:'Objectifs'};
 
 window.renderSidebarV8=function(){
   const el=document.getElementById('sidebar');if(!el)return;
@@ -5337,7 +5447,7 @@ window.renderBnavV8=function(){
   const el=document.getElementById('bnav');if(!el)return;
   // Pages: home, taches, [FAB], argent, plus
   const LEFT=['home','taches'];
-  const RIGHT=['argent','plus'];
+  const RIGHT=['argent','objectifs'];
   function btn(p){return `<button class="bn${_page===p?' active':''}" onclick="nav('${p}')">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">${PAGE_ICONS_V8[p]}</svg>
     ${PAGE_LABELS_V8[p]}
@@ -5414,7 +5524,8 @@ window.render=function(){
     case 'taches':root.innerHTML=renderTachesV8();initTachesV4();break;
     case 'argent':root.innerHTML=renderArgentV8();initChartsArgent();break;
     case 'stats':root.innerHTML=renderStatsV8();initChartsStats();break;
-    case 'plus':root.innerHTML=renderPlusV8();break;
+    case 'objectifs':root.innerHTML=renderObjectifs();initObjectifs();break;
+      case 'plus':root.innerHTML=renderPlusV8();break;
     case 'config':root.innerHTML=renderConfigV6();break;
     default:root.innerHTML=renderHomeV8();initChartsHome();
   }
@@ -5898,6 +6009,676 @@ window.initTachesV4=function(){
     });
   });
 };
+
+/* ── OBJECTIFS helpers ──────────────────────────────────────────────────── */
+function ogWeekBounds(){
+  const now=new Date();
+  const day=now.getDay(); // 0=Sun
+  const diffToMon=day===0?-6:1-day;
+  const mon=new Date(now);mon.setDate(now.getDate()+diffToMon);mon.setHours(0,0,0,0);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);sun.setHours(23,59,59,999);
+  return {mon:iso(mon),sun:iso(sun)};
+}
+function ogFmtDate(s){
+  if(!s)return '';
+  const months=['jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  const[,m,d]=s.split('-');
+  return parseInt(d)+' '+months[parseInt(m)-1];
+}
+function goalProgress(g){
+  if(g.type==='recurring'){
+    if(!g.recurringTarget||g.recurringTarget===0)return 0;
+    const{mon,sun}=ogWeekBounds();
+    const done=(g.completions||[]).filter(function(c){return c.date>=mon&&c.date<=sun;}).length;
+    return Math.min(100,Math.round(done/g.recurringTarget*100));
+  }
+  const sgs=g.subGoals||[];
+  if(sgs.length===0)return 0;
+  return Math.round(sgs.filter(function(sg){return sg.status==='done';}).length/sgs.length*100);
+}
+function goalNextAction(g){
+  if(g.type==='recurring'){
+    const{mon,sun}=ogWeekBounds();
+    const done=(g.completions||[]).filter(function(c){return c.date>=mon&&c.date<=sun;}).length;
+    return done+'/'+g.recurringTarget+'x/'+g.recurringPeriod+' cette semaine';
+  }
+  const sgs=(g.subGoals||[]).filter(function(sg){return sg.status!=='done';});
+  sgs.sort(function(a,b){
+    if(!a.deadline&&!b.deadline)return 0;
+    if(!a.deadline)return 1;
+    if(!b.deadline)return -1;
+    return a.deadline<b.deadline?-1:1;
+  });
+  if(sgs.length===0)return g.deadline?'deadline '+ogFmtDate(g.deadline):'';
+  const sg=sgs[0];
+  return sg.title+(sg.deadline?' · '+ogFmtDate(sg.deadline):'');
+}
+function ogGoalRing(pct,size,color){
+  const r=size/2-4;
+  const circ=2*Math.PI*r;
+  const offset=circ-(pct/100)*circ;
+  return '<svg width="'+size+'" height="'+size+'" style="transform:rotate(-90deg);display:block">'+
+    '<circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" fill="none" stroke="#1E2D3D" stroke-width="3"/>'+
+    '<circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="3"'+
+    ' stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'" stroke-linecap="round"/>'+
+    '</svg>';
+}
+function ogApplyStatusTransitions(goal){
+  if(goal.type!=='project')return;
+  const sgs=goal.subGoals||[];
+  sgs.forEach(function(sg){
+    if(sg.subtasks&&sg.subtasks.length>0){
+      const allDone=sg.subtasks.every(function(st){return st.done;});
+      if(allDone&&sg.status!=='done')sg.status='in_progress'; // only auto-done via subtasks
+    }
+  });
+  if(sgs.length>0&&sgs.every(function(sg){return sg.status==='done';})){
+    goal.status='done';
+  } else if(sgs.some(function(sg){return sg.status==='in_progress'||sg.status==='done';})){
+    if(goal.status==='todo')goal.status='in_progress';
+  }
+}
+/* S.goals migration */
+(function ogMigrate(){
+  var raw=localStorage.getItem('mcp_v5');
+  if(!raw)return;
+  try{var s=JSON.parse(raw);if(!s.goals){s.goals=[];localStorage.setItem('mcp_v5',JSON.stringify(s));}}catch(e){}
+})();
+
+
+window.renderObjectifs=function(){
+  if(!S)return '';
+  if(!S.goals)S.goals=[];
+  var goals=S.goals.slice();
+  // Sort: in_progress first (by deadline ASC, priority DESC), then todo, then done
+  var pOrder={urgente:4,haute:3,moyenne:2,basse:1};
+  goals.sort(function(a,b){
+    var sA=a.status==='in_progress'?0:a.status==='todo'?1:2;
+    var sB=b.status==='in_progress'?0:b.status==='todo'?1:2;
+    if(sA!==sB)return sA-sB;
+    if(sA===0){
+      if(!a.deadline&&!b.deadline)return (pOrder[b.priority]||2)-(pOrder[a.priority]||2);
+      if(!a.deadline)return 1;if(!b.deadline)return -1;
+      if(a.deadline!==b.deadline)return a.deadline<b.deadline?-1:1;
+      return (pOrder[b.priority]||2)-(pOrder[a.priority]||2);
+    }
+    return 0;
+  });
+  // Sub-title
+  var subtitle='';
+  if(goals.length===0){subtitle='';}
+  else{
+    var today=iso();
+    var cutoff=new Date();cutoff.setDate(cutoff.getDate()+14);
+    var cutoffStr=iso(cutoff);
+    var urgentSg=null;
+    goals.forEach(function(g){
+      if(g.type!=='project'||g.status!=='in_progress')return;
+      (g.subGoals||[]).forEach(function(sg){
+        if(sg.status==='in_progress'&&sg.deadline&&sg.deadline<=cutoffStr){
+          if(!urgentSg||sg.deadline<urgentSg.deadline)urgentSg=sg;
+        }
+      });
+    });
+    if(urgentSg){subtitle=urgentSg.title+' — '+ogFmtDate(urgentSg.deadline);}
+    else{
+      var inProgress=goals.filter(function(g){return g.status==='in_progress';}).length;
+      subtitle=inProgress>0?inProgress+' objectif'+(inProgress>1?'s':'')+' en cours':'';
+    }
+  }
+  var view=window._goalView||'list';
+  var html2='<div class="og-page">';
+  html2+='<div class="og-header"><div><div class="og-title">Objectifs</div>';
+  html2+='<div class="og-subtitle">'+subtitle+'</div></div>';
+  html2+='<button class="og-add-btn" onclick="openNewGoal()">+</button></div>';
+  if(goals.length===0){
+    html2+='<div class="og-empty">';
+    html2+='<div class="og-empty-ring">'+ogGoalRing(0,80,'#1E2D3D')+'</div>';
+    html2+='<div class="og-empty-title">Aucun objectif pour l\u0027instant</div>';
+    html2+='<div class="og-empty-sub">Lance-toi — tap + pour créer ton premier objectif</div>';
+    html2+='<button class="btn btn-primary" onclick="openNewGoal()">Créer un objectif →</button>';
+    html2+='</div>';
+  } else if(view==='board'){
+    html2+=window.renderGoalBoard();
+  } else {
+    html2+='<div class="og-list">';
+    goals.forEach(function(g){html2+=window.renderGoalRow(g);});
+    html2+='</div>';
+  }
+  html2+='<div class="og-toggle"><div class="og-toggle-inner">';
+  html2+='<button class="og-toggle-btn'+(view==='list'?' active':'')+'" onclick="window._goalView=\u0027list\u0027;render()">Liste</button>';
+  html2+='<button class="og-toggle-btn'+(view==='board'?' active':'')+'" onclick="window._goalView=\u0027board\u0027;render()">Board</button>';
+  html2+='</div></div>';
+  html2+='</div>';
+  return html2;
+};
+
+window.renderGoalRow=function(g){
+  var pct=goalProgress(g);
+  var color=g.type==='recurring'?'var(--purp)':'var(--cyan)';
+  var ring=ogGoalRing(pct,44,color);
+  var nextAction=goalNextAction(g);
+  var done=g.status==='done';
+  return '<div class="og-row'+(done?' done':'')+'" onclick="openGoalDetail(\''+g.id+'\')" '+
+    'data-goal-id="'+g.id+'">'+
+    '<div class="og-ring">'+ring+'<div class="og-ring-pct">'+pct+'%</div></div>'+
+    '<div class="og-row-body">'+
+    '<div class="og-row-title">'+(g.emoji||'🎯')+' '+g.title+'</div>'+
+    '<div class="og-row-sub">'+nextAction+'</div></div>'+
+    '<div class="og-row-chevron">›</div>'+
+    '</div>';
+};
+
+window.renderGoalBoard=function(){
+  var goals=S.goals||[];
+  var cols={todo:[],in_progress:[],done:[]};
+  goals.forEach(function(g){cols[g.status]&&cols[g.status].push(g);});
+  var labels={todo:'À DÉMARRER',in_progress:'EN COURS',done:'ATTEINT'};
+  var colors={todo:'var(--g1)',in_progress:'var(--cyan)',done:'var(--green)'};
+  var html2='<div class="og-board">';
+  ['todo','in_progress','done'].forEach(function(st){
+    html2+='<div>';
+    html2+='<div class="og-col-hdr" style="color:'+colors[st]+'">'+labels[st]+'</div>';
+    cols[st].forEach(function(g){
+      var pct=goalProgress(g);
+      var color=g.type==='recurring'?'var(--purp)':'var(--cyan)';
+      html2+='<div class="og-card" onclick="openGoalDetail(\''+g.id+'\')">';
+      html2+='<div class="og-card-title">'+(g.emoji||'🎯')+' '+g.title+'</div>';
+      html2+=ogGoalRing(pct,28,color);
+      if(g.deadline)html2+='<div class="og-card-dl">'+ogFmtDate(g.deadline)+'</div>';
+      html2+='</div>';
+    });
+    html2+='</div>';
+  });
+  html2+='</div>';
+  return html2;
+};
+
+window.openGoalDetail=function(id){
+  window._goalOpen=id;window._goalSubOpen=null;
+  var g=(S.goals||[]).find(function(x){return x.id===id;});
+  if(!g)return;
+  var el=document.createElement('div');
+  el.className='og-overlay';el.id='og-overlay';
+  el.innerHTML=renderGoalDetail(g);
+  document.body.appendChild(el);
+  initOgOverlaySwipe(el);
+};
+window.closeGoalDetail=function(){
+  var el=document.getElementById('og-overlay');
+  if(el)el.remove();
+  window._goalOpen=null;window._goalSubOpen=null;
+};
+function renderGoalDetail(g){
+  var pct=goalProgress(g);
+  var color=g.type==='recurring'?'var(--purp)':'var(--cyan)';
+  var ring=ogGoalRing(pct,64,color);
+  var sgCount=(g.subGoals||[]).length;
+  var sgDone=(g.subGoals||[]).filter(function(sg){return sg.status==='done';}).length;
+  var dlStr=g.deadline?'deadline '+ogFmtDate(g.deadline):'pas de deadline';
+  var meta=sgCount>0?sgDone+'/'+sgCount+' sous-obj. · '+dlStr:dlStr;
+  var html2='<div class="og-overlay-hdr">';
+  html2+='<div style="font-size:12px;color:var(--g1)">‹ Objectifs</div>';
+  html2+='<button class="og-close-btn" onclick="closeGoalDetail()">✕</button>';
+  html2+='</div>';
+  html2+='<div class="og-detail-hero">'+
+    '<div class="og-ring">'+ring+'<div class="og-ring-pct" style="font-size:13px;font-weight:800">'+pct+'%</div></div>'+
+    '<div class="og-detail-info">'+
+    '<div class="og-detail-title">'+(g.emoji||'🎯')+' '+g.title+'</div>'+
+    '<div class="og-detail-meta">'+meta+'</div>'+
+    '</div></div>';
+  // Status selector
+  html2+='<div class="og-detail-section">';
+  html2+='<div class="og-section-label">STATUT</div>';
+  html2+='<div class="og-status-row">';
+  [{v:'todo',l:'À démarrer'},{v:'in_progress',l:'En cours'},{v:'done',l:'Atteint'}].forEach(function(s){
+    html2+='<button class="og-status-btn'+(g.status===s.v?' active':'')+'" onclick="ogSetGoalStatus(\''+g.id+'\',\''+s.v+'\')">'+s.l+'</button>';
+  });
+  html2+='</div></div>';
+  if(g.type==='recurring'){
+    html2+=renderGoalRecurring(g);
+  } else {
+    html2+=renderGoalSubGoals(g);
+  }
+  return html2;
+}
+function renderGoalRecurring(g){
+  var html2='<div class="og-detail-section">';
+  html2+='<div class="og-section-label">CETTE SEMAINE</div>';
+  var bounds=ogWeekBounds();
+  var days=['L','M','M','J','V','S','D'];
+  var today=iso();
+  html2+='<div class="og-rec-grid">';
+  for(var i=0;i<7;i++){
+    var d=new Date(bounds.mon);d.setDate(d.getDate()+i);
+    var ds=iso(d);
+    var hasDone=(g.completions||[]).some(function(c){return c.date===ds;});
+    var isToday=ds===today;
+    html2+='<div class="og-rec-day"><div class="og-rec-lbl">'+days[i]+'</div>';
+    html2+='<div class="og-rec-dot'+(hasDone?' done':'')+(isToday&&!hasDone?' today':'')+'">'+(hasDone?'✓':'')+'</div></div>';
+  }
+  html2+='</div>';
+  var doneToday=(g.completions||[]).some(function(c){return c.date===today;});
+  html2+='<button class="og-mark-btn" onclick="markGoalDone(\''+g.id+'\')">'+
+    (doneToday?'✓ Marquer non fait':'+ Marquer fait aujourd’hui')+
+    '</button>';
+  html2+='</div>';
+  return html2;
+}
+function renderGoalSubGoals(g){
+  var sgs=g.subGoals||[];
+  var html2='<div class="og-detail-section">';
+  html2+='<div class="og-section-label">SOUS-OBJECTIFS</div>';
+  sgs.forEach(function(sg){
+    var expanded=window._goalSubOpen===sg.id;
+    html2+=renderSubGoalRow(sg,g.id,expanded);
+  });
+  html2+='<div class="og-add-sg-row" onclick="ogPromptAddSubGoal(\''+g.id+'\')">';
+  html2+='<div class="og-add-sg-circle">+</div>';
+  html2+='<div class="og-add-sg-text">Ajouter un sous-objectif</div></div>';
+  html2+='</div>';
+  return html2;
+}
+window.renderSubGoalRow=function(sg,gid,expanded){
+  var today=iso();
+  var urgent=sg.deadline&&sg.deadline<=iso(new Date(new Date().getTime()+7*86400000))&&sg.status!=='done';
+  var dlHtml=sg.deadline?'<span class="og-sg-dl'+(urgent?' urgent':'')+'">'+ogFmtDate(sg.deadline)+'</span>':'';
+  var circleClass='og-sg-circle'+(sg.status==='done'?' done':sg.status==='in_progress'?' in_progress':'');
+  var circleInner=sg.status==='done'?'✓':sg.status==='in_progress'?'<div class="og-sg-dot"></div>':'';
+  var html2='<div class="og-sg-row" onclick="toggleSubGoal(\''+gid+'\',\''+sg.id+'\')">';
+  html2+='<div class="'+circleClass+'">'+circleInner+'</div>';
+  html2+='<div class="og-sg-title">'+sg.title+'</div>';
+  html2+=dlHtml;
+  html2+='</div>';
+  if(expanded){
+    html2+='<div class="og-sg-expanded">';
+    // Description
+    var desc=sg.description||'';
+    html2+='<div class="og-sg-desc" onclick="ogEditDesc(\''+gid+'\',\''+sg.id+'\')">'+
+      (desc||'<span style="color:var(--g2);font-style:italic">Ajouter une description…</span>')+
+      '</div>';
+    // Checklist
+    html2+='<div class="og-checklist">';
+    (sg.subtasks||[]).forEach(function(st,idx){
+      html2+='<div class="og-check-row" onclick="toggleSubtask(\''+gid+'\',\''+sg.id+'\','  +idx+')">';
+      html2+='<div class="og-check-box'+(st.done?' done':'')+'">'+(st.done?'✓':'')+'</div>';
+      html2+='<div class="og-check-text'+(st.done?' done':'')+'">'+st.text+'</div></div>';
+    });
+    html2+='<div class="og-check-add" onclick="ogAddSubtask(\''+gid+'\',\''+sg.id+'\')">';
+    html2+='<div class="og-check-add-box"></div>';
+    html2+='<div style="font-size:11px;color:var(--g2)">Ajouter une étape…</div></div>';
+    html2+='</div>';
+    // Linked tasks
+    html2+='<div class="og-linked-block">';
+    html2+='<div class="og-linked-label">TÂCHES LIÉES</div>';
+    (sg.linkedTaskIds||[]).forEach(function(tid){
+      var task=(S.tasks||[]).find(function(t){return t.id===tid;});
+      if(!task)return; // orphan — silently skip
+      var doing=task.status==='todo';
+      html2+='<div class="og-linked-row">';
+      html2+='<div class="og-linked-circle'+(doing?' doing':'')+'"></div>';
+      html2+='<div class="og-linked-text">'+task.text+'</div>';
+      if(task.dueDate)html2+='<div class="og-linked-dl">'+ogFmtDate(task.dueDate)+'</div>';
+      html2+='<div class="og-linked-remove" onclick="ogUnlinkTask(event,\''+gid+'\',\''+sg.id+'\',\''+tid+'\')">✕</div>';
+      html2+='</div>';
+    });
+    html2+='<div class="og-link-btn" onclick="ogOpenLinkSheet(\''+gid+'\',\''+sg.id+'\')">+ Lier une tâche</div>';
+    html2+='</div>';
+    html2+='</div>';
+  }
+  return html2;
+};
+
+window.toggleSubGoal=function(gid,sgid){
+  window._goalSubOpen=(window._goalSubOpen===sgid)?null:sgid;
+  var overlay=document.getElementById('og-overlay');
+  var g=(S.goals||[]).find(function(x){return x.id===gid;});
+  if(overlay&&g)overlay.innerHTML=renderGoalDetail(g);
+  initOgOverlaySwipe(overlay);
+};
+window.toggleSubtask=function(gid,sgid,idx){
+  var g=(S.goals||[]).find(function(x){return x.id===gid;});
+  if(!g)return;
+  var sg=(g.subGoals||[]).find(function(x){return x.id===sgid;});
+  if(!sg||!sg.subtasks||sg.subtasks[idx]===undefined)return;
+  sg.subtasks[idx].done=!sg.subtasks[idx].done;
+  // Auto-transition subGoal: all subtasks done → in_progress (not auto-done)
+  if(sg.subtasks.every(function(st){return st.done;})&&sg.status==='todo')sg.status='in_progress';
+  ogApplyStatusTransitions(g);
+  save();
+  var overlay=document.getElementById('og-overlay');
+  if(overlay)overlay.innerHTML=renderGoalDetail(g);
+  initOgOverlaySwipe(overlay);
+};
+window.markGoalDone=function(id){
+  var g=(S.goals||[]).find(function(x){return x.id===id;});
+  if(!g||g.type!=='recurring')return;
+  var today=iso();
+  var idx=(g.completions||[]).findIndex(function(c){return c.date===today;});
+  if(idx>-1){g.completions.splice(idx,1);}
+  else{if(!g.completions)g.completions=[];g.completions.push({date:today});}
+  save();
+  var overlay=document.getElementById('og-overlay');
+  if(overlay)overlay.innerHTML=renderGoalDetail(g);
+  initOgOverlaySwipe(overlay);
+};
+window.ogSetGoalStatus=function(id,status){
+  var g=(S.goals||[]).find(function(x){return x.id===id;});
+  if(!g)return;
+  g.status=status;save();
+  var overlay=document.getElementById('og-overlay');
+  if(overlay)overlay.innerHTML=renderGoalDetail(g);
+  initOgOverlaySwipe(overlay);
+  render(); // update list behind overlay
+};
+window.ogUnlinkTask=function(e,gid,sgid,tid){
+  e.stopPropagation();
+  var g=(S.goals||[]).find(function(x){return x.id===gid;});
+  if(!g)return;
+  var sg=(g.subGoals||[]).find(function(x){return x.id===sgid;});
+  if(!sg)return;
+  sg.linkedTaskIds=(sg.linkedTaskIds||[]).filter(function(t){return t!==tid;});
+  save();
+  window._goalSubOpen=sgid;
+  var overlay=document.getElementById('og-overlay');
+  if(overlay)overlay.innerHTML=renderGoalDetail(g);
+  initOgOverlaySwipe(overlay);
+};
+window.ogAddSubtask=function(gid,sgid){
+  var text=prompt('Nouvelle étape :');
+  if(!text||!text.trim())return;
+  var g=(S.goals||[]).find(function(x){return x.id===gid;});
+  if(!g)return;
+  var sg=(g.subGoals||[]).find(function(x){return x.id===sgid;});
+  if(!sg)return;
+  if(!sg.subtasks)sg.subtasks=[];
+  sg.subtasks.push({text:text.trim(),done:false});
+  save();
+  window._goalSubOpen=sgid;
+  var overlay=document.getElementById('og-overlay');
+  if(overlay)overlay.innerHTML=renderGoalDetail(g);
+  initOgOverlaySwipe(overlay);
+};
+window.ogEditDesc=function(gid,sgid){
+  var g=(S.goals||[]).find(function(x){return x.id===gid;});
+  if(!g)return;
+  var sg=(g.subGoals||[]).find(function(x){return x.id===sgid;});
+  if(!sg)return;
+  var text=prompt('Description :',sg.description||'');
+  if(text===null)return;
+  sg.description=text.trim();save();
+  window._goalSubOpen=sgid;
+  var overlay=document.getElementById('og-overlay');
+  if(overlay)overlay.innerHTML=renderGoalDetail(g);
+  initOgOverlaySwipe(overlay);
+};
+
+window.saveGoal=function(data){
+  if(!S.goals)S.goals=[];
+  if(data.id){
+    var idx=S.goals.findIndex(function(g){return g.id===data.id;});
+    if(idx>-1){
+      var g=S.goals[idx];
+      g.title=data.title;g.emoji=data.emoji||'🎯';
+      g.type=data.type;g.deadline=data.deadline||null;
+      g.priority=data.priority||'moyenne';
+      if(data.type==='recurring'){
+        g.recurringTarget=parseInt(data.recurringTarget)||1;
+        g.recurringPeriod=data.recurringPeriod||'week';
+        if(!g.completions)g.completions=[];
+      }
+      if(data.type==='project'){if(!g.subGoals)g.subGoals=[];}
+    }
+  } else {
+    var newGoal={
+      id:'g_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      title:data.title,emoji:data.emoji||'🎯',
+      type:data.type||'project',status:'todo',
+      deadline:data.deadline||null,priority:data.priority||'moyenne',
+      createdAt:iso(),order:Date.now()
+    };
+    if(newGoal.type==='project'){newGoal.subGoals=[];}
+    else{newGoal.recurringTarget=parseInt(data.recurringTarget)||1;newGoal.recurringPeriod=data.recurringPeriod||'week';newGoal.completions=[];}
+    S.goals.push(newGoal);
+  }
+  save();ogCloseForm();render();
+};
+window.deleteGoal=function(id){
+  S.goals=(S.goals||[]).filter(function(g){return g.id!==id;});
+  save();closeGoalDetail();render();
+};
+window.addSubGoal=function(gid,data){
+  var g=(S.goals||[]).find(function(x){return x.id===gid;});
+  if(!g)return;
+  if(!g.subGoals)g.subGoals=[];
+  var sg={
+    id:'sg_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    title:data.title,status:'todo',
+    deadline:data.deadline||null,priority:data.priority||'moyenne',
+    description:'',subtasks:[],linkedTaskIds:[]
+  };
+  g.subGoals.push(sg);
+  ogApplyStatusTransitions(g);
+  save();
+  window._goalSubOpen=null;
+  var overlay=document.getElementById('og-overlay');
+  if(overlay)overlay.innerHTML=renderGoalDetail(g);
+  initOgOverlaySwipe(overlay);
+};
+window.saveSubGoal=function(gid,data){
+  var g=(S.goals||[]).find(function(x){return x.id===gid;});
+  if(!g||!g.subGoals)return;
+  if(data.id){
+    var sg=g.subGoals.find(function(x){return x.id===data.id;});
+    if(!sg)return;
+    sg.title=data.title;sg.deadline=data.deadline||null;sg.priority=data.priority||'moyenne';
+  } else {
+    g.subGoals.push({
+      id:'sg_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      title:data.title,status:'todo',
+      deadline:data.deadline||null,priority:data.priority||'moyenne',
+      description:'',subtasks:[],linkedTaskIds:[]
+    });
+  }
+  ogApplyStatusTransitions(g);save();
+  var overlay=document.getElementById('og-overlay');
+  if(overlay)overlay.innerHTML=renderGoalDetail(g);
+  initOgOverlaySwipe(overlay);
+};
+window.deleteSubGoal=function(gid,sgid){
+  var g=(S.goals||[]).find(function(x){return x.id===gid;});
+  if(!g)return;
+  g.subGoals=(g.subGoals||[]).filter(function(sg){return sg.id!==sgid;});
+  ogApplyStatusTransitions(g);save();
+  window._goalSubOpen=null;
+  var overlay=document.getElementById('og-overlay');
+  if(overlay)overlay.innerHTML=renderGoalDetail(g);
+  initOgOverlaySwipe(overlay);
+};
+window.ogPromptAddSubGoal=function(gid){
+  var title=prompt('Nom du sous-objectif :');
+  if(!title||!title.trim())return;
+  var dl=prompt('Deadline (YYYY-MM-DD, optionnel) :');
+  addSubGoal(gid,{title:title.trim(),deadline:(dl&&dl.match(/^d{4}-d{2}-d{2}$/))?dl:null});
+};
+window.openNewGoal=function(goalId){
+  if(document.getElementById('og-form'))return;
+  var g=goalId?(S.goals||[]).find(function(x){return x.id===goalId;}):null;
+  var el=document.createElement('div');
+  el.className='og-form';el.id='og-form';
+  var isEdit=!!g;
+  el.innerHTML='<div class="og-form-inner">'+
+    '<div class="og-form-title">'+(isEdit?'Modifier':'Nouvel objectif')+'</div>'+
+    '<div class="og-field"><label>EMOJI</label>'+
+    '<input class="og-input" id="og-f-emoji" maxlength="2" value="'+(g?g.emoji:'🎯')+'" style="width:60px;text-align:center;font-size:22px"></div>'+
+    '<div class="og-field"><label>TITRE *</label>'+
+    '<input class="og-input" id="og-f-title" placeholder="Ex: Lancer mon app" value="'+(g?g.title:'')+'"></div>'+
+    '<div class="og-field"><label>TYPE</label>'+
+    '<div class="og-type-row">'+
+    '<button class="og-type-btn'+((!g||g.type==='project')?' active':'')+'" id="og-f-type-project" onclick="ogToggleType(\u0027project\u0027)">Projet</button>'+
+    '<button class="og-type-btn'+((g&&g.type==='recurring')?' active':'')+'" id="og-f-type-recurring" onclick="ogToggleType(\u0027recurring\u0027)">Récurrent</button>'+
+    '</div></div>'+
+    '<div class="og-field"><label>DEADLINE</label>'+
+    '<input class="og-input" id="og-f-deadline" type="date" value="'+(g&&g.deadline?g.deadline:'')+'"></div>'+
+    '<div id="og-f-rec-fields" style="display:'+(g&&g.type==='recurring'?'block':'none')+'">'+
+    '<div class="og-field"><label>CIBLE (nb fois)</label>'+
+    '<input class="og-input" id="og-f-target" type="number" min="1" value="'+(g&&g.recurringTarget?g.recurringTarget:3)+'" style="width:80px"></div>'+
+    '<div class="og-field"><label>PÉRIODE</label>'+
+    '<div class="og-type-row">'+
+    '<button class="og-type-btn'+((!g||!g.recurringPeriod||g.recurringPeriod==='week')?' active':'')+'" id="og-f-p-week" onclick="ogTogglePeriod(\u0027week\u0027)">Semaine</button>'+
+    '<button class="og-type-btn'+((g&&g.recurringPeriod==='month')?' active':'')+'" id="og-f-p-month" onclick="ogTogglePeriod(\u0027month\u0027)">Mois</button>'+
+    '</div></div></div>'+
+    '<div class="og-form-btns">'+
+    '<button class="og-form-cancel" onclick="ogCloseForm()">Annuler</button>'+
+    '<button class="og-form-save" onclick="ogSubmitForm('+(isEdit?'\u0027'+goalId+'\u0027':'null')+')">'+
+    (isEdit?'Enregistrer':'Créer')+'</button>'+
+    '</div>'+
+    (isEdit?'<div style="text-align:center;margin-top:12px"><button style="background:none;border:none;color:var(--red);font-size:12px;cursor:pointer" onclick="deleteGoal(\''+goalId+'\')">Supprimer cet objectif</button></div>':'')+
+    '</div>';
+  document.body.appendChild(el);
+  setTimeout(function(){var i=document.getElementById('og-f-title');if(i)i.focus();},100);
+};
+window.ogToggleType=function(t){
+  ['project','recurring'].forEach(function(x){
+    var b=document.getElementById('og-f-type-'+x);
+    if(b)b.className='og-type-btn'+(x===t?' active':'');
+  });
+  var rec=document.getElementById('og-f-rec-fields');
+  if(rec)rec.style.display=t==='recurring'?'block':'none';
+};
+window.ogTogglePeriod=function(p){
+  ['week','month'].forEach(function(x){
+    var b=document.getElementById('og-f-p-'+x);
+    if(b)b.className='og-type-btn'+(x===p?' active':'');
+  });
+};
+window.ogCloseForm=function(){
+  var el=document.getElementById('og-form');if(el)el.remove();
+};
+window.ogSubmitForm=function(goalId){
+  var title=(document.getElementById('og-f-title')||{}).value||'';
+  if(!title.trim()){alert('Le titre est obligatoire');return;}
+  var type=document.getElementById('og-f-type-project')&&document.getElementById('og-f-type-project').className.includes('active')?'project':'recurring';
+  var data={
+    title:title.trim(),
+    emoji:(document.getElementById('og-f-emoji')||{}).value||'🎯',
+    type:type,
+    deadline:(document.getElementById('og-f-deadline')||{}).value||null,
+    priority:'moyenne',
+    recurringTarget:(document.getElementById('og-f-target')||{}).value||3,
+    recurringPeriod:document.getElementById('og-f-p-month')&&document.getElementById('og-f-p-month').className.includes('active')?'month':'week'
+  };
+  if(goalId)data.id=goalId;
+  saveGoal(data);
+};
+window.ogOpenLinkSheet=function(gid,sgid){
+  if(document.getElementById('og-link-sheet'))return;
+  var tasks=(S.tasks||[]).filter(function(t){return t.status==='todo';});
+  var el=document.createElement('div');
+  el.className='og-link-sheet';el.id='og-link-sheet';
+  var rows=tasks.map(function(t){
+    return '<div class="og-link-item" onclick="ogLinkTask(\''+gid+'\',\''+sgid+'\',\''+t.id+'\')" data-id="'+t.id+'">'+
+      '<div class="og-link-item-text">'+t.text+'</div>'+
+      (t.dueDate?'<div class="og-link-item-dl">'+ogFmtDate(t.dueDate)+'</div>':'')+
+      '</div>';
+  }).join('');
+  el.innerHTML='<div class="og-link-sheet-inner">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+    '<div style="font-size:13px;font-weight:700;color:var(--w)">Lier une tâche</div>'+
+    '<button style="background:none;border:none;color:var(--g1);font-size:16px;cursor:pointer" onclick="ogCloseLinkSheet()">✕</button></div>'+
+    (tasks.length>5?'<input class="og-link-search" id="og-link-q" placeholder="Rechercher..." oninput="ogFilterLinks(this.value)">':'')+
+    '<div class="og-link-list" id="og-link-list">'+rows+'</div></div>';
+  document.body.appendChild(el);
+};
+window.ogFilterLinks=function(q){
+  var list=document.getElementById('og-link-list');if(!list)return;
+  var items=list.querySelectorAll('.og-link-item');
+  items.forEach(function(item){
+    var text=item.querySelector('.og-link-item-text');
+    if(!text)return;
+    item.style.display=text.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+};
+window.ogCloseLinkSheet=function(){
+  var el=document.getElementById('og-link-sheet');if(el)el.remove();
+};
+window.ogLinkTask=function(gid,sgid,tid){
+  var g=(S.goals||[]).find(function(x){return x.id===gid;});
+  if(!g)return;
+  var sg=(g.subGoals||[]).find(function(x){return x.id===sgid;});
+  if(!sg)return;
+  if(!sg.linkedTaskIds)sg.linkedTaskIds=[];
+  if(!sg.linkedTaskIds.includes(tid))sg.linkedTaskIds.push(tid);
+  save();ogCloseLinkSheet();
+  window._goalSubOpen=sgid;
+  var overlay=document.getElementById('og-overlay');
+  if(overlay)overlay.innerHTML=renderGoalDetail(g);
+  initOgOverlaySwipe(overlay);
+};
+
+function initOgOverlaySwipe(el){
+  if(!el)return;
+  var startY=0,dragging=false;
+  el.addEventListener('touchstart',function(e){
+    startY=e.touches[0].clientY;dragging=true;
+  },{passive:true});
+  el.addEventListener('touchmove',function(e){
+    if(!dragging)return;
+    if(e.touches[0].clientY-startY>80){dragging=false;closeGoalDetail();}
+  },{passive:true});
+  el.addEventListener('touchend',function(){dragging=false;});
+}
+window.initObjectifs=function(){
+  window._goalView=window._goalView||'list';
+  window._goalOpen=null;window._goalSubOpen=null;
+  // Long-press on goal rows
+  var root=document.getElementById('root');
+  if(!root)return;
+  var timer=null,lpTarget=null;
+  root.addEventListener('touchstart',function(e){
+    var row=e.target.closest('[data-goal-id]');
+    if(!row)return;
+    e.preventDefault();
+    lpTarget=row;
+    timer=setTimeout(function(){
+      timer=null;
+      var id=lpTarget.getAttribute('data-goal-id');
+      ogShowContextMenu(id,lpTarget);
+    },500);
+  },{passive:false});
+  root.addEventListener('touchmove',function(){if(timer){clearTimeout(timer);timer=null;}});
+  root.addEventListener('touchcancel',function(){if(timer){clearTimeout(timer);timer=null;}});
+  root.addEventListener('touchend',function(){if(timer){clearTimeout(timer);timer=null;}});
+};
+window.ogShowContextMenu=function(id,target){
+  var existing=document.getElementById('og-ctx');if(existing)existing.remove();
+  var el=document.createElement('div');
+  el.className='og-ctx';el.id='og-ctx';
+  el.innerHTML='<button class="og-ctx-btn" onclick="ogCtxEdit(\''+id+'\')">Modifier</button>'+
+    '<button class="og-ctx-btn danger" onclick="ogCtxDelete(\''+id+'\')">Supprimer</button>';
+  var rect=target.getBoundingClientRect();
+  el.style.top=(rect.bottom+window.scrollY+4)+'px';
+  el.style.left='14px';el.style.right='14px';
+  document.body.appendChild(el);
+  setTimeout(function(){document.addEventListener('touchstart',ogDismissCtx,{once:true});},100);
+};
+window.ogDismissCtx=function(){
+  var el=document.getElementById('og-ctx');if(el)el.remove();
+};
+window.ogCtxEdit=function(id){
+  ogDismissCtx();openNewGoal(id);
+};
+window.ogCtxDelete=function(id){
+  var el=document.getElementById('og-ctx');
+  if(el)el.innerHTML='<div class="og-ctx-confirm">Supprimer cet objectif ?</div>'+
+    '<button class="og-ctx-btn danger" onclick="deleteGoal(\''+id+'\')">Oui, supprimer</button>'+
+    '<button class="og-ctx-btn" onclick="ogDismissCtx()">Annuler</button>';
+};
+
+
+
+
+
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function tv3FilterTasks(tasks){
