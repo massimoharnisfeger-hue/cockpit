@@ -4268,7 +4268,97 @@ const v8css=`
 .tv3-task-inner{transition:transform .1s;will-change:transform;}
 /* v3-fab-bnav-injected */
 .v8-ktask{user-select:none;}
+/* ── TACHES V4 ─────────────────────────────────────────────────────────── */
+.tv4-page{padding:12px 14px 80px;}
+.tv4-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.tv4-title{font-size:18px;font-weight:800;color:var(--w);}
+.tv4-subtitle{font-size:11px;color:var(--g1);margin-bottom:14px;}
+.tv4-header-btns{display:flex;gap:6px;}
+.tv4-icon-btn{background:var(--bg1);border:1px solid var(--b);border-radius:8px;padding:6px 9px;color:var(--g1);cursor:pointer;font-size:13px;line-height:1;}
+.tv4-zone-now{background:linear-gradient(135deg,rgba(0,212,255,.05),rgba(0,212,255,.02));border:1px solid rgba(0,212,255,.2);border-radius:14px;padding:12px;margin-bottom:10px;}
+.tv4-zone-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.tv4-zone-label{font-size:9px;font-weight:800;letter-spacing:.1em;}
+.tv4-zone-count{font-size:9px;color:var(--g1);}
+.tv4-task-row{display:flex;align-items:center;gap:10px;background:var(--bg1);border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer;position:relative;overflow:hidden;transition:opacity .15s;}
+.tv4-task-row.urgent{background:rgba(255,58,92,.08);border:1px solid rgba(255,58,92,.25);}
+.tv4-task-row.doing{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);}
+.tv4-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--g1);flex-shrink:0;}
+.tv4-check.urgent{border-color:var(--red);}
+.tv4-check.doing{border-color:var(--cyan);}
+.tv4-task-body{flex:1;min-width:0;}
+.tv4-task-text{font-size:13px;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tv4-task-meta{font-size:10px;color:var(--g1);margin-top:2px;}
+.tv4-task-meta.urgent{color:var(--red);}
+.tv4-task-arrow{font-size:14px;color:var(--g1);}
+.tv4-sep{font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--g1);margin:8px 0 5px;text-transform:uppercase;}
+.tv4-sep.urgent{color:var(--red);}
+.tv4-empty{font-size:12px;color:var(--g1);text-align:center;padding:10px 0;font-style:italic;}
+.tv4-swipe-right{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,229,160,.15);display:flex;align-items:center;padding-left:14px;font-size:11px;font-weight:700;color:var(--green);opacity:0;pointer-events:none;}
+.tv4-swipe-left{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,184,0,.15);display:flex;align-items:center;justify-content:flex-end;padding-right:14px;font-size:11px;font-weight:700;color:var(--amber);opacity:0;pointer-events:none;}
+.tv4-zone-week{background:var(--bg1);border:1px solid var(--b);border-radius:14px;padding:12px;margin-bottom:10px;}
+.tv4-week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;}
+.tv4-day-cell{text-align:center;cursor:pointer;}
+.tv4-day-letter{font-size:8px;color:var(--g1);margin-bottom:2px;}
+.tv4-day-num{font-size:10px;color:var(--g1);background:var(--bg);border-radius:6px;padding:4px 2px;position:relative;transition:all .15s;}
+.tv4-day-num.today{background:var(--cyan);color:#000;font-weight:800;}
+.tv4-day-num.selected{background:rgba(0,212,255,.2);border:1px solid rgba(0,212,255,.4);color:var(--w);}
+.tv4-day-num.has-urgent::after{content:'';width:4px;height:4px;background:var(--red);border-radius:50%;position:absolute;bottom:1px;left:50%;transform:translateX(-50%);}
+.tv4-day-num.has-tasks::after{content:'';width:4px;height:4px;background:var(--green);border-radius:50%;position:absolute;bottom:1px;left:50%;transform:translateX(-50%);}
+.tv4-week-tasks{margin-top:2px;}
+.tv4-week-task{background:var(--bg);border-radius:8px;padding:7px 10px;margin-bottom:4px;font-size:11px;color:var(--w);display:flex;align-items:center;gap:8px;cursor:pointer;}
+.tv4-week-task.urgent{border-left:2px solid var(--red);}
+.tv4-week-day-lbl{font-size:9px;color:var(--g1);margin-bottom:5px;font-weight:700;letter-spacing:.06em;}
+.tv4-week-add{font-size:11px;color:var(--g1);text-align:center;padding:6px;border:1px dashed var(--b);border-radius:8px;cursor:pointer;margin-top:4px;}
+.tv4-see-all{font-size:10px;color:var(--cyan);font-weight:700;cursor:pointer;}
+.tv4-zone-plan{background:var(--bg1);border:1px dashed var(--b);border-radius:14px;padding:12px;}
+.tv4-plan-links{font-size:10px;color:var(--g1);cursor:pointer;}
+.tv4-mini-month{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px;}
+.tv4-mini-day{text-align:center;font-size:8px;padding:2px;border-radius:3px;color:var(--g1);cursor:pointer;}
+.tv4-mini-day.today{background:var(--cyan);color:#000;font-weight:800;}
+.tv4-mini-day.has-urgent{color:var(--red);background:rgba(255,58,92,.1);}
+.tv4-mini-day.has-tasks{color:var(--w);background:rgba(0,229,160,.08);}
+.tv4-mini-day.other-month{opacity:.25;}
+.tv4-planner{position:fixed;inset:0;background:var(--bg);z-index:800;display:flex;flex-direction:column;animation:pageIn .2s cubic-bezier(.22,1,.36,1);}
+.tv4-planner-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px;}
+.tv4-planner-title{font-size:17px;font-weight:800;color:var(--w);}
+.tv4-planner-close{font-size:12px;font-weight:700;color:var(--cyan);cursor:pointer;padding:6px 10px;}
+.tv4-planner-tabs{display:flex;gap:3px;background:var(--bg1);border-radius:10px;padding:3px;margin:0 14px 14px;}
+.tv4-planner-tab{flex:1;text-align:center;padding:7px;font-size:11px;color:var(--g1);border-radius:7px;cursor:pointer;font-weight:600;transition:all .15s;}
+.tv4-planner-tab.active{background:var(--bg);color:var(--w);font-weight:700;}
+.tv4-planner-body{flex:1;overflow-y:auto;padding:0 14px 80px;}
+.tv4-cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.tv4-cal-month{font-size:14px;font-weight:800;color:var(--w);}
+.tv4-cal-arrow{background:var(--bg1);border:1px solid var(--b);border-radius:6px;padding:4px 9px;color:var(--g1);cursor:pointer;font-size:12px;}
+.tv4-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:12px;}
+.tv4-cal-hdr{text-align:center;font-size:9px;color:var(--g1);font-weight:700;padding:2px;}
+.tv4-cal-cell{text-align:center;padding:5px 2px;border-radius:6px;font-size:11px;color:var(--g1);cursor:pointer;position:relative;transition:background .1s;}
+.tv4-cal-cell.today{background:var(--cyan);color:#000;font-weight:800;}
+.tv4-cal-cell.selected{background:rgba(0,212,255,.2);border:1px solid rgba(0,212,255,.4);color:var(--w);}
+.tv4-cal-cell.has-urgent::after{content:'';width:4px;height:4px;background:var(--red);border-radius:50%;position:absolute;bottom:1px;left:50%;transform:translateX(-50%);}
+.tv4-cal-cell.has-tasks::after{content:'';width:4px;height:4px;background:var(--green);border-radius:50%;position:absolute;bottom:1px;left:50%;transform:translateX(-50%);}
+.tv4-cal-cell.other-month{opacity:.3;}
+.tv4-cal-tasks{margin-bottom:14px;}
+.tv4-cal-day-hdr{font-size:10px;font-weight:700;color:var(--g1);letter-spacing:.07em;margin-bottom:6px;text-transform:uppercase;}
+.tv4-cal-task{background:var(--bg1);border-radius:8px;padding:8px 10px;margin-bottom:4px;font-size:12px;color:var(--w);cursor:pointer;}
+.tv4-cal-task.urgent{border-left:2px solid var(--red);}
+.tv4-cal-add{font-size:11px;color:var(--g1);text-align:center;padding:7px;border:1px dashed var(--b);border-radius:8px;cursor:pointer;margin-bottom:14px;}
+.tv4-week-plan{overflow-x:auto;}
+.tv4-week-plan-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;min-width:420px;}
+.tv4-week-plan-col{background:var(--bg1);border-radius:10px;padding:8px;}
+.tv4-week-plan-col.today{border:1px solid rgba(0,212,255,.3);}
+.tv4-week-plan-col-hdr{text-align:center;margin-bottom:6px;}
+.tv4-week-plan-day{font-size:9px;color:var(--g1);}
+.tv4-week-plan-num{font-size:13px;font-weight:800;color:var(--w);}
+.tv4-week-plan-col.today .tv4-week-plan-num{color:var(--cyan);}
+.tv4-week-plan-task{background:var(--bg);border-radius:6px;padding:5px 6px;margin-bottom:3px;font-size:10px;color:var(--w);cursor:pointer;}
+.tv4-week-plan-task.urgent{border-left:2px solid var(--red);}
+.tv4-week-plan-add{font-size:10px;color:var(--g1);text-align:center;padding:5px;border:1px dashed var(--b);border-radius:6px;cursor:pointer;margin-top:4px;}
+.tv4-search-overlay{position:fixed;top:0;left:0;right:0;background:var(--bg);z-index:700;padding:14px;border-bottom:1px solid var(--b);animation:pageIn .15s ease;}
+.tv4-search-input{width:100%;background:var(--bg1);border:1px solid var(--b);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--w);outline:none;box-sizing:border-box;}
+.tv4-search-results{margin-top:12px;max-height:60vh;overflow-y:auto;}
+
 `;
+
 const styleEl=document.createElement('style');
 styleEl.id='v8-styles';
 styleEl.textContent=v8css;
@@ -5321,7 +5411,7 @@ window.render=function(){
   if(!root)return;
   switch(_page){
     case 'home':root.innerHTML=renderHomeV8();initChartsHome();break;
-    case 'taches':root.innerHTML=renderTachesV8();initTachesV3();initSwipeGestures();break;
+    case 'taches':root.innerHTML=renderTachesV8();initTachesV4();break;
     case 'argent':root.innerHTML=renderArgentV8();initChartsArgent();break;
     case 'stats':root.innerHTML=renderStatsV8();initChartsStats();break;
     case 'plus':root.innerHTML=renderPlusV8();break;
@@ -5782,6 +5872,32 @@ window.initTachesV3=function(){
   scheduleAllReminders();
   requestNotifPerm();
 };
+window.initTachesV4=function(){
+  window._tv4WeekDay=window._tv4WeekDay||iso();
+  window._tv4PlanView=window._tv4PlanView||'mois';
+  window._tv4PlanOpen=false;
+  scheduleAllReminders();
+  requestNotifPerm();
+  document.querySelectorAll('.tv4-task-row[data-id]').forEach(function(el){
+    var startX=0,startY=0,id=el.dataset.id;
+    el.addEventListener('touchstart',function(e){startX=e.touches[0].clientX;startY=e.touches[0].clientY;},{passive:true});
+    el.addEventListener('touchmove',function(e){
+      var dx=e.touches[0].clientX-startX,dy=e.touches[0].clientY-startY;
+      if(Math.abs(dy)>Math.abs(dx)*0.5||Math.abs(dx)<10) return;
+      var rEl=el.querySelector('.tv4-swipe-right'),lEl=el.querySelector('.tv4-swipe-left');
+      if(dx>0){if(rEl)rEl.style.opacity=Math.min(1,dx/80);if(lEl)lEl.style.opacity=0;}
+      else{if(lEl)lEl.style.opacity=Math.min(1,Math.abs(dx)/80);if(rEl)rEl.style.opacity=0;}
+    },{passive:true});
+    el.addEventListener('touchend',function(e){
+      var dx=e.changedTouches[0].clientX-startX,dy=e.changedTouches[0].clientY-startY;
+      var rEl=el.querySelector('.tv4-swipe-right'),lEl=el.querySelector('.tv4-swipe-left');
+      if(rEl)rEl.style.opacity=0;if(lEl)lEl.style.opacity=0;
+      if(Math.abs(dy)>Math.abs(dx)*0.5||Math.abs(dx)<40) return;
+      if(dx>40) tv4SwipeDone(id);
+      else if(dx<-40) tv4SwipeReport(id);
+    });
+  });
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function tv3FilterTasks(tasks){
@@ -6072,89 +6188,415 @@ function renderStatsView(tasks){
 
 // ── renderTachesV8 ────────────────────────────────────────────────────────────
 window.renderTachesV8=function(){
+  return renderTachesV4();
+};
+
+// ── TV4 STATE ──────────────────────────────────────────────────────────────
+if(!window._tv4WeekDay) window._tv4WeekDay=iso();
+if(!window._tv4PlanView) window._tv4PlanView='mois';
+if(!window._tv4PlanOpen) window._tv4PlanOpen=false;
+if(!window._tv4Search) window._tv4Search='';
+if(!window._tv4CalMonth&&window._tv4CalMonth!==0) window._tv4CalMonth=null;
+if(!window._tv4CalYear) window._tv4CalYear=null;
+if(!window._tv4PlanSelDay) window._tv4PlanSelDay=null;
+if(!window._tv4PlanWeekStart) window._tv4PlanWeekStart=null;
+
+// ── TV4 HELPERS ────────────────────────────────────────────────────────────
+window.tv4SelectDay=function(d){
+  window._tv4WeekDay=d;
+  var zone=document.querySelector('.tv4-zone-week');
+  if(!zone){render();return;}
+  var tasksEl=zone.querySelector('.tv4-week-tasks');
+  if(tasksEl) tasksEl.innerHTML=renderWeekDayTasks(S.tasks||[],d);
+  zone.querySelectorAll('.tv4-day-num').forEach(function(el){
+    el.classList.remove('selected');
+    if(el.dataset.date===d) el.classList.add('selected');
+  });
+  var lbl=zone.querySelector('.tv4-week-day-lbl');
+  if(lbl){var dt=new Date(d);var s=dt.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});lbl.textContent=s.charAt(0).toUpperCase()+s.slice(1);}
+};
+
+window.tv4SwipeDone=function(id){
+  var t=(S.tasks||[]).find(function(x){return x.id===id;});
+  if(!t) return;
+  var prev=t.status;
+  t.status='done';t.completedAt=iso();
+  if(prev!=='done') addXP(t.xpReward||10,'Tâche terminée');
+  save();render();
+  if(window.showUndoToast) showUndoToast('✓ Tâche terminée',function(){t.status=prev;t.completedAt=undefined;save();render();});
+};
+
+window.tv4SwipeReport=function(id){
+  var t=(S.tasks||[]).find(function(x){return x.id===id;});
+  if(!t) return;
+  var d=new Date(t.dueDate||iso());d.setDate(d.getDate()+1);
+  t.dueDate=d.toISOString().slice(0,10);
+  save();render();
+  if(window.toast) toast('Reporter à demain','var(--amber)');
+};
+
+window.openPlanifier=function(view){
+  window._tv4PlanView=view||'mois';
+  window._tv4PlanOpen=true;
+  var existing=document.getElementById('tv4-planner');
+  if(existing) existing.remove();
+  var el=document.createElement('div');
+  el.id='tv4-planner';el.className='tv4-planner';
+  el.innerHTML=renderPlannerContent(S.tasks||[]);
+  document.body.appendChild(el);
+};
+
+window.closePlanifier=function(){
+  window._tv4PlanOpen=false;
+  var el=document.getElementById('tv4-planner');
+  if(el) el.remove();
+};
+
+window.tv4SetPlanView=function(v){
+  window._tv4PlanView=v;
+  var body=document.querySelector('.tv4-planner-body');
+  if(body) body.innerHTML=renderPlanBody(S.tasks||[],v);
+  document.querySelectorAll('.tv4-planner-tab').forEach(function(t){
+    t.classList.toggle('active',t.dataset.view===v);
+  });
+};
+
+window.tv4OpenSearch=function(){
+  var existing=document.getElementById('tv4-search-overlay');
+  if(existing){existing.remove();return;}
+  var el=document.createElement('div');
+  el.id='tv4-search-overlay';el.className='tv4-search-overlay';
+  el.innerHTML='<input class="tv4-search-input" placeholder="Rechercher une tâche…" autofocus oninput="tv4DoSearch(this.value)">'
+    +'<div class="tv4-search-results" id="tv4-sr"></div>'
+    +'<div style="text-align:center;margin-top:8px"><button onclick="var e=document.getElementById(&quot;tv4-search-overlay&quot;);if(e)e.remove();" style="background:none;border:none;color:var(--g1);cursor:pointer;font-size:12px">✕ Fermer</button></div>';
+  document.body.appendChild(el);
+  setTimeout(function(){var inp=el.querySelector('input');if(inp)inp.focus();},50);
+};
+
+window.tv4DoSearch=function(q){
+  var sr=document.getElementById('tv4-sr');if(!sr)return;
+  if(!q){sr.innerHTML='';return;}
+  var tasks=(S.tasks||[]).filter(function(t){return t.text&&t.text.toLowerCase().includes(q.toLowerCase())&&t.status!=='done';});
+  if(!tasks.length){sr.innerHTML='<div class="tv4-empty">Aucune tâche trouvée</div>';return;}
+  sr.innerHTML=tasks.slice(0,20).map(function(t){
+    return '<div class="tv4-week-task'+(t.priority==='urgente'?' urgent':'')+'" onclick="openTaskDetail(\''+t.id+'\')">'+t.text.slice(0,60)+'</div>';
+  }).join('');
+};
+
+window.tv4PlanSelectDay=function(d){
+  window._tv4PlanSelDay=d;
+  var body=document.querySelector('.tv4-planner-body');
+  if(body) body.innerHTML=renderPlanBody(S.tasks||[],'mois');
+};
+
+window.tv4CalPrevMonth=function(){
+  var now=new Date();
+  if(window._tv4CalMonth===null||window._tv4CalMonth===undefined) window._tv4CalMonth=now.getMonth();
+  if(!window._tv4CalYear) window._tv4CalYear=now.getFullYear();
+  window._tv4CalMonth--;
+  if(window._tv4CalMonth<0){window._tv4CalMonth=11;window._tv4CalYear--;}
+  var body=document.querySelector('.tv4-planner-body');
+  if(body) body.innerHTML=renderPlanBody(S.tasks||[],'mois');
+};
+
+window.tv4CalNextMonth=function(){
+  var now=new Date();
+  if(window._tv4CalMonth===null||window._tv4CalMonth===undefined) window._tv4CalMonth=now.getMonth();
+  if(!window._tv4CalYear) window._tv4CalYear=now.getFullYear();
+  window._tv4CalMonth++;
+  if(window._tv4CalMonth>11){window._tv4CalMonth=0;window._tv4CalYear++;}
+  var body=document.querySelector('.tv4-planner-body');
+  if(body) body.innerHTML=renderPlanBody(S.tasks||[],'mois');
+};
+
+window.tv4NavWeek=function(weekStart){
+  window._tv4PlanWeekStart=weekStart;
+  var body=document.querySelector('.tv4-planner-body');
+  if(body) body.innerHTML=renderPlanBody(S.tasks||[],'semaine');
+};
+
+window.openQuickCaptureDate=function(date){
+  if(window.openQuickCapture) openQuickCapture();
+  window._tv4CaptureDate=date;
+  setTimeout(function(){
+    var hint=document.getElementById('v3-capture-hint');
+    if(hint) hint.textContent='Pour le '+new Date(date).toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
+  },150);
+};
+
+// ── TV4 RENDER ─────────────────────────────────────────────────────────────
+function getContextLabel(){
+  var h=new Date().getHours();
+  if(h>=5&&h<12) return '🌅 Focus matinal';
+  if(h>=12&&h<19) return '☀️ Après-midi';
+  return '🌙 Soirée';
+}
+
+function renderTachesV4(){
   checkRecurringTasks();
   autoEscalatePriority();
-
   var tasks=S.tasks||[];
-  var view=window._tacheView||'today';
-  var sel=window._tv3.sel||[];
-
-  // Badge counts for tabs
-  var todayCount=tasks.filter(function(t){return (t.dueDate===iso()||t.priority==='urgente')&&t.status!=='done';}).length;
-  var inboxCount=tasks.filter(function(t){return t.status==='inbox';}).length;
-  var overdueCount=tasks.filter(function(t){return t.dueDate&&t.dueDate<iso()&&t.status!=='done';}).length;
-
-  // Pomodoro bar
-  var pomoHtml='';
-  if(window._pomo.taskId){
+  var pomo='';
+  if(window._pomo&&window._pomo.taskId){
     var pt=(tasks.find(function(t){return t.id===window._pomo.taskId;})||{});
     var pm=Math.floor(window._pomo.secs/60),ps=window._pomo.secs%60;
-    pomoHtml='<div class="tv3-pomo-bar">'
+    pomo='<div class="tv3-pomo-bar">'
       +'<div class="tv3-pomo-time" id="tv3-pomo-time">'+(pm<10?'0':'')+pm+':'+(ps<10?'0':'')+ps+'</div>'
       +'<div class="tv3-pomo-label">🍅 '+(pt.text||'Focus').slice(0,35)+'</div>'
       +'<button class="tv3-pomo-ctrl" id="tv3-pomo-pause" onclick="pausePomodoro()">'+(window._pomo.paused?'▶':'⏸')+'</button>'
       +'<button class="tv3-pomo-ctrl" onclick="stopPomodoro()">■</button>'
       +'</div>';
   }
-
-  // Tabs
-  var tabDefs=[
-    {id:'today',label:'Aujourd\'hui'+(todayCount?'<span class="tv3-badge-cnt">'+todayCount+'</span>':'')},
-    {id:'inbox',label:'Inbox'+(inboxCount?'<span class="tv3-badge-cnt">'+inboxCount+'</span>':'')},
-    {id:'week',label:'Semaine'},
-    {id:'all',label:'Tout'},
-    {id:'kanban',label:'Kanban'},
-    {id:'stats',label:'Stats'}
-  ];
-  var tabsHtml='<div class="tv3-tabs">'+tabDefs.map(function(tab){
-    return '<button class="tv3-tab'+(view===tab.id?' active':'')+'" onclick="setTacheView(\''+tab.id+'\')">'+tab.label+'</button>';
-  }).join('')+'</div>';
-
-  // Bulk bar
-  var bulkHtml='';
-  if(sel.length){
-    bulkHtml='<div class="tv3-bulk-bar">'
-      +'<span class="tv3-bulk-lbl">'+sel.length+' sélectionnée(s)</span>'
-      +'<button class="tv3-bulk-btn" onclick="bulkDone()">✓ Fait</button>'
-      +'<button class="tv3-bulk-btn" onclick="bulkSnooze(1)">😴 Demain</button>'
-      +'<button class="tv3-bulk-btn" style="color:var(--red)" onclick="bulkDelete()">🗑 Supprimer</button>'
-      +'<button class="tv3-bulk-btn" onclick="window._tv3.sel=[];render()">✕</button>'
-      +'</div>';
-  }
-
-  // Overdue banner
-  var overdueBanner=overdueCount&&view==='today'?'':'';
-
-  // Quick add bar
-  var addBar='<div style="display:flex;gap:6px;margin-bottom:12px">'
-    +'<input id="tv3-quick-input" type="text" class="hqbar-input" placeholder="'
-    +(view==='inbox'?'Capture rapide sans organisation...':'Nouvelle tâche... (ex: Appeler médecin demain #sante urgent)')
-    +'" onkeydown="if(event.key===\'Enter\')quickAddTask()"/>'
-    +'<button onclick="quickAddTask()" style="background:var(--cyan);color:#000;border:none;border-radius:10px;padding:8px 14px;font-weight:800;font-size:16px;cursor:pointer;flex-shrink:0">+</button>'
-    +'<button id="tv3-voice-btn" class="tv3-voice-btn'+(window._voiceActive?' listening':'')+'" onclick="startVoiceInput()" title="Ajout vocal">🎤</button>'
-    +'</div>';
-
-  // View content
-  var content='';
-  if(view==='today')   content=renderTodayView(tasks);
-  else if(view==='inbox')  content=renderInboxView(tasks);
-  else if(view==='week')   content=renderWeekView(tasks);
-  else if(view==='all')    content=renderAllView(tasks);
-  else if(view==='kanban') content=renderKanbanView(tasks);
-  else if(view==='stats')  content=renderStatsView(tasks);
-
-  return '<div class="page">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
-    +'<div class="page-title" style="margin:0">✅ Tâches</div>'
-    +'<div style="font-size:12px;color:var(--g1)">'+tasks.filter(function(t){return t.status!=='done';}).length+' actives</div>'
+  var now=new Date();
+  var dateStr=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  return '<div class="tv4-page">'
+    +'<div class="tv4-header">'
+    +'<div><div class="tv4-title">Tâches</div></div>'
+    +'<div class="tv4-header-btns">'
+    +'<button class="tv4-icon-btn" onclick="tv4OpenSearch()">🔍</button>'
+    +'<button class="tv4-icon-btn" onclick="openQuickCapture()">+</button>'
     +'</div>'
-    +addBar
-    +pomoHtml
-    +bulkHtml
-    +tabsHtml
-    +content
+    +'</div>'
+    +'<div class="tv4-subtitle">'+getContextLabel()+' · '+dateStr.charAt(0).toUpperCase()+dateStr.slice(1)+'</div>'
+    +pomo
+    +renderZoneMaintenant(tasks)
+    +renderZoneSemaine(tasks)
+    +renderZonePlanifier(tasks)
     +'</div>';
-};
+}
+
+function tv4TaskRow(t){
+  var isUrgent=t.priority==='urgente';
+  var isDoing=t.status==='doing';
+  var cls='tv4-task-row'+(isUrgent?' urgent':isDoing?' doing':'');
+  var meta='';
+  var today=iso();
+  if(isUrgent) meta='URGENT'+(t.dueDate?' · '+(t.dueDate===today?'Aujourd’hui':t.dueDate):'');
+  else if(t.dueDate) meta=t.dueDate===today?'Aujourd’hui':t.dueDate;
+  if(t.category) meta+=(meta?' · ':'')+t.category;
+  return '<div class="'+cls+'" data-id="'+t.id+'" onclick="openTaskDetail(\''+t.id+'\')">'
+    +'<div class="tv4-swipe-right">✓ Fait</div>'
+    +'<div class="tv4-swipe-left">😴 Reporter</div>'
+    +'<div class="tv4-check'+(isUrgent?' urgent':isDoing?' doing':'')+'"></div>'
+    +'<div class="tv4-task-body">'
+    +'<div class="tv4-task-text">'+t.text.slice(0,60)+(t.text.length>60?'…':'')+'</div>'
+    +(meta?'<div class="tv4-task-meta'+(isUrgent?' urgent':'')+'">'+meta+'</div>':'')
+    +'</div>'
+    +'<div class="tv4-task-arrow">›</div>'
+    +'</div>';
+}
+
+function renderZoneMaintenant(tasks){
+  var today=iso();
+  var h=new Date().getHours();
+  var urgent=tasks.filter(function(t){return t.priority==='urgente'&&t.status!=='done';});
+  var overdue=tasks.filter(function(t){return t.dueDate&&t.dueDate<today&&t.status!=='done'&&t.priority!=='urgente';});
+  var dueToday=tasks.filter(function(t){return t.dueDate===today&&t.status!=='done'&&t.priority!=='urgente';});
+  var doing=tasks.filter(function(t){return t.status==='doing'&&t.priority!=='urgente'&&t.dueDate!==today&&!(t.dueDate&&t.dueDate<today);});
+  var noDate=tasks.filter(function(t){return !t.dueDate&&t.status!=='done'&&t.priority!=='urgente'&&t.status!=='doing';});
+  var sections=[];
+  if(h>=5&&h<12){
+    if(urgent.length) sections.push({label:'URGENT',cls:'urgent',items:urgent});
+    if(overdue.length) sections.push({label:'EN RETARD',cls:'urgent',items:overdue});
+    if(dueToday.length) sections.push({label:'AUJOURD’HUI',cls:'',items:dueToday});
+    if(doing.length) sections.push({label:'EN COURS',cls:'',items:doing});
+  } else if(h>=12&&h<19){
+    if(doing.length) sections.push({label:'EN COURS',cls:'',items:doing});
+    if(urgent.length) sections.push({label:'URGENT',cls:'urgent',items:urgent});
+    if(overdue.length) sections.push({label:'EN RETARD',cls:'urgent',items:overdue});
+    if(dueToday.length) sections.push({label:'AUJOURD’HUI',cls:'',items:dueToday});
+  } else {
+    var unfinished=tasks.filter(function(t){return (t.dueDate===today||t.status==='doing')&&t.status!=='done';});
+    if(unfinished.length) sections.push({label:'NON FINIES',cls:'',items:unfinished});
+    else if(urgent.length) sections.push({label:'URGENT',cls:'urgent',items:urgent});
+    if(overdue.length) sections.push({label:'EN RETARD',cls:'urgent',items:overdue});
+  }
+  var total=sections.reduce(function(s,sec){return s+sec.items.length;},0)+noDate.length;
+  var html='<div class="tv4-zone-now">'
+    +'<div class="tv4-zone-hdr">'
+    +'<span class="tv4-zone-label" style="color:var(--cyan)">⚡ MAINTENANT</span>'
+    +'<span class="tv4-zone-count">'+total+' tâche'+(total>1?'s':'')+'</span>'
+    +'</div>';
+  if(!sections.length&&!noDate.length){
+    html+='<div class="tv4-empty">🎉 Rien d&#39;urgent — belle journée !</div>';
+  } else {
+    sections.forEach(function(sec){
+      html+='<div class="tv4-sep'+(sec.cls?' '+sec.cls:'')+'">'+sec.label+' · '+sec.items.length+'</div>';
+      html+=sec.items.map(function(t){return tv4TaskRow(t);}).join('');
+    });
+    if(noDate.length){
+      html+='<div class="tv4-sep" style="margin-top:10px">À TRIER</div>';
+      html+=noDate.slice(0,3).map(function(t){return tv4TaskRow(t);}).join('');
+      if(noDate.length>3) html+='<div class="tv4-empty" style="cursor:pointer" onclick="openPlanifier(\'mois\')">+ '+(noDate.length-3)+' autres non planifiées</div>';
+    }
+  }
+  html+='</div>';
+  return html;
+}
+
+function renderZoneSemaine(tasks){
+  var today=iso();
+  var selDay=window._tv4WeekDay||today;
+  var d=new Date(today);
+  var dow=d.getDay();var diff=dow===0?-6:1-dow;
+  d.setDate(d.getDate()+diff);
+  var days=[];
+  for(var i=0;i<7;i++){var dd=new Date(d);dd.setDate(d.getDate()+i);days.push(dd.toISOString().slice(0,10));}
+  var dl=['L','M','M','J','V','S','D'];
+  var strip=days.map(function(day,i){
+    var hasUrgent=tasks.some(function(t){return t.dueDate===day&&t.priority==='urgente'&&t.status!=='done';});
+    var hasTasks=!hasUrgent&&tasks.some(function(t){return t.dueDate===day&&t.status!=='done';});
+    var cls='tv4-day-num'+(day===today?' today':'')+(day===selDay&&day!==today?' selected':'')+(hasUrgent?' has-urgent':hasTasks?' has-tasks':'');
+    return '<div class="tv4-day-cell" onclick="tv4SelectDay(\''+day+'\')">'
+      +'<div class="tv4-day-letter">'+dl[i]+'</div>'
+      +'<div class="'+cls+'" data-date="'+day+'">'+parseInt(day.slice(8))+'</div>'
+      +'</div>';
+  }).join('');
+  var selDate=new Date(selDay);
+  var selLbl=selDate.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  return '<div class="tv4-zone-week">'
+    +'<div class="tv4-zone-hdr">'
+    +'<span class="tv4-zone-label" style="color:var(--g1)">📅 CETTE SEMAINE</span>'
+    +'<span class="tv4-see-all" onclick="openPlanifier(\'semaine\')">Voir tout →</span>'
+    +'</div>'
+    +'<div class="tv4-week-strip">'+strip+'</div>'
+    +'<div class="tv4-week-day-lbl">'+selLbl.charAt(0).toUpperCase()+selLbl.slice(1)+'</div>'
+    +'<div class="tv4-week-tasks">'+renderWeekDayTasks(tasks,selDay)+'</div>'
+    +'</div>';
+}
+
+function renderWeekDayTasks(tasks,day){
+  var dayTasks=tasks.filter(function(t){return t.dueDate===day&&t.status!=='done';});
+  var html='';
+  if(!dayTasks.length) html='<div class="tv4-empty">Rien ce jour — tap + pour planifier</div>';
+  else html=dayTasks.map(function(t){
+    return '<div class="tv4-week-task'+(t.priority==='urgente'?' urgent':'')+'" onclick="openTaskDetail(\''+t.id+'\')">'+t.text.slice(0,50)+'</div>';
+  }).join('');
+  html+='<div class="tv4-week-add" onclick="openQuickCaptureDate(\''+day+'\')">+ Ajouter ce jour</div>';
+  return html;
+}
+
+function renderZonePlanifier(tasks){
+  var today=iso();
+  var now=new Date();
+  var year=now.getFullYear(),month=now.getMonth();
+  var todayD=new Date(today);
+  var weekStart=new Date(todayD);
+  var wd=weekStart.getDay();weekStart.setDate(weekStart.getDate()-(wd===0?6:wd-1));
+  var maxDate=new Date(weekStart);maxDate.setDate(weekStart.getDate()+27);
+  var cur=new Date(weekStart);
+  var cells=[];
+  while(cur<=maxDate){cells.push(new Date(cur));cur.setDate(cur.getDate()+1);}
+  var hdrs=['L','M','M','J','V','S','D'].map(function(h){return '<div class="tv4-mini-day" style="font-weight:700;color:var(--g1)">'+h+'</div>';}).join('');
+  var daysHtml=cells.map(function(d){
+    var iso2=d.toISOString().slice(0,10);
+    var isToday=iso2===today;
+    var inMonth=d.getMonth()===month;
+    var hasUrgent=tasks.some(function(t){return t.dueDate===iso2&&t.priority==='urgente'&&t.status!=='done';});
+    var hasTasks=!hasUrgent&&tasks.some(function(t){return t.dueDate===iso2&&t.status!=='done';});
+    var cls='tv4-mini-day'+(isToday?' today':hasUrgent?' has-urgent':hasTasks?' has-tasks':!inMonth?' other-month':'');
+    return '<div class="'+cls+'" onclick="openPlanifier(\'mois\')">'+d.getDate()+'</div>';
+  }).join('');
+  return '<div class="tv4-zone-plan">'
+    +'<div class="tv4-zone-hdr">'
+    +'<span class="tv4-zone-label" style="color:var(--g1);opacity:.7">🗃 PLANIFIER</span>'
+    +'<span class="tv4-plan-links" onclick="openPlanifier(\'mois\')">Mois · Kanban · Stats →</span>'
+    +'</div>'
+    +'<div class="tv4-mini-month">'+hdrs+daysHtml+'</div>'
+    +'</div>';
+}
+
+function renderPlannerContent(tasks){
+  var views=['mois','semaine','kanban','stats'];
+  var labels={mois:'Mois',semaine:'Semaine',kanban:'Kanban',stats:'Stats'};
+  var cur=window._tv4PlanView||'mois';
+  var tabsHtml='<div class="tv4-planner-tabs">'+views.map(function(v){
+    return '<div class="tv4-planner-tab'+(cur===v?' active':'')+'" data-view="'+v+'" onclick="tv4SetPlanView(\''+v+'\')">'+labels[v]+'</div>';
+  }).join('')+'</div>';
+  return '<div class="tv4-planner-hdr">'
+    +'<div class="tv4-planner-title">📅 Planifier</div>'
+    +'<div class="tv4-planner-close" onclick="closePlanifier()">✕ Fermer</div>'
+    +'</div>'
+    +tabsHtml
+    +'<div class="tv4-planner-body">'+renderPlanBody(tasks,cur)+'</div>';
+}
+
+function renderPlanBody(tasks,view){
+  if(view==='mois') return renderPlanMois(tasks);
+  if(view==='semaine') return renderPlanSemaine(tasks);
+  if(view==='kanban') return renderKanbanView(tasks);
+  if(view==='stats') return renderStatsView(tasks);
+  return '';
+}
+
+function renderPlanMois(tasks){
+  var now=new Date();
+  var calMonth=(window._tv4CalMonth!==null&&window._tv4CalMonth!==undefined)?window._tv4CalMonth:now.getMonth();
+  var calYear=window._tv4CalYear||now.getFullYear();
+  var monthNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var today=iso();
+  var selDay=window._tv4PlanSelDay||today;
+  var firstDay=new Date(calYear,calMonth,1);
+  var lastDay=new Date(calYear,calMonth+1,0);
+  var start=new Date(firstDay);
+  var sd=start.getDay();start.setDate(start.getDate()-(sd===0?6:sd-1));
+  var hdrs=['L','M','M','J','V','S','D'].map(function(h){return '<div class="tv4-cal-hdr">'+h+'</div>';}).join('');
+  var cells='';
+  var cur=new Date(start);
+  var safety=0;
+  while(safety<42){
+    if(cur>lastDay&&cur.getDay()===1) break;
+    var iso2=cur.toISOString().slice(0,10);
+    var inMonth=cur.getMonth()===calMonth;
+    var isToday=iso2===today;
+    var isSel=iso2===selDay;
+    var hasUrgent=tasks.some(function(t){return t.dueDate===iso2&&t.priority==='urgente'&&t.status!=='done';});
+    var hasTasks=!hasUrgent&&tasks.some(function(t){return t.dueDate===iso2&&t.status!=='done';});
+    var cls='tv4-cal-cell'+(isToday?' today':isSel&&!isToday?' selected':hasUrgent?' has-urgent':hasTasks?' has-tasks':!inMonth?' other-month':'');
+    cells+='<div class="'+cls+'" onclick="tv4PlanSelectDay(\''+iso2+'\')">'+cur.getDate()+'</div>';
+    cur.setDate(cur.getDate()+1);safety++;
+  }
+  var dayTasks=tasks.filter(function(t){return t.dueDate===selDay&&t.status!=='done';});
+  var selDate=new Date(selDay);
+  var selLbl=selDate.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  var dayHtml=dayTasks.length?dayTasks.map(function(t){
+    return '<div class="tv4-cal-task'+(t.priority==='urgente'?' urgent':'')+'" onclick="openTaskDetail(\''+t.id+'\')">'+t.text.slice(0,60)+'</div>';
+  }).join(''):'<div class="tv4-cal-task" style="color:var(--g1);font-style:italic">Aucune tâche</div>';
+  return '<div class="tv4-cal-nav">'
+    +'<button class="tv4-cal-arrow" onclick="tv4CalPrevMonth()">‹</button>'
+    +'<div class="tv4-cal-month">'+monthNames[calMonth]+' '+calYear+'</div>'
+    +'<button class="tv4-cal-arrow" onclick="tv4CalNextMonth()">›</button>'
+    +'</div>'
+    +'<div class="tv4-cal-grid">'+hdrs+cells+'</div>'
+    +'<div class="tv4-cal-day-hdr">'+selLbl.charAt(0).toUpperCase()+selLbl.slice(1)+'</div>'
+    +dayHtml
+    +'<div class="tv4-cal-add" onclick="openQuickCaptureDate(\''+selDay+'\')">+ Ajouter ce jour</div>';
+}
+
+function renderPlanSemaine(tasks){
+  var today=iso();
+  var ws=window._tv4PlanWeekStart;
+  if(!ws){var d=new Date(today);var dow=d.getDay();d.setDate(d.getDate()-(dow===0?6:dow-1));ws=d.toISOString().slice(0,10);}
+  var days=[];var d=new Date(ws);
+  for(var i=0;i<7;i++){var dd=new Date(d);dd.setDate(d.getDate()+i);days.push(dd.toISOString().slice(0,10));}
+  var dn=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  var cols=days.map(function(day,i){
+    var isToday=day===today;
+    var dt=tasks.filter(function(t){return t.dueDate===day&&t.status!=='done';});
+    return '<div class="tv4-week-plan-col'+(isToday?' today':'')+'">'
+      +'<div class="tv4-week-plan-col-hdr"><div class="tv4-week-plan-day">'+dn[i]+'</div><div class="tv4-week-plan-num">'+parseInt(day.slice(8))+'</div></div>'
+      +dt.map(function(t){return '<div class="tv4-week-plan-task'+(t.priority==='urgente'?' urgent':'')+'" onclick="openTaskDetail(\''+t.id+'\')">'+t.text.slice(0,30)+'</div>';}).join('')
+      +'<div class="tv4-week-plan-add" onclick="openQuickCaptureDate(\''+day+'\')">+</div>'
+      +'</div>';
+  }).join('');
+  var prev=new Date(ws);prev.setDate(prev.getDate()-7);
+  var next=new Date(ws);next.setDate(next.getDate()+7);
+  return '<div style="display:flex;gap:8px;margin-bottom:12px">'
+    +'<button class="tv4-cal-arrow" onclick="tv4NavWeek(\''+prev.toISOString().slice(0,10)+'\')">‹ Préc.</button>'
+    +'<button class="tv4-cal-arrow" onclick="tv4NavWeek(\''+next.toISOString().slice(0,10)+'\')">Suiv. ›</button>'
+    +'</div>'
+    +'<div class="tv4-week-plan"><div class="tv4-week-plan-grid">'+cols+'</div></div>';
+}
 
 // ── PRODUCT V3 — Core features ──────────────────────────────────────────────
 
