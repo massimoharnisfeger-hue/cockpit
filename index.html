@@ -4194,7 +4194,7 @@ window.renderHomeV8=function(){
     return `<div class="v8-task-item">
       <div class="v8-task-cb" onclick="toggleTaskV8('${t.id}')"></div>
       <span class="v8-task-text">${t.text||''}</span>
-      <span class="v8-priority-badge v8-priority-${pri==='urgent'?'urgent':pri==='moyen'?'moyen':'bas'}">${pri==='urgent'?'URGENT':pri==='moyen'?'MOYEN':'BAS'}</span>
+      <span class="v8-priority-badge v8-priority-${pri==='urgente'||pri==='urgent'?'urgent':pri==='haute'||pri==='moyen'?'moyen':'bas'}">${pri==='urgente'||pri==='urgent'?'URGENT':pri==='haute'?'HAUTE':pri==='moyenne'||pri==='moyen'?'MOYEN':'BAS'}</span>
       <span class="v8-xp-badge">+5XP</span>
     </div>`;
   }).join(''):`<div style="color:var(--g1);font-size:13px;padding:12px 0;text-align:center">Aucune tâche — ajoute-en une ci-dessous</div>`;
