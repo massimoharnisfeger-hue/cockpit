@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Cockpit — Massimo</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script id="chartjs-script" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -2338,6 +2338,35 @@ function extractINGDesc(label){
   // Fallback: libellé nettoyé
   return label.replace(/Num[eé]ro de carte.+/i,'').replace(/R[eé]f[eé]rence ING.+/i,'').replace(/\s{2,}/g,' ').trim().slice(0,70);
 }
+/* ── REVOLUT PARSER ─────────────────────────────────────────────────────── */
+const REVOLUT_CATS = {
+  'netflix': 'Abonnements', 'spotify': 'Abonnements', 'amazon': 'Shopping',
+  'uber': 'Transport', 'bolt': 'Transport', 'deliveroo': 'Alimentation',
+  'uber eats': 'Alimentation', 'mcdo': 'Alimentation', 'starbucks': 'Alimentation',
+  'myprotein': 'Sport', 'décathlon': 'Sport',
+  'intermarché': 'Alimentation', 'carrefour': 'Alimentation', 'lidl': 'Alimentation',
+};
+function extractRevolutDesc(raw) {
+  if (!raw) return null;
+  // Revolut pattern: "Revolut**XXXX* MERCHANT - CITY - COUNTRY"
+  const revMatch = raw.match(/Revolut\*+\w+\*?\s+([^-\*]+)/i);
+  if (revMatch) return revMatch[1].trim();
+  // Another Revolut pattern: "R[0-9]+ ... - Description"
+  if (/^R\d+/.test(raw)) {
+    const parts = raw.split(' - ');
+    return parts[parts.length > 1 ? 1 : 0].trim();
+  }
+  return null;
+}
+function smartCatFromDesc(desc) {
+  if (!desc) return null;
+  const lower = desc.toLowerCase();
+  for (const [key, cat] of Object.entries(REVOLUT_CATS)) {
+    if (lower.includes(key)) return cat;
+  }
+  return null;
+}
+
 function parseINGLine(parts){
   if(parts.length<9)return null;
   const dateRaw=(parts[4]||'').trim();
@@ -2375,14 +2404,18 @@ function importCSV(input){
         /* Format générique: date;desc;montant */
         if(parts.length<3)return;
         const dateRaw=parts[0].trim();
-        const desc=(parts[1]||'').trim();
+        let rawDesc=(parts[1]||'').trim();
         const amtRaw=parseFloat((parts[2]||'').replace(',','.').trim());
-        if(!desc||isNaN(amtRaw))return;
+        if(!rawDesc||isNaN(amtRaw))return;
         let dateISO='';
         if(/\d{2}\/\d{2}\/\d{4}/.test(dateRaw)){const[d,m,y]=dateRaw.split('/');dateISO=`${y}-${m}-${d}`;}
         else if(/\d{4}-\d{2}-\d{2}/.test(dateRaw)){dateISO=dateRaw;}
         if(!dateISO)return;
-        const cat=autoCat(desc);
+        // Try Revolut extraction first
+        const revDesc=extractRevolutDesc(rawDesc);
+        const desc=revDesc||rawDesc;
+        const revCat=revDesc?smartCatFromDesc(desc):null;
+        const cat=revCat||autoCat(desc+' '+rawDesc);
         const type=amtRaw>=0?'Revenu':cat==='Épargne'?'Épargne':'Dépense';
         tx={date:dateISO,desc,amt:amtRaw,type,cat,tags:[]};
       }
@@ -3994,6 +4027,8 @@ const v8css=`
 .v8-task-input-row{display:flex;gap:8px;margin-bottom:16px;}
 .v8-task-input-row input{flex:1;background:var(--bg1);border:1px solid var(--b);border-radius:10px;padding:10px 14px;color:var(--w);font-size:13px;}
 .v8-task-input-row input:focus{outline:none;border-color:var(--cyan);}
+.v8-kcol.drag-over{border-color:var(--cyan);background:rgba(0,212,255,.05);}
+.v8-ktask{user-select:none;}
 `;
 const styleEl=document.createElement('style');
 styleEl.id='v8-styles';
@@ -4170,8 +4205,12 @@ window.renderHomeV8=function(){
   const xp=S.config.xp||0;
   const lvl=getLevelInfo(xp);
 
-  // A2 — Mode matin/soir automatique
+  // M8 — Contextual greeting
   const hour=new Date().getHours();
+  const greeting=hour<12?'Bonjour':hour<18?'Bon après-midi':'Bonsoir';
+  const name=(S.config.profile&&S.config.profile.name)?`, ${S.config.profile.name}`:'';
+
+  // A2 — Mode matin/soir automatique
   const isMorning=hour<14;
   const isEvening=hour>=19;
   const timeLabel=isMorning?'🌅 Matin':isEvening?'🌙 Soir':'☀️ Journée';
@@ -4201,7 +4240,7 @@ window.renderHomeV8=function(){
       <div class="v8-stat-lbl">Streak</div>
     </div>
     <div class="v8-stat-card v8-anim-1" onclick="promptBalance()" style="cursor:pointer">
-      <div class="v8-stat-val" style="color:${bal>0?'var(--cyan)':'var(--g1)'};font-size:${bal>0&&bal>=1000?'18px':'22px'}">${bal>0?bal.toFixed(0)+'€':'—'}</div>
+      <div class="v8-stat-val" style="color:${bal>0?'var(--cyan)':'var(--g1)'};font-size:${bal>0&&bal>=1000?'18px':'22px'}">${(()=>{const balDisplay=bal<=0?'—':bal<100?bal.toFixed(2)+'€':bal<10000?Math.round(bal)+'€':(bal/1000).toFixed(1)+'k€';return balDisplay;})()}</div>
       <div class="v8-stat-lbl">Solde 💳</div>
     </div>
     <div class="v8-stat-card v8-anim-2">
@@ -4274,9 +4313,14 @@ window.renderHomeV8=function(){
   const doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(1000*60*60*24));
   const quote=QUOTES[doy%QUOTES.length];
 
+  // M10 — CTA contextuel
+  const urgentTasks=(S.tasks||[]).filter(t=>t.priority==='urgente'&&t.status!=='done');
+  const habitsDone=Object.keys(day).filter(k=>day[k]).length;
+  const habitsTodo=habs.length-habitsDone;
+
   return `<div class="page">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div class="page-title" style="margin:0">🏠 Aujourd'hui</div>
+      <div class="page-title" style="margin:0">${greeting}${name} 👋</div>
       <div style="font-size:12px;color:var(--g1)">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'short'})} · ${timeLabel}</div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:16px">
@@ -4285,6 +4329,13 @@ window.renderHomeV8=function(){
         onkeydown="if(event.key==='Enter')homeQuickAdd()"/>
       <button onclick="homeQuickAdd()" style="background:var(--cyan);color:#000;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer">+</button>
     </div>
+    ${urgentTasks.length?`<div onclick="nav('taches')" style="background:rgba(255,58,92,.12);border:1px solid rgba(255,58,92,.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;color:var(--red)">🔴 ${urgentTasks.length} tâche${urgentTasks.length>1?'s':''} urgente${urgentTasks.length>1?'s':''}</span>
+      <span style="color:var(--red)">→</span>
+    </div>`:habitsTodo>0?`<div onclick="openRattrapage()" style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;color:var(--cyan)">${habitsTodo} habitude${habitsTodo>1?'s':''} à cocher aujourd'hui</span>
+      <span style="color:var(--cyan)">→</span>
+    </div>`:''}
     ${scoreRing}
     ${statCards}
     <div class="v8-sec">Habitudes du jour</div>
@@ -4293,7 +4344,7 @@ window.renderHomeV8=function(){
     ${isMorning?morningPriorities:''}
     <div class="v8-sec">7 derniers jours</div>
     <div class="v8-card v8-anim-1" style="padding:14px 12px;margin-bottom:16px">
-      <div style="position:relative;height:140px"><canvas id="chart-home-week" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas></div>
+      <div style="position:relative;height:100px"><canvas id="chart-home-week" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas></div>
     </div>
     <div class="v8-sec">Tâches en cours</div>
     <div class="v8-card v8-anim-2" style="padding:12px 16px">
@@ -4307,21 +4358,92 @@ window.renderHomeV8=function(){
   </div>
   <script>window._homeWeekScores=${JSON.stringify(weekScores)};window._homeWeekLabels=${JSON.stringify(weekLabels)};<\/script>`;
 };
+// ── waitForChart helper ────────────────────────────────────────────────────────
+function waitForChart(fn, attempt) {
+  if (typeof Chart !== 'undefined') { fn(); return; }
+  if ((attempt||0) > 20) return; // give up after 2s
+  setTimeout(function(){ waitForChart(fn, (attempt||0)+1); }, 100);
+}
+
 // ── initChartsHome ────────────────────────────────────────────────────────────
 window.initChartsHome=function(){
-  setTimeout(function(){
+  waitForChart(function(){
     const canvas=document.getElementById('chart-home-week');
-    if(!canvas||typeof Chart==='undefined')return;
+    if(!canvas)return;
     if(canvas._chart){canvas._chart.destroy();}
     const scores=window._homeWeekScores||[];
     const labels=window._homeWeekLabels||[];
     const barColors=scores.map(s=>s>=80?'rgba(0,229,160,.8)':s>=50?'rgba(255,184,0,.8)':s>0?'rgba(255,58,92,.7)':'rgba(30,45,61,.8)');
-    canvas._chart=new Chart(canvas,{
-      type:'bar',
-      data:{labels,datasets:[{data:scores,backgroundColor:barColors,borderRadius:6,borderSkipped:false}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},scales:{x:{grid:{display:false},ticks:{color:'#8B9BAD',font:{size:11}}},y:{display:false,max:110}},animation:{duration:600}}
-    });
-  },0);
+    try {
+      canvas._chart=new Chart(canvas,{
+        type:'bar',
+        data:{labels,datasets:[{data:scores,backgroundColor:barColors,borderRadius:6,borderSkipped:false}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},scales:{x:{grid:{display:false},ticks:{color:'#8B9BAD',font:{size:11}}},y:{display:false,max:110}},animation:{duration:600}}
+      });
+    } catch(e) {
+      canvas.parentElement.innerHTML = `<div style="display:flex;align-items:flex-end;gap:4px;height:140px;padding:8px 0">
+        ${scores.map((s,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:100%;background:${s>=80?'var(--green)':s>=50?'var(--amber)':'var(--red)'};border-radius:4px 4px 0 0;height:${Math.max(4,s*1.2)}px;transition:height .5s"></div>
+          <div style="font-size:9px;color:var(--g1)">${labels[i]||''}</div>
+        </div>`).join('')}
+      </div>`;
+    }
+  });
+};
+
+// ── Deduplication ─────────────────────────────────────────────────────────────
+window.findDuplicates=function(){
+  const txMap={};
+  const dups=[];
+  (S.finance||[]).forEach(t=>{
+    const key=`${t.date}|${t.amt}|${(t.desc||'').slice(0,20)}`;
+    if(txMap[key]) dups.push(t.id);
+    else txMap[key]=t.id;
+  });
+  return dups;
+};
+window.deduplicateTransactions=function(){
+  const dups=findDuplicates();
+  if(!dups.length){toast('Aucun doublon détecté ✓','var(--green)');return;}
+  const msg=`${dups.length} doublon(s) détecté(s). Supprimer ?`;
+  if(confirm(msg)){
+    S.finance=S.finance.filter(t=>!dups.includes(t.id));
+    save();render();toast(`${dups.length} doublon(s) supprimé(s) ✓`,'var(--green)');
+  }
+};
+
+// ── Transaction editing ───────────────────────────────────────────────────────
+window.editTransaction=function(id){
+  const t=(S.finance||[]).find(x=>x.id===id);
+  if(!t)return;
+  const cats=['Alimentation','Transport','Loisirs','Santé','Logement','Shopping','Épargne','Salaire','Revenus divers','Sport','Abonnements','Factures','Divers'];
+  const html=`<h3 style="margin:0 0 16px;color:var(--w)">Modifier la transaction</h3>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--g1)">Description</label>
+      <input id="et-desc" value="${t.desc||''}" style="display:block;width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:8px;color:var(--w);font-size:13px;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--g1)">Catégorie</label>
+      <select id="et-cat" style="display:block;width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:8px;color:var(--w);font-size:13px">
+        ${cats.map(c=>`<option value="${c}"${c===t.cat?' selected':''}>${c}</option>`).join('')}
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button onclick="saveEditTransaction('${id}')" style="flex:1;background:var(--cyan);color:#000;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">Sauvegarder</button>
+      <button onclick="deleteFinTransaction('${id}')" style="background:var(--red)22;border:1px solid var(--red);border-radius:10px;padding:10px;color:var(--red);cursor:pointer">Supprimer</button>
+    </div>`;
+  openModal(html);
+};
+window.saveEditTransaction=function(id){
+  const t=(S.finance||[]).find(x=>x.id===id);
+  if(!t)return;
+  t.desc=document.getElementById('et-desc').value;
+  t.cat=document.getElementById('et-cat').value;
+  save();closeModal();render();toast('Transaction mise à jour ✓');
+};
+window.deleteFinTransaction=function(id){
+  S.finance=(S.finance||[]).filter(x=>x.id!==id);
+  save();closeModal();render();toast('Transaction supprimée','var(--red)');
 };
 
 // ── renderArgentV8 ────────────────────────────────────────────────────────────
@@ -4367,7 +4489,7 @@ window.renderArgentV8=function(){
     const ico=CAT_EMOJI[t.cat]||'📦';
     const color=t.cat==='Épargne'?'var(--purp)':t.amt>0?'var(--green)':t.amt===0?'var(--g1)':'var(--red)';
     const bg=t.amt>0?'rgba(0,229,160,.12)':t.amt<0?'rgba(255,58,92,.12)':'rgba(139,155,173,.1)';
-    return `<div class="v8-tx-row">
+    return `<div class="v8-tx-row" onclick="editTransaction('${t.id}')" style="cursor:pointer">
       <div class="v8-tx-icon" style="background:${bg}">${ico}</div>
       <div style="flex:1;min-width:0">
         <div class="v8-tx-desc">${t.desc||t.cat}</div>
@@ -4423,7 +4545,10 @@ window.renderArgentV8=function(){
         ${catKeys.map((k,i)=>`<span style="font-size:11px;color:${doughnutColors[i]||'#fff'};background:${doughnutColors[i]||'#fff'}22;padding:2px 8px;border-radius:10px">${k}: ${catVals[i]}€</span>`).join('')}
       </div>
     </div>`:''}
-    <div class="v8-sec">Transactions récentes</div>
+    ${(()=>{const dups=findDuplicates();return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="v8-sec" style="margin:0">Transactions récentes</div>
+      ${dups.length?`<button onclick="deduplicateTransactions()" style="font-size:11px;padding:4px 10px;background:rgba(255,58,92,.15);border:1px solid var(--red);border-radius:8px;color:var(--red);cursor:pointer">⚠️ ${dups.length} doublon${dups.length>1?'s':''}</button>`:''}
+    </div>`;})()}
     <div class="v8-card v8-anim-4" style="padding:0 16px">
       ${txRows||'<p style="padding:16px;text-align:center;color:var(--g1)">Aucune transaction</p>'}
     </div>
@@ -4433,20 +4558,35 @@ window.renderArgentV8=function(){
 
 // ── initChartsArgent ──────────────────────────────────────────────────────────
 window.initChartsArgent=function(){
-  setTimeout(function(){
+  waitForChart(function(){
     const canvas=document.getElementById('chart-argent-doughnut');
-    if(!canvas||typeof Chart==='undefined')return;
+    if(!canvas)return;
     if(canvas._chart){canvas._chart.destroy();}
     const keys=window._argentCatKeys||[];
     const vals=window._argentCatVals||[];
     const colors=window._argentColors||[];
     if(!keys.length)return;
-    canvas._chart=new Chart(canvas,{
-      type:'doughnut',
-      data:{labels:keys,datasets:[{data:vals,backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:1.5,hoverOffset:8}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.raw+'€'}}},animation:{duration:700}}
-    });
-  },0);
+    try {
+      canvas._chart=new Chart(canvas,{
+        type:'doughnut',
+        data:{labels:keys,datasets:[{data:vals,backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:1.5,hoverOffset:8}]},
+        options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.raw+'€'}}},animation:{duration:700}}
+      });
+    } catch(e) {
+      const total=vals.reduce((a,b)=>a+b,0)||1;
+      canvas.parentElement.innerHTML = `<div style="padding:8px 0">
+        ${keys.map((k,i)=>`<div style="margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+            <span style="color:${colors[i]}">${k}</span>
+            <span style="color:var(--g1);font-family:var(--font-mono)">${vals[i]}€</span>
+          </div>
+          <div style="height:6px;background:var(--b);border-radius:3px">
+            <div style="height:100%;background:${colors[i]};border-radius:3px;width:${Math.round(vals[i]/total*100)}%"></div>
+          </div>
+        </div>`).join('')}
+      </div>`;
+    }
+  });
 };
 
 // ── renderStatsV8 ─────────────────────────────────────────────────────────────
@@ -4491,7 +4631,7 @@ window.renderStatsV8=function(){
       <div class="v8-card v8-anim" style="padding:14px;margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <span class="v8-sec" style="margin:0">Score 30 jours</span>
-          <span style="font-size:13px;color:var(--cyan);font-weight:700;font-family:var(--font-mono)">Moy: ${avg30}%</span>
+          <span style="font-size:13px;color:${avg30>=70?'var(--green)':avg30>=40?'var(--amber)':'var(--red)'};font-weight:700;font-family:var(--font-mono)">Moy: ${avg30}%</span>
         </div>
         <div style="position:relative;height:140px"><canvas id="chart-stats-line" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas></div>
       </div>
@@ -4545,18 +4685,24 @@ window.renderStatsV8=function(){
 
 // ── initChartsStats ────────────────────────────────────────────────────────────
 window.initChartsStats=function(){
-  setTimeout(function(){
+  waitForChart(function(){
     const canvas=document.getElementById('chart-stats-line');
-    if(!canvas||typeof Chart==='undefined')return;
+    if(!canvas)return;
     if(canvas._chart){canvas._chart.destroy();}
     const scores=window._statsScores30||[];
     const labels=window._statsLabels30||[];
-    canvas._chart=new Chart(canvas,{
-      type:'line',
-      data:{labels,datasets:[{data:scores,borderColor:'#00D4FF',borderWidth:2,pointRadius:0,pointHoverRadius:4,fill:true,backgroundColor:'rgba(0,212,255,.08)',tension:0.4}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},scales:{x:{grid:{display:false},ticks:{color:'#8B9BAD',font:{size:9},maxTicksLimit:8}},y:{display:false,max:110,min:0}},animation:{duration:600}}
-    });
-  },0);
+    try {
+      canvas._chart=new Chart(canvas,{
+        type:'line',
+        data:{labels,datasets:[{data:scores,borderColor:'#00D4FF',borderWidth:2,pointRadius:0,pointHoverRadius:4,fill:true,backgroundColor:'rgba(0,212,255,.08)',tension:0.4}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},scales:{x:{grid:{display:false},ticks:{color:'#8B9BAD',font:{size:9},maxTicksLimit:8}},y:{display:false,max:110,min:0}},animation:{duration:600}}
+      });
+    } catch(e) {
+      canvas.parentElement.innerHTML = `<div style="display:flex;align-items:flex-end;gap:2px;height:140px;padding:8px 0;overflow:hidden">
+        ${scores.map(s=>`<div style="flex:1;background:var(--cyan);opacity:${0.3+s/100*0.7};border-radius:2px 2px 0 0;height:${Math.max(2,s*1.3)}px"></div>`).join('')}
+      </div>`;
+    }
+  });
 };
 
 // ── renderPlusV8 ──────────────────────────────────────────────────────────────
@@ -4738,7 +4884,7 @@ window.render=function(){
   if(!root)return;
   switch(_page){
     case 'home':root.innerHTML=renderHomeV8();initChartsHome();break;
-    case 'taches':root.innerHTML=renderTachesV8();break;
+    case 'taches':root.innerHTML=renderTachesV8();initKanbanDragDrop();break;
     case 'argent':root.innerHTML=renderArgentV8();initChartsArgent();break;
     case 'stats':root.innerHTML=renderStatsV8();initChartsStats();break;
     case 'plus':root.innerHTML=renderPlusV8();break;
@@ -4756,8 +4902,51 @@ window.nav=function(p){_page=p;window._statsTab='analytics';render();const root=
 
 Object.assign(window,{PAGES:PAGES_V8});
 
+// ── initKanbanDragDrop ────────────────────────────────────────────────────────
+window._dragTaskId=null;
+window._dragFromCol=null;
+
+window.initKanbanDragDrop=function(){
+  // Set up drag on cards
+  document.querySelectorAll('.v8-ktask[data-id]').forEach(card=>{
+    card.addEventListener('dragstart',function(e){
+      window._dragTaskId=this.dataset.id;
+      window._dragFromCol=this.dataset.status;
+      this.style.opacity='0.5';
+      e.dataTransfer.effectAllowed='move';
+    });
+    card.addEventListener('dragend',function(){
+      this.style.opacity='1';
+      document.querySelectorAll('.v8-kcol').forEach(col=>col.classList.remove('drag-over'));
+    });
+  });
+
+  // Set up drop zones on columns
+  document.querySelectorAll('.v8-kcol[id]').forEach(col=>{
+    col.addEventListener('dragover',function(e){
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      document.querySelectorAll('.v8-kcol').forEach(c=>c.classList.remove('drag-over'));
+      this.classList.add('drag-over');
+    });
+    col.addEventListener('dragleave',function(){
+      this.classList.remove('drag-over');
+    });
+    col.addEventListener('drop',function(e){
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      const newStatus=this.id.replace('kcol-','');
+      if(window._dragTaskId&&newStatus!==window._dragFromCol){
+        moveTaskStatus(window._dragTaskId,newStatus);
+      }
+      window._dragTaskId=null;
+    });
+  });
+};
+
 // ── renderTachesV8 ────────────────────────────────────────────────────────────
 window.renderTachesV8=function(){
+  const allTasks=S.tasks||[];
   const COLS=[
     {id:'todo',label:'À faire',color:'var(--g1)'},
     {id:'doing',label:'En cours',color:'var(--cyan)'},
@@ -4766,6 +4955,11 @@ window.renderTachesV8=function(){
   ];
   const PRI_COLORS={urgente:'var(--red)',haute:'var(--amber)',moyenne:'var(--cyan)',basse:'var(--g1)'};
   const cats=Object.fromEntries(TASK_CATEGORIES.map(c=>[c.id,c]));
+
+  // M7 — Summary bar
+  const totalTasks=allTasks.length;
+  const urgentCount=allTasks.filter(t=>t.priority==='urgente'&&t.status!=='done').length;
+  const overdueCount=allTasks.filter(t=>t.dueDate&&t.dueDate<iso()&&t.status!=='done').length;
 
   const colsHTML=COLS.map(col=>{
     const tasks=(S.tasks||[]).filter(t=>t.status===col.id).sort((a,b)=>(a.order||0)-(b.order||0));
@@ -4798,7 +4992,7 @@ window.renderTachesV8=function(){
         <span style="font-weight:700;font-size:13px;color:${col.color}">${col.label}</span>
         <span style="font-size:11px;color:var(--g1);background:var(--b);padding:2px 8px;border-radius:10px">${tasks.length}</span>
       </div>
-      ${cards||'<div style="color:var(--g1);font-size:12px;text-align:center;padding:16px">Vide</div>'}
+      ${cards||'<div></div>'}
     </div>`;
   }).join('');
 
@@ -4811,6 +5005,16 @@ window.renderTachesV8=function(){
       <input id="v8-quick-task" type="text" placeholder="Nouvelle tâche... (ex: Appeler dentiste demain #sante urgent)" onkeydown="if(event.key==='Enter')quickAddTask()"/>
       <button onclick="quickAddTask()" style="background:var(--cyan);color:#000;border:none;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer">+</button>
     </div>
+    ${totalTasks>0?`<div style="display:flex;gap:12px;margin-bottom:12px;font-size:12px;color:var(--g1)">
+      <span>${totalTasks} tâche${totalTasks>1?'s':''}</span>
+      ${urgentCount?`<span style="color:var(--red)">● ${urgentCount} urgente${urgentCount>1?'s':''}</span>`:''}
+      ${overdueCount?`<span style="color:var(--amber)">⚠ ${overdueCount} en retard</span>`:''}
+    </div>`:''}
+    ${allTasks.length===0?`<div style="text-align:center;padding:32px 16px;color:var(--g1)">
+      <div style="font-size:40px;margin-bottom:12px">✅</div>
+      <div style="font-size:16px;font-weight:700;color:var(--w);margin-bottom:8px">Tout est clair !</div>
+      <div style="font-size:13px;margin-bottom:16px">Ajoute ta première tâche ci-dessus ou tape "Finir le TFE demain #tfe urgent"</div>
+    </div>`:''}
     <div class="v8-kanban">${colsHTML}</div>
   </div>`;
 };
