@@ -3797,26 +3797,20 @@ window.render=function(){
 };
 
 /* ── V8 ─────────────────────────────────────────────────────────────────── */
+/* REPLACES V7 render with 4-page nav using the original design system */
 (function(){
-// ── V8 CSS ──────────────────────────────────────────────────────────────────
+// ── V8 CSS (maps aliases to original design system variables) ────────────────
 const v8css=`
 :root{
+  /* aliases → original design system */
+  --card:var(--bg1);--border:var(--b);--text:var(--w);
+  --muted:var(--g1);--accent:var(--cyan);--danger:var(--red);
+  --bg-page:var(--bg);
+  /* spacing */
   --sp1:4px;--sp2:8px;--sp3:12px;--sp4:16px;--sp5:24px;--sp6:32px;
-  --fs-xs:11px;--fs-sm:13px;--fs-md:15px;--fs-lg:18px;--fs-xl:24px;
   --radius:12px;--radius-sm:8px;
 }
-/* bottom-nav V8 */
-#bnav-v8{position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--card);border-top:1px solid var(--border);display:flex;align-items:stretch;z-index:200;}
-#bnav-v8 .bni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--muted);font-size:var(--fs-xs);border:none;background:none;padding:0;transition:color .15s;}
-#bnav-v8 .bni.active{color:var(--accent);}
-#bnav-v8 .bni svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-/* sidebar hidden on mobile V8 */
-#sidebar-v8{display:none;}
-@media(min-width:768px){
-  #sidebar-v8{display:flex;flex-direction:column;gap:4px;position:fixed;left:0;top:0;bottom:0;width:200px;background:var(--card);border-right:1px solid var(--border);padding:var(--sp5) var(--sp3);z-index:100;}
-  #bnav-v8{display:none;}
-  #root{margin-left:200px;}
-}
+/* removed: #bnav-v8, #sidebar-v8 — using original #sidebar and #bnav instead */
 /* status bar */
 .v8-status{display:flex;gap:var(--sp3);padding:var(--sp3) var(--sp4);background:var(--card);border-radius:var(--radius);margin-bottom:var(--sp3);}
 .v8-stat{flex:1;text-align:center;}
@@ -3904,42 +3898,38 @@ styleEl.id='v8-styles';
 styleEl.textContent=v8css;
 document.head.appendChild(styleEl);
 
-// ── V8 DOM shell ─────────────────────────────────────────────────────────────
+// ── V8 DOM shell — only add the bottom sheet (reuse existing FAB/modal/overlay)
 document.body.insertAdjacentHTML('beforeend',`
-<div id="fab-v8" onclick="openQuickSheet()" title="Ajouter">+</div>
-<div id="v8-sheet-bg" onclick="closeQuickSheet()"></div>
-<div id="v8-sheet">
-  <div class="sheet-handle"></div>
+<div id="v8-sheet-bg" onclick="closeQuickSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400"></div>
+<div id="v8-sheet" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-radius:16px 16px 0 0;padding:20px;z-index:500;transform:translateY(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);max-height:80vh;overflow-y:auto">
+  <div style="width:36px;height:4px;background:var(--b2);border-radius:2px;margin:0 auto 16px"></div>
   <div id="v8-sheet-content"></div>
 </div>
-<div id="v8-bal-modal">
-  <div class="v8-modal-box">
-    <h3>💳 Solde bancaire</h3>
-    <input id="v8-bal-input" type="number" placeholder="0.00" step="0.01"/>
-    <div class="v8-modal-actions">
-      <button class="v8-btn-cancel" onclick="document.getElementById('v8-bal-modal').classList.remove('open')">Annuler</button>
-      <button class="v8-btn-confirm" onclick="confirmBalance()">Enregistrer</button>
-    </div>
-  </div>
-</div>
-<div id="v8-rattrap">
-  <div class="rat-box" id="v8-rattrap-content"></div>
-</div>
 `);
+// Redirect FAB to open quick sheet
+const _origFab=document.getElementById('fab');
+if(_origFab){_origFab.onclick=function(){openQuickSheet();};_origFab.title='Ajouter';}
 
 // ── Bank balance ─────────────────────────────────────────────────────────────
 window.getBankBalance=function(){return S.config.bankBalance||0;};
 window.setBankBalance=function(v){S.config.bankBalance=parseFloat(v)||0;save();};
 window.promptBalance=function(){
-  document.getElementById('v8-bal-input').value=getBankBalance()||'';
-  document.getElementById('v8-bal-modal').classList.add('open');
-  setTimeout(()=>document.getElementById('v8-bal-input').focus(),100);
+  const bal=getBankBalance();
+  document.getElementById('modal').innerHTML=`
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">💳 Solde bancaire</div>
+    <div class="form-group">
+      <label>Solde actuel (€)</label>
+      <input id="v8-bal-input" type="number" placeholder="0.00" step="0.01" value="${bal||''}" style="font-size:24px;text-align:center;font-family:var(--font-mono)"/>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="confirmBalance()">Enregistrer</button>`;
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>{const el=document.getElementById('v8-bal-input');if(el){el.focus();el.select();}},100);
 };
 window.confirmBalance=function(){
   const v=document.getElementById('v8-bal-input').value;
   setBankBalance(v);
-  document.getElementById('v8-bal-modal').classList.remove('open');
-  render();
+  closeModal();render();
   toast('Solde mis à jour ✓');
 };
 
@@ -3986,12 +3976,14 @@ window.openQuickSheet=function(type){
       </div>`;
     setTimeout(()=>{const el=document.getElementById('qs-task');if(el)el.focus();},200);
   }
-  bg.classList.add('open');
-  sheet.classList.add('open');
+  bg.style.display='block';
+  sheet.style.transform='translateY(0)';
 };
 window.closeQuickSheet=function(){
-  document.getElementById('v8-sheet-bg').classList.remove('open');
-  document.getElementById('v8-sheet').classList.remove('open');
+  const bg=document.getElementById('v8-sheet-bg');
+  const sheet=document.getElementById('v8-sheet');
+  if(bg)bg.style.display='none';
+  if(sheet)sheet.style.transform='translateY(100%)';
 };
 window.confirmQuickDepense=function(){
   const amt=parseFloat(document.getElementById('qs-amount')?.value||0);
@@ -4015,33 +4007,30 @@ window.openRattrapage=function(dateStr){
   const habs=H();
   let rows=habs.map(h=>{
     const done=!!day[h.id];
-    return `<div class="v8-task-item">
-      <div class="v8-task-cb ${done?'done':''}" onclick="toggleHabitRattrap('${d}','${h.id}',this)">${done?'✓':''}</div>
-      <span class="v8-task-text">${h.emoji||'📌'} ${h.label||h.name||''}</span>
+    return `<div class="habit-row">
+      <div class="habit-toggle${done?' on':''}" onclick="toggleHabitRattrap('${d}','${h.id}',this)"></div>
+      <span style="font-size:18px">${h.emoji||'📌'}</span>
+      <span style="font-size:14px;color:var(--w);flex:1">${h.label||h.name||''}</span>
     </div>`;
   }).join('');
-  if(!rows)rows='<p style="color:var(--muted);text-align:center">Aucune habitude configurée</p>';
-  document.getElementById('v8-rattrap-content').innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <h3 style="font-size:18px;font-weight:700">✅ Check-in ${d===iso()?'Aujourd\'hui':d}</h3>
-      <button onclick="document.getElementById('v8-rattrap').classList.remove('open')" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
-    </div>
+  if(!rows)rows='<p style="color:var(--g1);text-align:center;padding:16px">Aucune habitude — va dans Config</p>';
+  document.getElementById('modal').innerHTML=`
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">✅ Check-in ${d===iso()?'Aujourd\'hui':d}</div>
     <div id="rattrap-list">${rows}</div>
-    <button onclick="saveCheckinRattrap('${d}')" style="width:100%;margin-top:12px;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer">Enregistrer</button>
-  `;
-  document.getElementById('v8-rattrap').classList.add('open');
+    <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="saveCheckinRattrap('${d}')">Enregistrer</button>`;
+  document.getElementById('overlay').classList.add('open');
 };
 window.toggleHabitRattrap=function(d,hid,el){
   if(!S.habits[d])S.habits[d]={};
   const cur=S.habits[d][hid];
   S.habits[d][hid]=cur?false:true;
   save();
-  el.classList.toggle('done',!!S.habits[d][hid]);
-  el.textContent=S.habits[d][hid]?'✓':'';
+  el.classList.toggle('on',!!S.habits[d][hid]);
 };
 window.saveCheckinRattrap=function(d){
   save();
-  document.getElementById('v8-rattrap').classList.remove('open');
+  closeModal();
   render();toast('Check-in sauvegardé ✓');
 };
 
@@ -4058,12 +4047,20 @@ window.renderHomeV8=function(){
   const xp=S.config.xp||0;
   const lvl=getLevelInfo(xp);
 
-  // Status bar
-  const statusBar=`<div class="v8-status">
-    <div class="v8-stat"><div class="val">${score}%</div><div class="lbl">Score</div></div>
-    <div class="v8-stat"><div class="val">${streak}🔥</div><div class="lbl">Streak</div></div>
-    <div class="v8-stat" onclick="promptBalance()" style="cursor:pointer"><div class="val">${bal>0?bal.toFixed(0)+'€':'—'}</div><div class="lbl">Solde</div></div>
-    <div class="v8-stat"><div class="val">${lvl.name.slice(0,6)}</div><div class="lbl">Niv.${lvl.lvl}</div></div>
+  // Status bar — using native card + stat-num classes
+  const statusBar=`<div class="card grid3" style="gap:0;padding:0;overflow:hidden;margin-bottom:0">
+    <div style="padding:12px 8px;text-align:center;border-right:1px solid var(--b)">
+      <div class="stat-num" style="font-size:22px;color:${score>=80?'var(--green)':score>=50?'var(--amber)':'var(--red)'}">${score}%</div>
+      <div class="stat-label">Score</div>
+    </div>
+    <div style="padding:12px 8px;text-align:center;border-right:1px solid var(--b)">
+      <div class="stat-num" style="font-size:22px;color:var(--amber)">${streak}🔥</div>
+      <div class="stat-label">Streak</div>
+    </div>
+    <div style="padding:12px 8px;text-align:center;cursor:pointer" onclick="promptBalance()">
+      <div class="stat-num" style="font-size:${bal>0?'18':'14'}px;color:${bal>0?'var(--cyan)':'var(--g1)'}">${bal>0?bal.toFixed(0)+'€':'Définir'}</div>
+      <div class="stat-label">Solde 💳</div>
+    </div>
   </div>`;
 
   // Habit cards
@@ -4094,14 +4091,16 @@ window.renderHomeV8=function(){
       <span class="v8-task-text">${t.text}</span>
     </div>`).join(''):`<div style="color:var(--muted);font-size:13px;padding:8px 0">Aucune tâche — tap + pour ajouter</div>`;
 
-  return `
+  return `<div class="page">
+    <div class="page-title">🏠 Aujourd'hui</div>
     ${statusBar}
-    <div class="v8-sec">Habitudes du jour</div>
+    <div class="section-label" style="margin-top:16px">Habitudes du jour</div>
     <div class="v8-hab-grid">${habCards}</div>
-    <div class="v8-sec">Semaine</div>
-    <div class="v8-week">${weekRibbon}</div>
-    <div class="v8-sec">Tâches</div>
-    <div class="v8-tasks">${taskRows}</div>`;
+    <div class="section-label" style="margin-top:16px">Cette semaine</div>
+    <div class="v8-week" style="margin-bottom:16px">${weekRibbon}</div>
+    <div class="section-label">Tâches en cours</div>
+    <div class="card" style="padding:8px">${taskRows}</div>
+  </div>`;
 };
 
 window.toggleHabitHome=function(d,hid,el){
@@ -4136,43 +4135,51 @@ window.renderArgentV8=function(){
   const expRows=expenses.slice(0,20).map(e=>{
     const cats={Alimentation:'🍔',Transport:'🚗',Loisirs:'🎮',Santé:'💊',Logement:'🏠',Vêtements:'👕',Épargne:'💰',Revenu:'💵'};
     const ico=cats[e.cat]||'📦';
-    return `<div class="v8-expense-item">
-      <div class="v8-exp-cat" style="background:var(--border)">${ico}</div>
-      <div class="v8-exp-info"><div class="v8-exp-name">${e.desc||e.cat}</div><div class="v8-exp-date">${e.date}</div></div>
-      <div class="v8-exp-amount">${e.amt<0?'-':''}${Math.abs(e.amt).toFixed(2)}€</div>
+    return `<div class="tx-row" style="padding:10px 16px">
+      <div class="tx-icon" style="background:var(--bg3)">${ico}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:500;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.desc||e.cat}</div>
+        <div style="font-size:12px;color:var(--g1)">${e.date}</div>
+      </div>
+      <div class="tx-amt" style="color:${e.amt<0?'var(--red)':'var(--green)'}">${e.amt<0?'–':'+'}${Math.abs(e.amt).toFixed(2)}€</div>
     </div>`;
   }).join('');
 
   const totalMonth=(()=>{let t=0;expenses.filter(e=>e.date.startsWith(mk)).forEach(e=>t+=Math.abs(e.amt));return t.toFixed(2);})();
 
-  return `
-    <div class="v8-balance-hero" onclick="promptBalance()" style="cursor:pointer">
-      <div class="bal-label">Solde bancaire (tap pour modifier)</div>
-      <div class="bal-amount">${bal>0?bal.toFixed(2)+'€':'Entrer le solde'}</div>
-      <div class="bal-goal">${pct}% de l'objectif ${goal>0?goal+'€':''}</div>
+  return `<div class="page">
+    <div class="page-title">💰 Finances</div>
+    <div class="v8-balance-hero card" onclick="promptBalance()" style="cursor:pointer;text-align:center;padding:20px;margin-bottom:12px">
+      <div style="font-size:12px;color:var(--g1);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Solde bancaire · tap pour modifier</div>
+      <div style="font-family:var(--font-mono);font-size:36px;font-weight:700;color:${bal>0?'var(--cyan)':'var(--g1)'}">${bal>0?bal.toFixed(2)+'€':'—'}</div>
+      <div style="font-size:12px;color:var(--g1);margin-top:6px">${pct}% de l'objectif ${goal>0?goal+'€':''}</div>
+      <div class="progress-bar" style="margin-top:10px"><div class="progress-fill" style="width:${pct}%;background:var(--green)"></div></div>
     </div>
-    <div style="background:var(--card);border-radius:12px;padding:12px;margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;color:var(--muted)">Progression épargne</span><span style="font-size:13px;font-weight:700">${pct}%</span></div>
-      <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--accent);transition:width .5s"></div></div>
+    <div class="grid2" style="margin-bottom:12px">
+      <div class="card" style="text-align:center">
+        <div class="stat-num" style="color:var(--red);font-size:22px">${totalMonth}€</div>
+        <div class="stat-label">Dépenses ce mois</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="stat-num" style="color:var(--cyan);font-size:22px">${bal>0?(bal-parseFloat(totalMonth)).toFixed(0)+'€':'—'}</div>
+        <div class="stat-label">Net estimé</div>
+      </div>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <div style="flex:1;background:var(--card);border-radius:12px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--danger,#e17055)">${totalMonth}€</div><div style="font-size:11px;color:var(--muted)">Dépenses ce mois</div></div>
-      <div style="flex:1;background:var(--card);border-radius:12px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--accent)">${bal>0?(bal-parseFloat(totalMonth)).toFixed(0)+'€':'—'}</div><div style="font-size:11px;color:var(--muted)">Net estimé</div></div>
+    <div class="section-label">Transactions récentes</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      ${expRows||'<p style="padding:16px;text-align:center;color:var(--g1)">Aucune dépense — tap + pour ajouter</p>'}
     </div>
-    <div class="v8-sec">Transactions récentes</div>
-    <div style="background:var(--card);border-radius:12px;overflow:hidden">
-      ${expRows||'<p style="padding:16px;text-align:center;color:var(--muted)">Aucune dépense enregistrée</p>'}
-    </div>`;
+  </div>`;
 };
 
 // ── renderStatsV8 ─────────────────────────────────────────────────────────────
 window._statsTab=window._statsTab||'analytics';
 window.renderStatsV8=function(){
   const tab=window._statsTab;
-  const tabs=`<div class="v8-tabs">
-    <div class="v8-tab ${tab==='analytics'?'active':''}" onclick="window._statsTab='analytics';render()">Statistiques</div>
-    <div class="v8-tab ${tab==='goals'?'active':''}" onclick="window._statsTab='goals';render()">Objectifs</div>
-    <div class="v8-tab ${tab==='badges'?'active':''}" onclick="window._statsTab='badges';render()">Badges</div>
+  const tabs=`<div class="tabs">
+    <button class="tab${tab==='analytics'?' active':''}" onclick="window._statsTab='analytics';render()">Statistiques</button>
+    <button class="tab${tab==='goals'?' active':''}" onclick="window._statsTab='goals';render()">Objectifs</button>
+    <button class="tab${tab==='badges'?' active':''}" onclick="window._statsTab='badges';render()">Badges</button>
   </div>`;
   let body='';
   if(tab==='analytics'){
@@ -4184,125 +4191,167 @@ window.renderStatsV8=function(){
     const maxS=Math.max(...scores)||1;
     const bars=scores.map((s,i)=>{const h=Math.max(2,Math.round(s/maxS*60));const bg=s>=80?'#00b894':s>=50?'#fdcb6e':s>0?'#e17055':'var(--border)';return `<div style="width:${100/30}%;height:${h}px;background:${bg};border-radius:2px 2px 0 0" title="${labels[i]}: ${s}%"></div>`;}).join('');
     body=`
-      <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:13px;font-weight:600">Score 30 jours</span><span style="font-size:13px;color:var(--accent);font-weight:700">Moy: ${avg}%</span></div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+          <span class="section-label" style="margin:0">Score 30 jours</span>
+          <span style="font-size:13px;color:var(--cyan);font-weight:700">Moy: ${avg}%</span>
+        </div>
         <div style="display:flex;align-items:flex-end;height:60px;gap:1px">${bars}</div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        ${['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'].map((dayName,i)=>{
+      <div class="grid2">
+        ${['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map((dayName,i)=>{
           const sc30=[];for(let w=0;w<4;w++){const dd=new Date();const diff=((dd.getDay()-1-i+7)%7)+w*7;dd.setDate(dd.getDate()-diff);const k=dd.toISOString().slice(0,10);sc30.push(Math.round(scoreDay(S.habits[k]||{})/mx30*100));}
           const avg2=Math.round(sc30.reduce((a,b)=>a+b,0)/sc30.length);
-          const col=avg2>=70?'#00b894':avg2>=40?'#fdcb6e':'#e17055';
-          return `<div style="background:var(--card);border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--muted)">${dayName.slice(0,3)}</span><span style="font-size:15px;font-weight:700;color:${col}">${avg2}%</span></div>`;
+          const col=avg2>=70?'var(--green)':avg2>=40?'var(--amber)':'var(--red)';
+          return `<div class="card-sm" style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--g1)">${dayName}</span><span style="font-family:var(--font-mono);font-size:15px;font-weight:700;color:${col}">${avg2}%</span></div>`;
         }).join('')}
       </div>`;
   } else if(tab==='goals'){
     body=renderGoals();
   } else {
-    body=`<div class="badge-grid">${(S.config.badges||[]).map(b=>{const def=BADGES_DEF.find(x=>x.id===b);return def?`<div class="badge-item"><div style="font-size:28px">${def.emoji}</div><div style="font-size:11px;color:var(--muted)">${def.label}</div></div>`:''}).join('')||'<p style="color:var(--muted);text-align:center;grid-column:1/-1">Aucun badge encore — continue tes efforts !</p>'}</div>`;
+    const earned=new Set(S.config.badges||[]);
+    body=`<div class="badge-grid">${BADGES_DEF.map(b=>{const u=earned.has(b.id);return `<div class="badge-item${u?' unlocked':''}" title="${b.desc||b.label}" style="opacity:${u?1:.35}"><div style="font-size:28px">${b.emoji}</div><div class="badge-label">${b.label}</div></div>`;}).join('')}</div>`;
   }
-  return tabs+body;
+  return `<div class="page"><div class="page-title">📊 Stats</div>${tabs}${body}</div>`;
 };
 
 // ── renderPlusV8 ──────────────────────────────────────────────────────────────
 window.renderPlusV8=function(){
   const xp=S.config.xp||0;
   const lvl=getLevelInfo(xp);
-  return `
-    <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:12px">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-        <div style="width:48px;height:48px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff">${lvl.lvl}</div>
-        <div><div style="font-size:16px;font-weight:700">${lvl.name}</div><div style="font-size:12px;color:var(--muted)">${xp} XP · ${lvl.next?lvl.next+' pour le prochain niveau':' Max'}</div></div>
+  const streak=currentStreak(),best=bestStreak();
+  return `<div class="page">
+    <div class="page-title">☰ Plus</div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:48px;height:48px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#06090D">${lvl.lvl}</div>
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--w)">${lvl.name}</div>
+          <div style="font-size:12px;color:var(--g1)">${xp} XP${lvl.next?' · '+lvl.next+' XP pour prochain':''}</div>
+        </div>
       </div>
-      <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${lvl.pct}%;background:var(--accent)"></div></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${lvl.pct}%;background:${lvl.color}"></div></div>
     </div>
-    <div class="v8-sec">Menu</div>
-    <div style="background:var(--card);border-radius:12px;overflow:hidden">
+    <div class="grid2" style="margin-bottom:12px">
+      <div class="card" style="text-align:center">
+        <div class="stat-num" style="color:var(--amber)">${streak}🔥</div>
+        <div class="stat-label">Streak actuel</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="stat-num" style="color:var(--g1)">${best}</div>
+        <div class="stat-label">Record</div>
+      </div>
+    </div>
+    <div class="section-label">Navigation</div>
+    <div class="card" style="padding:4px">
       ${[
         ['⚙️','Configuration','config'],
-        ['📅','Calendrier','analytics'],
-        ['🏆','Objectifs','goals'],
-        ['📊','Analytics complets','analytics'],
-      ].map(([ico,lbl,pg])=>`<div class="sheet-option" onclick="nav('${pg}')"><div class="sheet-opt-icon" style="background:var(--border)">${ico}</div><div><div class="sheet-opt-title">${lbl}</div></div></div>`).join('')}
-    </div>`;
-};
+        ['🏆','Objectifs & badges','stats'],
+        ['📊','Analytics','stats'],
+        ['✅','Check-in aujourd\'hui','checkin'],
+      ].map(([ico,lbl,pg])=>`
+        <div onclick="nav('${pg}')" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''"">
+          <div style="width:36px;height:36px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px">${ico}</div>
+          <div style="font-size:15px;font-weight:500;color:var(--w)">${lbl}</div>
+          <div style="margin-left:auto;color:var(--g2)">›</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
 
-// ── Sidebar & bnav V8 ─────────────────────────────────────────────────────────
+// ── Sidebar & bnav V8 — use the EXISTING #sidebar and #bnav elements ──────────
 const PAGES_V8=['home','argent','stats','plus'];
-const PAGE_META_V8={
-  home:{label:'Home',ico:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
-  argent:{label:'Argent',ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
-  stats:{label:'Stats',ico:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
-  plus:{label:'Plus',ico:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>'},
+const PAGE_ICONS_V8={
+  home:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline stroke-linecap="round" stroke-linejoin="round" stroke-width="2" points="9 22 9 12 15 12 15 22"/>',
+  argent:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+  stats:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
+  plus:'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>',
 };
+const PAGE_LABELS_V8={home:'Home',argent:'Argent',stats:'Stats',plus:'Plus'};
 
 window.renderSidebarV8=function(){
-  let el=document.getElementById('sidebar-v8');
-  if(!el){el=document.createElement('nav');el.id='sidebar-v8';document.body.insertBefore(el,document.body.firstChild);}
-  el.innerHTML=`<div style="font-size:18px;font-weight:800;color:var(--accent);padding:0 8px 16px">Cockpit</div>`+
-    PAGES_V8.map(p=>{const m=PAGE_META_V8[p];const active=_page===p;return `<div class="bni ${active?'active':''}" onclick="nav('${p}')" style="flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 8px;border-radius:8px;${active?'background:var(--border)':''}"><svg viewBox="0 0 24 24">${m.ico}</svg><span style="font-size:14px">${m.label}</span></div>`;}).join('');
+  const el=document.getElementById('sidebar');if(!el)return;
+  el.innerHTML=`<div class="logo">M</div>`+PAGES_V8.map(p=>`
+    <button class="sn${_page===p?' active':''}" onclick="nav('${p}')" title="${PAGE_LABELS_V8[p]}">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="22" height="22">${PAGE_ICONS_V8[p]}</svg>
+      <span class="sk-hint">${PAGE_LABELS_V8[p]}</span>
+    </button>`).join('');
 };
 window.renderBnavV8=function(){
-  let el=document.getElementById('bnav-v8');
-  if(!el){el=document.createElement('nav');el.id='bnav-v8';document.body.appendChild(el);}
-  el.innerHTML=PAGES_V8.map(p=>{const m=PAGE_META_V8[p];const active=_page===p;return `<button class="bni ${active?'active':''}" onclick="nav('${p}')"><svg viewBox="0 0 24 24">${m.ico}</svg><span>${m.label}</span></button>`;}).join('');
+  const el=document.getElementById('bnav');if(!el)return;
+  el.innerHTML=PAGES_V8.map(p=>`
+    <button class="bn${_page===p?' active':''}" onclick="nav('${p}')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">${PAGE_ICONS_V8[p]}</svg>
+      ${PAGE_LABELS_V8[p]}
+    </button>`).join('');
 };
 window.renderRightPanelV8=function(){
-  let rp=document.getElementById('right-panel');
-  if(!rp)return;
-  const d=iso();
-  const streak=(()=>{let s=0,cur=new Date();for(let i=0;i<365;i++){const dd=cur.toISOString().slice(0,10);if(scoreDay(dd)>=50)s++;else break;cur.setDate(cur.getDate()-1);}return s;})();
-  const xp=S.config.xp||0;const lvl=getLevelInfo(xp);
+  const rp=document.getElementById('right-panel');if(!rp)return;
+  const mk=mKey(),streak=currentStreak(),best=bestStreak();
+  const goal=S.config.streakGoal;
+  const lvl=getLevelInfo(S.config.xp||0);
+  const xp=S.config.xp||0;
   const bal=getBankBalance();
+  const balGoal=parseFloat(S.config.savingsGoal||4000);
+  const balPct=balGoal>0?Math.min(100,Math.round(bal/balGoal*100)):0;
+  const today=iso(),day=S.habits[today]||{};
+  const rawScore=scoreDay(day),mx=Math.max(H().length,1);
+  const scorePct=Math.round(rawScore/mx*100);
   rp.innerHTML=`
-    <div class="v8-rp-section">
-      <div class="v8-rp-title">Profil</div>
-      <div style="text-align:center;padding:8px">
-        <div style="font-size:32px;font-weight:800;color:var(--accent)">${lvl.lvl}</div>
-        <div style="font-size:13px;font-weight:600">${lvl.name}</div>
-        <div style="font-size:11px;color:var(--muted)">${xp} XP</div>
-        <div style="height:4px;background:var(--border);border-radius:2px;margin:8px 0;overflow:hidden"><div style="height:100%;width:${lvl.pct}%;background:var(--accent)"></div></div>
+    <div class="right-section" style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--cyan)">Cockpit</span>
+      <button style="background:none;border:1px solid var(--b);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:14px" onclick="toggleTheme()">${S.config.theme==='dark'?'☀️':'🌙'}</button>
+    </div>
+    <div class="right-section">
+      <div class="right-title">Score · ${rawScore}/${mx}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin:6px 0">
+        ${H().map(hb=>{const v=day[hb.id],t=hb.type||'boolean';
+          const done=t==='boolean'||t==='negbool'?v===true:(t==='number'?typeof v==='number'&&v>0:(typeof v==='object'&&v&&(v.dur||0)>0));
+          return`<span title="${hb.label}" style="font-size:18px;opacity:${done?1:.25};cursor:pointer;transition:opacity .2s" onclick="openRattrapage()">${hb.emoji}</span>`;}).join('')}
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${scorePct}%;background:${scoreColor(rawScore,mx)}"></div></div>
+    </div>
+    <div class="right-section">
+      <div class="right-title">Solde bancaire</div>
+      <div onclick="promptBalance()" style="cursor:pointer" title="Modifier">
+        <div style="font-family:var(--font-mono);font-size:20px;font-weight:700;color:${bal>0?'var(--cyan)':'var(--g1)'}">${bal>0?bal.toFixed(2)+'€':'—  tap pour définir'}</div>
+        <div class="progress-bar" style="margin-top:6px"><div class="progress-fill" style="width:${balPct}%;background:var(--green)"></div></div>
+        <div style="font-size:11px;color:var(--g2);margin-top:3px">${balPct}% de l'objectif ${balGoal>0?balGoal+'€':''}</div>
       </div>
     </div>
-    <div class="v8-rp-section">
-      <div class="v8-rp-title">Solde</div>
-      <div onclick="promptBalance()" style="cursor:pointer;background:var(--bg);border-radius:8px;padding:10px;text-align:center">
-        <div style="font-size:22px;font-weight:800">${bal>0?bal.toFixed(2)+'€':'Définir'}</div>
-        <div style="font-size:11px;color:var(--muted)">tap pour modifier</div>
+    <div class="right-section">
+      <div class="right-title">Streak 🔥</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px">
+        <span style="font-family:var(--font-mono);font-size:26px;font-weight:700;color:var(--amber)">${streak}</span>
+        <span style="font-size:12px;color:var(--g1)">jours · Record ${best}</span>
       </div>
+      <div class="streak-bar"><div class="streak-fill" style="width:${pct(streak,goal)}%"></div></div>
     </div>
-    <div class="v8-rp-section">
-      <div class="v8-rp-title">Streak</div>
-      <div style="text-align:center;font-size:28px;font-weight:800">${streak} 🔥</div>
+    <div class="right-section">
+      <div class="right-title">Niveau · ${lvl.name}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+        <span class="level-pill" style="color:${lvl.color};border-color:${lvl.color}44">Niv.${lvl.lvl}</span>
+        <span style="font-size:11px;color:var(--g2)">${xp} XP</span>
+      </div>
+      <div class="xp-track"><div class="xp-fill" style="width:${lvl.pct}%;background:${lvl.color}"></div></div>
     </div>`;
 };
 
 // ── window.render V8 override ─────────────────────────────────────────────────
 window.render=function(){
-  // hide old sidebar/bnav
-  const oldSb=document.getElementById('sidebar');if(oldSb)oldSb.style.display='none';
-  const oldBn=document.getElementById('bnav');if(oldBn)oldBn.style.display='none';
-
   renderSidebarV8();
   renderBnavV8();
   renderRightPanelV8();
-
   const root=document.getElementById('root');
+  if(!root)return;
   switch(_page){
-    case 'home':    root.innerHTML=renderHomeV8();break;
-    case 'argent':  root.innerHTML=renderArgentV8();break;
-    case 'stats':   root.innerHTML=renderStatsV8();break;
-    case 'plus':    root.innerHTML=renderPlusV8();break;
-    // legacy fallbacks
-    case 'checkin': root.innerHTML=renderCheckin();break;
-    case 'finances':root.innerHTML=renderArgentV8();break;
-    case 'analytics':root.innerHTML=renderStatsV8();break;
-    case 'goals':   root.innerHTML=renderGoals();break;
-    case 'config':  root.innerHTML=renderConfigV6();break;
-    default:        root.innerHTML=renderHomeV8();
+    case 'home':     root.innerHTML=renderHomeV8();break;
+    case 'argent':   root.innerHTML=renderArgentV8();break;
+    case 'stats':    root.innerHTML=renderStatsV8();break;
+    case 'plus':     root.innerHTML=renderPlusV8();break;
+    case 'config':   root.innerHTML=renderConfigV6();break;
+    default:         root.innerHTML=renderHomeV8();
   }
-  // FAB visibility
-  const fab=document.getElementById('fab-v8');
+  const fab=document.getElementById('fab');
   if(fab)fab.style.display='flex';
   setTimeout(addSwipeToHabits,100);
 };
