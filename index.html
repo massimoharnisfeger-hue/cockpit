@@ -7874,6 +7874,12 @@ window.exportBackup=function(){
   toast('Backup téléchargé ✓','var(--green)');
 };
 
+// Expose helpers for V2 override functions (outside IIFE)
+window.goalProgress=goalProgress;
+window.goalNextAction=goalNextAction;
+window.ogGoalRing=ogGoalRing;
+window.ogWeekBounds=ogWeekBounds;
+
 })(); // end V8 IIFE
 
 /* ── INIT ──────────────────────────────────────────────────────────────── */
