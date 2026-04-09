@@ -1269,7 +1269,7 @@ function renderRightPanel(){
   const savGoal=S.config.savingsGoal;
   const savPct=pct(sav,savGoal);
   const savColor=savPct>=100?'var(--green)':savPct>=70?'var(--amber)':'var(--red)';
-  const themeIcon=S.config.theme==='dark'?'☀️':'🌙';
+  const themeIcon=(S.config.theme==='light')?'☀️':'🌙';
   const rp=document.getElementById('right-panel');
   rp.innerHTML=`
     <div class="right-section" style="display:flex;justify-content:space-between;align-items:center">
@@ -4170,11 +4170,11 @@ const v8css=`
 .v8-gradient-text{background:linear-gradient(90deg,var(--cyan),var(--purp));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 /* habit grid */
 .v8-hab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px;margin-bottom:16px;}
-.v8-hab-card{background:rgba(12,17,24,0.8);border:1.5px solid var(--b);border-radius:12px;padding:12px 6px;text-align:center;cursor:pointer;transition:all .2s ease;position:relative;overflow:hidden;}
+.v8-hab-card{transition:transform 0.1s,opacity 0.1s;cursor:pointer;-webkit-tap-highlight-color:transparent;background:rgba(12,17,24,0.8);border:1.5px solid var(--b);border-radius:12px;padding:12px 6px;text-align:center;cursor:pointer;transition:all .2s ease;position:relative;overflow:hidden;}
 .v8-hab-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,212,255,.06),transparent);pointer-events:none;opacity:0;transition:opacity .2s;}
 .v8-hab-card:hover{border-color:var(--cyan);transform:scale(1.04);}
 .v8-hab-card:hover::before{opacity:1;}
-.v8-hab-card.done{border-color:var(--cyan);background:rgba(0,212,255,.1);box-shadow:0 0 16px rgba(0,212,255,.15);}
+.v8-hab-card:active{transform:scale(0.96);opacity:0.8;}.v8-hab-card.done{border-color:var(--cyan);background:rgba(0,212,255,.1);box-shadow:0 0 16px rgba(0,212,255,.15);}
 .v8-hab-card .hc-icon{font-size:22px;margin-bottom:4px;display:block;}
 .v8-hab-card .hc-name{font-size:10px;color:var(--g1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;}
 .v8-hab-card.done .hc-name{color:var(--cyan);}
@@ -4943,7 +4943,7 @@ window.renderHomeV8=function(){
   // ── Context
   var hour=new Date().getHours();
   var greeting=hour<12?'Bonjour':hour<18?'Bon apr\u00E8s-midi':'Bonsoir';
-  var name=(S.config.profile&&S.config.profile.name)?', '+S.config.profile.name:'';
+  var name=(S.config&&S.config.profile&&S.config.profile.name)?', '+S.config.profile.name:'';
   var perfEmoji=score>=80?'\uD83D\uDD25':score>=50?'\uD83D\uDC4A':'\uD83D\uDCAA';
   var isMorning=hour<14;
   var isEvening=hour>=19;
@@ -4990,7 +4990,7 @@ window.renderHomeV8=function(){
 
   // ── SCORE RING
   var scoreRing='<div style="display:flex;flex-direction:column;align-items:center;margin-bottom:14px;gap:6px">'
-    +'<div style="position:relative;width:120px;height:120px;cursor:pointer" onclick="openRattrapage()">'
+    +'<div style="position:relative;width:120px;height:120px;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0)" onclick="openRattrapage()">'
     +'<div style="position:absolute;inset:0;border-radius:50%;background:conic-gradient('+scoreColor+' '+score+'%,var(--b) '+score+'%);display:flex;align-items:center;justify-content:center">'
     +'<div style="width:90px;height:90px;border-radius:50%;background:var(--bg1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px">'
     +'<div style="font-family:var(--font-mono);font-size:26px;font-weight:800;color:'+scoreColor+'">'+score+'<span style="font-size:13px">%</span></div>'
@@ -5490,7 +5490,7 @@ window.renderArgentV8=function(){
 
   var CAT_EMOJI = {Alimentation:'🍔',Transport:'🚗',Loisirs:'🎮','Santé':'💊',Logement:'🏠',Shopping:'👕','Épargne':'💰',Salaire:'💵','Revenus divers':'💼',Sport:'💪',Abonnements:'📱',Factures:'🧾',Divers:'📦'};
 
-  var allTx = (S.finance||[]).slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  var allTx = (S.finance||[]).filter(function(t){return t && t.date;}).slice().sort(function(a,b){return b.date.localeCompare(a.date);});
   var monthTx = allTx.filter(function(t){return t.date.startsWith(mk);});
   var monthExpenses = monthTx.filter(function(t){return t.amt<0;});
   var monthRevenues = monthTx.filter(function(t){return t.amt>0;});
@@ -5582,7 +5582,7 @@ window.renderArgentV8=function(){
           + '<span class="av3-cat-label">' + qc.cat + '</span>'
           + '</button>';
       }).join('')
-    + '<button class="av3-cat-btn" onclick="document.querySelector(\'[onclick*=showFinanceForm]\') ? document.querySelector(\'[onclick*=showFinanceForm]\').click() : nav(\'finances\')" style="min-width:40px">'
+    + '<button class="av3-cat-btn" onclick="openArgentQuickCat(\'Divers\',\'📦\')" style="min-width:40px">'
     + '<span class="av3-cat-emoji">+</span>'
     + '<span class="av3-cat-label">Autre</span>'
     + '</button>'
@@ -5838,20 +5838,21 @@ window.renderStatsV8=function(){
       </div>
     <script>window._statsScores30=${JSON.stringify(scores30)};window._statsLabels30=${JSON.stringify(labels30)};<\/script>`;
   } else if(tab==='goals'){
-    const goals=S.config.goals||[];
+    const goals=S.goals||[];
     if(goals.length){
-      body=goals.map(g=>{
-        const val=parseFloat(g.current||0),target=parseFloat(g.target||1);
-        const p=Math.min(100,Math.round(val/target*100));
-        const col=p>=80?'var(--green)':p>=50?'var(--cyan)':'var(--amber)';
-        return `<div class="v8-goal-row v8-card v8-anim" style="margin-bottom:10px">
-          <div class="v8-goal-header"><span class="v8-goal-name">${g.emoji||'🎯'} ${g.name||'Objectif'}</span><span class="v8-goal-val">${val}/${target}</span></div>
-          <div class="v8-goal-bar"><div class="v8-goal-fill" style="width:${p}%;background:${col}"></div></div>
-          <div style="font-size:11px;color:var(--g1);margin-top:4px">${p}% atteint</div>
-        </div>`;
+      body='<div style="margin-bottom:10px;font-size:12px;color:var(--g1)">'+goals.filter(function(g){return g.status==='in_progress';}).length+' en cours · '+goals.filter(function(g){return g.status==='done';}).length+' atteints</div>'
+      +goals.map(function(g){
+        var pct=typeof goalProgress==='function'?goalProgress(g):0;
+        var col=pct>=80?'var(--green)':pct>=50?'var(--cyan)':'var(--amber)';
+        var statusLabel={todo:'\u00C0 d\u00E9marrer',in_progress:'En cours',done:'\u2713 Atteint'}[g.status]||g.status;
+        return '<div class="v8-goal-row v8-card v8-anim" style="margin-bottom:10px;cursor:pointer" onclick="nav(\'objectifs\');">'
+          +'<div class="v8-goal-header"><span class="v8-goal-name">'+(g.emoji||'\uD83C\uDFAF')+' '+(g.title||g.name||'Objectif')+'</span><span style="font-size:11px;color:var(--g1)">'+statusLabel+'</span></div>'
+          +'<div class="v8-goal-bar"><div class="v8-goal-fill" style="width:'+pct+'%;background:'+col+'"></div></div>'
+          +'<div style="font-size:11px;color:var(--g1);margin-top:4px">'+pct+'% — '+(g.deadline?'deadline '+g.deadline:'pas de deadline')+'</div>'
+          +'</div>';
       }).join('');
     } else {
-      body=renderGoals();
+      body='<div style="text-align:center;padding:40px 20px;color:var(--g1)"><div style="font-size:48px;margin-bottom:12px">\uD83C\uDFAF</div><div style="font-family:var(--font-display);font-size:18px;color:var(--w);margin-bottom:8px">Aucun objectif</div><div style="font-size:13px;margin-bottom:16px">D\u00E9finis tes objectifs dans l\u2019onglet Objectifs</div><button onclick="nav(\'objectifs\')" style="padding:10px 24px;background:var(--cyan);color:#000;border:none;border-radius:10px;font-weight:700;cursor:pointer">Aller aux Objectifs \u2192</button></div>';
     }
   } else {
     const earned=new Set(S.config.badges||[]);
@@ -7746,8 +7747,8 @@ function tv4TaskRow(t){
   var cls='tv4-task-row'+(isUrgent?' urgent':isDoing?' doing':'');
   var meta='';
   var today=iso();
-  if(isUrgent) meta='URGENT'+(t.dueDate?' · '+(t.dueDate===today?'Aujourd’hui':t.dueDate):'');
-  else if(t.dueDate) meta=t.dueDate===today?'Aujourd’hui':t.dueDate;
+  if(isUrgent) meta='URGENT'+(t.dueDate?' · '+(t.dueDate===today?'Aujourd\u2019hui':t.dueDate):'');
+  else if(t.dueDate) meta=t.dueDate===today?'Aujourd\u2019hui':t.dueDate;
   if(t.category) meta+=(meta?' · ':'')+t.category;
   return '<div class="'+cls+'" data-id="'+t.id+'" onclick="openTaskDetail(\''+t.id+'\')">'
     +'<div class="tv4-swipe-right">✓ Fait</div>'
@@ -8921,10 +8922,10 @@ window.renderTachesV8 = function() {
   var ipCnt = todayTasks.filter(function(t){ return t.status==='in_progress'; }).length;
   var urgentAll = tasks.filter(function(t){ return t.priority==='urgente' && t.status!=='done'; });
   var pct = todayTasks.length > 0 ? Math.round(doneCnt/todayTasks.length*100) : 0;
-  var progLabel = doneCnt+' tâches faites aujourd’hui · '+ipCnt+' en cours · '+urgentAll.length+' urgentes';
+  var progLabel = doneCnt+' tâches faites aujourd\u2019hui · '+ipCnt+' en cours · '+urgentAll.length+' urgentes';
   var filter = window._tv3rFilter || 'today';
   var chips = [
-    {id:'today', label:'Aujourd’hui', extra:''},
+    {id:'today', label:'Aujourd\u2019hui', extra:''},
     {id:'urgent', label:'🔴 Urgentes', extra:'urgent-chip'},
     {id:'week', label:'Cette semaine', extra:''},
     {id:'calendar', label:'📅 Calendrier', extra:''},
@@ -8977,7 +8978,7 @@ window.renderTachesV8 = function() {
     if(filter==='today'){
       main = tasks.filter(function(t){ return t.dueDate===today && t.status!=='done'; });
       late = tasks.filter(function(t){ return t.dueDate && t.dueDate<today && t.status!=='done'; });
-      secLabel = 'AUJOURD’HUI';
+      secLabel = 'AUJOURD\u2019HUI';
     } else if(filter==='urgent'){
       main = urgentAll;
       secLabel = 'URGENTES';
@@ -9010,17 +9011,21 @@ window.renderTachesV8 = function() {
 };
 
 })();
-</script>
 /* stats-v3-redesign */
 window._statsTab = window._statsTab || 'analyse';
 
 window.renderStatsV8 = function() {
+  // normalise legacy tab names
+  var _t = window._statsTab;
+  if (!_t || _t === 'analytics') window._statsTab = 'analyse';
+  if (_t === 'goals') window._statsTab = 'objectifs';
+  if (_t === 'badges') window._statsTab = 'profil';
   var tab = window._statsTab;
 
   var tabsHtml = '<div class="sv3-tabs">'
-    + '<button class="sv3-tab' + (tab === 'analyse' ? ' active' : '') + '" onclick="window._statsTab='analyse';render()">Analyse</button>'
-    + '<button class="sv3-tab' + (tab === 'objectifs' ? ' active' : '') + '" onclick="window._statsTab='objectifs';render()">Objectifs</button>'
-    + '<button class="sv3-tab' + (tab === 'profil' ? ' active' : '') + '" onclick="window._statsTab='profil';render()">Profil</button>'
+    + '<button class="sv3-tab' + (tab === 'analyse' ? ' active' : '') + '" onclick="window._statsTab=&quot;analyse&quot;;render()">Analyse</button>'
+    + '<button class="sv3-tab' + (tab === 'objectifs' ? ' active' : '') + '" onclick="window._statsTab=&quot;objectifs&quot;;render()">Objectifs</button>'
+    + '<button class="sv3-tab' + (tab === 'profil' ? ' active' : '') + '" onclick="window._statsTab=&quot;profil&quot;;render()">Profil</button>'
     + '</div>';
 
   var body = '';
@@ -9099,7 +9104,7 @@ function sv3RenderAnalyse() {
     + ringHtml
     + '<div>'
     + '<div class="sv3-ring-label">' + todayScore + '%</div>'
-    + '<div class="sv3-ring-sub">Score aujourd’hui</div>'
+    + '<div class="sv3-ring-sub">Score aujourd\u2019hui</div>'
     + '</div>'
     + '</div>'
     + '<div class="sv3-stats-row">'
@@ -9194,7 +9199,7 @@ function sv3RenderAnalyse() {
     var sign = mn.net >= 0 ? '+' : '';
     var shortAmt = Math.abs(mn.net) >= 1000 ? (sign + (mn.net / 1000).toFixed(1) + 'k') : (sign + mn.net);
     finHtml += '<div class="sv3-fin-col">'
-      + '<div class="sv3-fin-bar-wrap" onclick="nav('argent')">'
+      + '<div class="sv3-fin-bar-wrap" onclick="nav(\'argent\')">'
       + '<div class="sv3-fin-bar" style="height:' + Math.max(h, 3) + 'px;background:' + color + '"></div>'
       + '</div>'
       + '<div class="sv3-fin-lbl">' + mn.name + '<br>' + shortAmt + '</div>'
@@ -9235,7 +9240,7 @@ function sv3RenderObjectifs() {
     var badgeClass = g.status === 'done' ? 'sv3-badge-done' : g.status === 'in_progress' ? 'sv3-badge-inprogress' : 'sv3-badge-todo';
     var badgeLabel = g.status === 'done' ? 'terminé' : g.status === 'in_progress' ? 'en cours' : 'à faire';
 
-    var clickAttr = 'onclick="if(typeof openGoalDetail==='function')openGoalDetail(' + JSON.stringify(g.id) + ')"';
+    var clickAttr = 'onclick="openGoalDetail(' + JSON.stringify(g.id) + ')"';
 
     html2 += '<div class="sv3-goal-row" ' + clickAttr + '>'
       + '<div class="sv3-goal-emoji">' + (g.emoji || '🎯') + '</div>'
@@ -9326,6 +9331,7 @@ function pv3EscId(id){ return String(id).replace(/"/g,'&quot;'); }
 
 // ── renderPlusV8 override ────────────────────────────────────────────────────
 window.renderPlusV8 = function(){
+  if (!S.config) S.config = {};
   var xp = S.config.xp || 0;
   var lvl = getLevelInfo(xp);
   var streak = currentStreak();
@@ -9396,15 +9402,15 @@ window.renderPlusV8 = function(){
 
   // ── Feature 3: Stats snapshot ────────────────────────────────────────────
   html += '<div class="pv3-stats-row">';
-  html += '<div class="pv3-chip" onclick="nav('stats')">';
+  html += '<div class="pv3-chip" onclick="nav(\'stats\')">';
   html += '<div class="pv3-chip-val" style="color:var(--amber)">🔥 ' + streak + '</div>';
   html += '<div class="pv3-chip-lbl">Streak</div>';
   html += '</div>';
-  html += '<div class="pv3-chip" onclick="nav('taches')">';
+  html += '<div class="pv3-chip" onclick="nav(\'taches\')">';
   html += '<div class="pv3-chip-val" style="color:var(--green)">' + tasksDone + '</div>';
   html += '<div class="pv3-chip-lbl">✅ Tâches</div>';
   html += '</div>';
-  html += '<div class="pv3-chip" onclick="nav('objectifs')">';
+  html += '<div class="pv3-chip" onclick="nav(\'objectifs\')">';
   html += '<div class="pv3-chip-val" style="color:var(--purp)">' + goalsDone + '</div>';
   html += '<div class="pv3-chip-lbl">🎯 Objectifs</div>';
   html += '</div>';
@@ -9442,7 +9448,7 @@ window.renderPlusV8 = function(){
   // Add form
   html += '<div class="pv3-inline-form' + (_pv3FormOpen ? ' open' : '') + '" id="pv3-add-form">';
   html += '<div class="pv3-form-row">';
-  html += '<input id="pv3-h-label" class="pv3-input" style="flex:1;min-width:120px" placeholder="Nom de l’habitude" value="">';
+  html += '<input id="pv3-h-label" class="pv3-input" style="flex:1;min-width:120px" placeholder="Nom de l\u2019habitude" value="">';
   html += '<input id="pv3-h-emoji" class="pv3-input" style="width:60px;text-align:center" placeholder="🌟" maxlength="2" value="">';
   html += '<input id="pv3-h-target" class="pv3-input" style="width:70px" type="number" min="1" max="31" placeholder="20">';
   html += '</div>';
@@ -9587,7 +9593,7 @@ window.pv3SaveHabit = function() {
   var label = (document.getElementById('pv3-h-label')||{}).value || '';
   var emoji = (document.getElementById('pv3-h-emoji')||{}).value || '🌟';
   var target = parseInt((document.getElementById('pv3-h-target')||{}).value || '20', 10) || 20;
-  if (!label.trim()) { toast('Entrez un nom d’habitude', 'var(--red)'); return; }
+  if (!label.trim()) { toast('Entrez un nom d\u2019habitude', 'var(--red)'); return; }
   if (!S.hcfg) S.hcfg = [];
   S.hcfg.push({id: 'h_' + Date.now(), label: label.trim(), emoji: emoji.trim() || '🌟', monthTarget: target, color: _pv3FormColor, group: null});
   _pv3FormOpen = false; _pv3FormColor = 'var(--cyan)'; save(); render();
@@ -9682,6 +9688,10 @@ window.pv3ScrollNotes = function() {
 };
 
 })();
+
+
+
+/* audit-v1-fixes — applied 2026-04-09 */
 
 </script>
 </body>
