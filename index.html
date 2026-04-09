@@ -531,6 +531,20 @@ body.compact .habit-row{padding:7px 0}
 .hv2-fin-balance{font-size:12px;color:var(--g1);margin-top:4px}
 .hv2-section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--g1);margin-bottom:8px}
 </style>
+
+<style>
+/* final-polish-v1 — CSS touch targets + transitions */
+.hv2-hab-row,.hv2-task-row{min-height:44px;transition:opacity 0.15s, background 0.15s;}
+.hv2-hab-row:active,.hv2-task-row:active{opacity:0.7;}
+.hv2-check-circle,.hv2-task-cb{transition:opacity 0.15s;}
+/* Consistent section headers across all pages */
+.hv2-section-label,
+.tv3-section-label,
+.av3-section-label,
+.sv3-section-label,
+.og-section-label,
+.pv3-section-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--g1);}
+</style>
 </head>
 <body>
 <div id="app">
@@ -9901,7 +9915,7 @@ window.renderHomeV8 = function() {
 
   // Feature 5: Goal hero
   if (mods.goals !== false) {
-    var goals = (S.goals || []).filter(function(g) { return g.status === "active" && g.type === "project"; });
+    var goals = (S.goals || []).filter(function(g) { return g.status !== "done" && g.type === "project"; });
     goals.sort(function(a, b) {
       if (!a.deadline) return 1;
       if (!b.deadline) return -1;
@@ -9913,8 +9927,8 @@ window.renderHomeV8 = function() {
     if (heroGoal) {
       var gPct = typeof goalProgress === "function" ? Math.round(goalProgress(heroGoal)) : 0;
       var rhythm = (typeof window.ogRhythm === "function") ? window.ogRhythm(heroGoal) : "neutral";
-      var rhythmLabel = rhythm === "ahead" ? "En avance" : rhythm === "on" ? "Dans les temps" : rhythm === "late" ? "En retard" : "Neutre";
-      var rhythmClass = rhythm === "ahead" ? "hv2-rhythm-ahead" : rhythm === "on" ? "hv2-rhythm-on" : rhythm === "late" ? "hv2-rhythm-late" : "hv2-rhythm-neutral";
+      var rhythmLabel = rhythm === "ahead" ? "En avance" : rhythm === "ontrack" ? "Dans les temps" : rhythm === "late" ? "En retard" : "";
+      var rhythmClass = rhythm === "ahead" ? "hv2-rhythm-ahead" : rhythm === "ontrack" ? "hv2-rhythm-on" : rhythm === "late" ? "hv2-rhythm-late" : "hv2-rhythm-neutral";
       var nextAction = "";
       if (heroGoal.subGoals && heroGoal.subGoals.length) {
         var nextSub = heroGoal.subGoals.find(function(sg) { return !sg.done; });
@@ -9990,6 +10004,28 @@ window.renderHomeV8 = function() {
   return h;
 };
 /* == end Home V2 == */
+
+/* final-polish-v1 */
+// Fix 1-4: unescaped apostrophes patched via string replace above
+// Fix 5: goal hero status filter — "active" → status !== "done"
+// Fix 6: rhythm label — "on" → "ontrack" (matches ogRhythm return value)
+
+// Guard: ensure homeModules always has all keys
+(function(){
+  if(!window.S||!window.S.config)return;
+  var def={streak:true,kpis:true,weekBars:true,checkin:true,finAlert:true,goals:true};
+  var hm=window.S.config.homeModules;
+  if(!hm){window.S.config.homeModules=def;return;}
+  Object.keys(def).forEach(function(k){if(hm[k]===undefined)hm[k]=true;});
+})();
+
+// Guard: openGoalDetail stub if not defined (should already be defined by IIFE)
+if(!window.openGoalDetail){
+  window.openGoalDetail=function(id){
+    if(typeof window.nav==='function')window.nav('objectifs');
+  };
+}
+
 </script>
 </body>
 </html>
