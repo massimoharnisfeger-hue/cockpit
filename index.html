@@ -864,6 +864,36 @@ body.compact .habit-row{padding:7px 0}
 .aim-primary{background:var(--cyan);color:#000}
 .aim-primary:disabled{opacity:.4;cursor:not-allowed}
 </style>
+
+<style id="ttc-css">
+.ttc-counter {
+  font-size: 13px;
+  color: var(--g1);
+  padding: 2px 16px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ttc-done-count {
+  color: var(--green);
+  font-weight: 600;
+}
+.ttc-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--bg3);
+  border-radius: 2px;
+  overflow: hidden;
+  max-width: 80px;
+}
+.ttc-bar-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+</style>
+
 </head>
 <body>
 <div id="app">
@@ -12232,7 +12262,11 @@ function parseCSV(text, bank) {
 function isDuplicate(tx) {
   var fin = (window.S && window.S.finance) || [];
   return fin.some(function(e) {
-    return e && e.date === tx.date && Math.abs(e.amt - tx.amt) < 0.01;
+    if (!e || e.date !== tx.date) return false;
+    if (Math.abs(e.amt - tx.amt) > 0.01) return false;
+    var ea = (e.desc || '').slice(0,20).toLowerCase();
+    var ta = (tx.desc || '').slice(0,20).toLowerCase();
+    return ea === ta;
   });
 }
 
@@ -12382,8 +12416,13 @@ window._aimConfirm = function() {
       tags: [], pending: false, note: ''
     });
   });
-  if (typeof save === 'function') save();
-  window.closeArgentImport();
+  var cfg = (window.S && window.S.config) ? window.S.config : {};
+    if (!cfg.importHistory) cfg.importHistory = [];
+    cfg.importHistory.unshift({date: new Date().toISOString().slice(0,10), count: toImport.length, source: _bank});
+    if (cfg.importHistory.length > 5) cfg.importHistory = cfg.importHistory.slice(0,5);
+    if (window.S) window.S.config = cfg;
+    if (typeof save === 'function') save();
+    window.closeArgentImport();
   if (typeof render === 'function') render();
   if (typeof toast === 'function') toast(toImport.length+' transaction(s) import\u00e9e(s) \u2713', 'var(--green)');
 };
@@ -12403,6 +12442,35 @@ window.renderArgentV8 = function() {
 
 })();
 /* end argent-import-v1 */
+
+
+/* tasks-today-counter-v1 */
+(function() {
+  var _origRender = window.renderTachesV8;
+  window.renderTachesV8 = function() {
+    var base = _origRender ? _origRender() : '';
+    var today = iso();
+    var tasks = S.tasks || [];
+    var doneToday = tasks.filter(function(t) {
+      return t.status === 'done' && t.completedAt && t.completedAt.startsWith(today);
+    }).length;
+    var totalToday = tasks.filter(function(t) {
+      return t.dueDate === today;
+    }).length;
+    var pct = totalToday > 0 ? Math.round(doneToday / totalToday * 100) : 0;
+    var label = doneToday + ' / ' + totalToday
+      + ' tâche' + (totalToday !== 1 ? 's' : '')
+      + ' terminée' + (doneToday !== 1 ? 's' : '')
+      + ' aujourd’hui';
+    var counter = '<div class="ttc-counter">'
+      + '<span class="ttc-done-count">' + doneToday + '</span>'
+      + '<span style="color:var(--g2)">/ ' + totalToday + ' terminée' + (doneToday !== 1 ? 's' : '') + ' aujourd’hui</span>'
+      + '<div class="ttc-bar"><div class="ttc-bar-fill" style="width:' + pct + '%"></div></div>'
+      + '</div>';
+    // Injecter apres le tv4-subtitle
+    return base.replace(/(class="tv4-subtitle">[^<]*<\/div>)/, '$1' + counter);
+  };
+})();
 
 </script>
 </body>
