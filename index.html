@@ -382,6 +382,80 @@ body.compact .habit-row{padding:7px 0}
 .sv3-qs-val{font-size:24px;font-weight:800;color:var(--purp);}
 .sv3-qs-lbl{font-size:11px;color:var(--g1);margin-top:3px;}
 </style>
+<style id="pv3-css">
+/* PLUS V3 */
+.pv3-page{padding:16px;max-width:600px;margin:0 auto;}
+.pv3-hero{background:linear-gradient(135deg,var(--bg1),var(--bg3));border-radius:20px;padding:24px 20px;margin-bottom:16px;text-align:center;border:1px solid var(--b);position:relative;}
+.pv3-avatar{font-size:64px;line-height:1;margin-bottom:10px;cursor:pointer;display:inline-block;transition:transform .2s;}
+.pv3-avatar:active{transform:scale(.92);}
+.pv3-name{font-size:22px;font-weight:800;color:var(--w);font-family:var(--font-display);cursor:pointer;}
+.pv3-level-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.3);border-radius:20px;padding:4px 14px;margin-top:8px;font-size:13px;color:var(--cyan);font-weight:600;}
+.pv3-edit-btn{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.06);border:1px solid var(--b);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:14px;color:var(--g1);}
+.pv3-edit-btn:hover{color:var(--w);}
+.pv3-xp-card{background:var(--bg1);border-radius:16px;padding:18px;margin-bottom:16px;border:1px solid var(--b);}
+.pv3-xp-bar-wrap{height:10px;background:var(--bg3);border-radius:5px;overflow:hidden;margin:10px 0;}
+.pv3-xp-bar-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width .5s cubic-bezier(.4,0,.2,1);}
+.pv3-xp-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--g1);}
+.pv3-xp-total{font-size:12px;color:var(--g2);margin-top:6px;text-align:right;}
+.pv3-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.pv3-chip{background:var(--bg1);border:1px solid var(--b);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;}
+.pv3-chip:hover{border-color:var(--cyan);background:rgba(0,212,255,.06);}
+.pv3-chip-val{font-size:18px;font-weight:800;color:var(--w);font-family:var(--font-mono);}
+.pv3-chip-lbl{font-size:10px;color:var(--g1);margin-top:3px;}
+.pv3-sec{font-size:11px;font-weight:700;color:var(--g2);letter-spacing:.08em;text-transform:uppercase;margin:20px 0 10px;}
+.pv3-card{background:var(--bg1);border-radius:16px;border:1px solid var(--b);margin-bottom:12px;overflow:hidden;}
+.pv3-habit-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--bg3);}
+.pv3-habit-row:last-child{border-bottom:none;}
+.pv3-habit-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.pv3-habit-info{flex:1;min-width:0;}
+.pv3-habit-label{font-size:14px;font-weight:600;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pv3-habit-target{font-size:11px;color:var(--g1);margin-top:1px;}
+.pv3-del-btn{background:rgba(255,58,92,.1);border:1px solid rgba(255,58,92,.25);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:16px;color:var(--red);flex-shrink:0;}
+.pv3-del-btn:hover{background:rgba(255,58,92,.2);}
+.pv3-add-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;cursor:pointer;font-size:14px;font-weight:600;color:var(--cyan);}
+.pv3-add-btn:hover{background:rgba(0,212,255,.04);}
+.pv3-inline-form{padding:14px;border-top:1px solid var(--bg3);display:none;}
+.pv3-inline-form.open{display:block;}
+.pv3-form-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.pv3-input{background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:8px 12px;color:var(--w);font-size:13px;font-family:var(--font-body);outline:none;transition:border-color .2s;}
+.pv3-input:focus{border-color:var(--cyan);}
+.pv3-color-row{display:flex;gap:8px;margin-bottom:10px;align-items:center;}
+.pv3-color-swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color .2s,transform .2s;}
+.pv3-color-swatch:hover,.pv3-color-swatch.sel{border-color:var(--w);transform:scale(1.2);}
+.pv3-pref-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--bg3);}
+.pv3-pref-row:last-child{border-bottom:none;}
+.pv3-pref-lbl{font-size:14px;color:var(--w);font-weight:500;}
+.pv3-pref-sub{font-size:11px;color:var(--g1);margin-top:1px;}
+.pv3-pref-input{background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:6px 10px;color:var(--w);font-size:14px;font-weight:700;width:90px;text-align:right;outline:none;}
+.pv3-pref-input:focus{border-color:var(--cyan);}
+.pv3-toggle{width:44px;height:24px;background:var(--bg3);border-radius:12px;position:relative;cursor:pointer;transition:background .25s;border:none;flex-shrink:0;}
+.pv3-toggle.on{background:var(--cyan);}
+.pv3-toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .25s;}
+.pv3-toggle.on::after{transform:translateX(20px);}
+.pv3-theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;}
+.pv3-theme-card{padding:12px;border-radius:12px;border:2px solid var(--b);cursor:pointer;display:flex;align-items:center;gap:10px;transition:border-color .2s;}
+.pv3-theme-card.active{border-color:var(--active-preview,var(--cyan));}
+.pv3-theme-swatch{width:22px;height:22px;border-radius:50%;flex-shrink:0;}
+.pv3-theme-name{font-size:13px;font-weight:600;color:var(--w);}
+.pv3-theme-desc{font-size:10px;color:var(--g1);}
+.pv3-density-row{display:flex;gap:8px;padding:12px 14px;}
+.pv3-dens-btn{flex:1;padding:8px;border-radius:10px;border:1px solid var(--b);background:var(--bg);color:var(--g1);font-size:13px;cursor:pointer;transition:all .2s;}
+.pv3-dens-btn.active{background:rgba(0,212,255,.12);border-color:var(--cyan);color:var(--cyan);font-weight:700;}
+.pv3-data-btn{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--bg3);}
+.pv3-data-btn:last-child{border-bottom:none;}
+.pv3-data-btn:hover{background:rgba(255,255,255,.03);}
+.pv3-data-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.pv3-data-info{flex:1;}
+.pv3-data-title{font-size:14px;font-weight:600;color:var(--w);}
+.pv3-data-sub{font-size:11px;color:var(--g1);margin-top:1px;}
+.pv3-data-arr{color:var(--g2);font-size:18px;}
+.pv3-note-item{padding:10px 14px;border-bottom:1px solid var(--bg3);}
+.pv3-note-item:last-child{border-bottom:none;}
+.pv3-note-date{font-size:11px;color:var(--g1);margin-bottom:3px;}
+.pv3-note-text{font-size:13px;color:var(--w);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pv3-note-add{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;cursor:pointer;font-size:14px;font-weight:600;color:var(--cyan);border-top:1px solid var(--bg3);}
+.pv3-note-add:hover{background:rgba(0,212,255,.04);}
+</style>
 </head>
 <body>
 <div id="app">
@@ -9236,6 +9310,378 @@ function sv3RenderProfil() {
 
   return xpHtml + '<div class="sv3-section"><div class="sv3-section-title">BADGES</div></div>' + badgesHtml + qsHtml;
 }
+
+
+/* plus-v3-redesign */
+(function(){
+'use strict';
+
+// ── Habit form state ─────────────────────────────────────────────────────────
+var _pv3FormOpen = false;
+var _pv3FormColor = 'var(--cyan)';
+var _pv3ConfirmId = null;
+
+// ── Helper: safe ID attr ─────────────────────────────────────────────────────
+function pv3EscId(id){ return String(id).replace(/"/g,'&quot;'); }
+
+// ── renderPlusV8 override ────────────────────────────────────────────────────
+window.renderPlusV8 = function(){
+  var xp = S.config.xp || 0;
+  var lvl = getLevelInfo(xp);
+  var streak = currentStreak();
+  var best = (typeof bestStreak === 'function') ? bestStreak() : (S.config.bestStreak || 0);
+  var profile = S.config.profile || {name:'Massimo', emoji:'⚡'};
+  var pName = profile.name || 'Massimo';
+  var pEmoji = profile.emoji || '⚡';
+  var lvlName = lvl.name || lvl.label || 'Explorateur';
+  var lvlNum = lvl.lvl || lvl.level || 1;
+
+  // Stats
+  var tasksDone = (S.tasks || []).filter(function(t){ return t.done || t.status === 'done'; }).length;
+  var goalsDone = (S.goals || []).filter(function(g){ return g.status === 'done' || g.status === 'completed'; }).length;
+  var notesCount = (S.notes || []).length;
+
+  // Habits
+  var habits = S.hcfg || [];
+  var COLORS = ['var(--cyan)','var(--green)','var(--amber)','var(--red)','var(--purp)'];
+  var THEMES = [
+    {id:'midnight', label:'Midnight', desc:'Cyan sur noir (défaut)', preview:'#00D4FF'},
+    {id:'ocean',    label:'Ocean',    desc:'Bleu profond',               preview:'#4A90E2'},
+    {id:'forest',   label:'Forest',   desc:'Vert nature',                preview:'#2ECC71'},
+    {id:'sunset',   label:'Sunset',   desc:'Orange & rouge',             preview:'#FF6B35'},
+  ];
+  var currentTheme = S.config.theme || 'midnight';
+  var density = S.config.density || 'confort';
+  var hm = S.config.homeModules || {};
+  var HOME_MODS = [
+    {key:'streak',   label:'Streak du jour'},
+    {key:'kpis',     label:'KPIs rapides'},
+    {key:'weekBars', label:'Barres hebdo'},
+    {key:'checkin',  label:'Check-in'},
+    {key:'finAlert', label:'Alerte finances'},
+    {key:'goals',    label:'Objectifs'},
+  ];
+
+  // Notes (last 3)
+  var notes = (S.notes || []).slice().sort(function(a,b){
+    return (b.date+' '+(b.time||'')).localeCompare(a.date+' '+(a.time||''));
+  }).slice(0,3);
+
+  // ── Build HTML ──────────────────────────────────────────────────────────
+  var html = '<div class="pv3-page">';
+
+  // ── Feature 1: Hero header ───────────────────────────────────────────────
+  html += '<div class="pv3-hero">';
+  html += '<button class="pv3-edit-btn" onclick="pv3EditProfile()">&#9998;</button>';
+  html += '<div class="pv3-avatar" onclick="pv3ChangeEmoji()">' + pEmoji + '</div>';
+  html += '<div class="pv3-name" onclick="pv3ChangeName()">' + pName + '</div>';
+  html += '<div class="pv3-level-badge">';
+  html += '<span style="background:' + (lvl.color||'var(--cyan)') + ';width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#06090D">' + lvlNum + '</span>';
+  html += 'Niveau ' + lvlNum + ' — ' + lvlName;
+  html += '</div>';
+  html += '</div>';
+
+  // ── Feature 2: XP card ──────────────────────────────────────────────────
+  var nextXp = lvl.next ? lvl.next.minXP : xp;
+  var curXp  = lvl.minXP || 0;
+  html += '<div class="pv3-xp-card">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+  html += '<span style="font-size:13px;font-weight:700;color:var(--w)">' + lvlName + '</span>';
+  html += '<span style="font-size:12px;color:var(--g1)">' + xp + ' / ' + nextXp + ' XP</span>';
+  html += '</div>';
+  html += '<div class="pv3-xp-bar-wrap"><div class="pv3-xp-bar-fill" style="width:' + lvl.pct + '%"></div></div>';
+  html += '<div class="pv3-xp-labels"><span>Niv. ' + lvlNum + '</span><span>' + (lvl.next ? 'Niv. ' + ((lvlNum||0)+1) : 'MAX') + '</span></div>';
+  html += '<div class="pv3-xp-total">Total XP gagné : <strong style="color:var(--cyan)">' + xp + '</strong></div>';
+  html += '</div>';
+
+  // ── Feature 3: Stats snapshot ────────────────────────────────────────────
+  html += '<div class="pv3-stats-row">';
+  html += '<div class="pv3-chip" onclick="nav('stats')">';
+  html += '<div class="pv3-chip-val" style="color:var(--amber)">🔥 ' + streak + '</div>';
+  html += '<div class="pv3-chip-lbl">Streak</div>';
+  html += '</div>';
+  html += '<div class="pv3-chip" onclick="nav('taches')">';
+  html += '<div class="pv3-chip-val" style="color:var(--green)">' + tasksDone + '</div>';
+  html += '<div class="pv3-chip-lbl">✅ Tâches</div>';
+  html += '</div>';
+  html += '<div class="pv3-chip" onclick="nav('objectifs')">';
+  html += '<div class="pv3-chip-val" style="color:var(--purp)">' + goalsDone + '</div>';
+  html += '<div class="pv3-chip-lbl">🎯 Objectifs</div>';
+  html += '</div>';
+  html += '<div class="pv3-chip" onclick="pv3ScrollNotes()">';
+  html += '<div class="pv3-chip-val" style="color:var(--cyan)">' + notesCount + '</div>';
+  html += '<div class="pv3-chip-lbl">💬 Notes</div>';
+  html += '</div>';
+  html += '</div>';
+
+  // ── Feature 4: Habits manager ────────────────────────────────────────────
+  html += '<div class="pv3-sec">MES HABITUDES</div>';
+  html += '<div class="pv3-card" id="pv3-habits-card">';
+  if (habits.length === 0) {
+    html += '<div style="padding:18px;text-align:center;color:var(--g1);font-size:13px">Aucune habitude — ajoutez-en une !</div>';
+  } else {
+    habits.forEach(function(h) {
+      var color = h.color || 'var(--cyan)';
+      var safeid = pv3EscId(h.id);
+      html += '<div class="pv3-habit-row" id="pv3-hr-' + safeid + '">';
+      html += '<span style="font-size:22px">' + (h.emoji || '🌟') + '</span>';
+      html += '<div class="pv3-habit-dot" style="background:' + color + '"></div>';
+      html += '<div class="pv3-habit-info">';
+      html += '<div class="pv3-habit-label">' + h.label + '</div>';
+      html += '<div class="pv3-habit-target">Cible : ' + (h.monthTarget || 0) + ' jours/mois</div>';
+      html += '</div>';
+      if (_pv3ConfirmId === h.id) {
+        html += '<button class="pv3-del-btn" style="font-size:12px;width:auto;padding:4px 8px;background:rgba(255,58,92,.25)" onclick="pv3DeleteHabit(' + JSON.stringify(h.id) + ')">Confirmer</button>';
+        html += '<button style="background:none;border:none;color:var(--g1);cursor:pointer;font-size:12px;padding:4px 6px" onclick="pv3CancelDel()">Ann.</button>';
+      } else {
+        html += '<button class="pv3-del-btn" onclick="pv3ConfirmDel(' + JSON.stringify(h.id) + ')">&#x1F5D1;</button>';
+      }
+      html += '</div>';
+    });
+  }
+  // Add form
+  html += '<div class="pv3-inline-form' + (_pv3FormOpen ? ' open' : '') + '" id="pv3-add-form">';
+  html += '<div class="pv3-form-row">';
+  html += '<input id="pv3-h-label" class="pv3-input" style="flex:1;min-width:120px" placeholder="Nom de l’habitude" value="">';
+  html += '<input id="pv3-h-emoji" class="pv3-input" style="width:60px;text-align:center" placeholder="🌟" maxlength="2" value="">';
+  html += '<input id="pv3-h-target" class="pv3-input" style="width:70px" type="number" min="1" max="31" placeholder="20">';
+  html += '</div>';
+  html += '<div class="pv3-color-row">';
+  html += '<span style="font-size:12px;color:var(--g1)">Couleur :</span>';
+  COLORS.forEach(function(c) {
+    html += '<div class="pv3-color-swatch' + (_pv3FormColor === c ? ' sel' : '') + '" style="background:' + c + '" onclick="pv3SelectColor(' + JSON.stringify(c) + ')"></div>';
+  });
+  html += '</div>';
+  html += '<div style="display:flex;gap:8px">';
+  html += '<button onclick="pv3SaveHabit()" style="flex:1;padding:10px;background:var(--cyan);color:#000;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px">Enregistrer</button>';
+  html += '<button onclick="pv3CloseForm()" style="padding:10px 16px;background:var(--bg3);color:var(--g1);border:none;border-radius:10px;cursor:pointer;font-size:14px">Annuler</button>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="pv3-add-btn" onclick="pv3OpenForm()">&#xFF0B; Ajouter une habitude</div>';
+  html += '</div>';
+
+  // ── Feature 5: Préférences ───────────────────────────────────────────────
+  html += '<div class="pv3-sec">PRÉFÉRENCES</div>';
+  html += '<div class="pv3-card">';
+  // Streak goal
+  html += '<div class="pv3-pref-row">';
+  html += '<div><div class="pv3-pref-lbl">Objectif de streak</div><div class="pv3-pref-sub">Nombre de jours visé</div></div>';
+  html += '<input class="pv3-pref-input" id="pv3-streak-goal" type="number" min="1" max="999" value="' + (S.config.streakGoal || 30) + '" onchange="pv3SaveStreakGoal()">';
+  html += '</div>';
+  // Savings goal
+  html += '<div class="pv3-pref-row">';
+  html += '<div><div class="pv3-pref-lbl">Objectif d’épargne</div><div class="pv3-pref-sub">Montant cible en €</div></div>';
+  html += '<input class="pv3-pref-input" id="pv3-savings-goal" type="number" min="0" value="' + (S.config.savingsGoal || 4000) + '" onchange="pv3SaveSavingsGoal()">';
+  html += '</div>';
+  // Home modules toggles
+  html += '<div style="padding:10px 14px 6px;font-size:11px;color:var(--g2);font-weight:700;letter-spacing:.06em;text-transform:uppercase">Modules accueil</div>';
+  HOME_MODS.forEach(function(mod) {
+    var isOn = hm[mod.key] !== false;
+    html += '<div class="pv3-pref-row">';
+    html += '<div class="pv3-pref-lbl">' + mod.label + '</div>';
+    html += '<button class="pv3-toggle' + (isOn ? ' on' : '') + '" onclick="pv3ToggleMod(' + JSON.stringify(mod.key) + ')" aria-label="toggle ' + mod.key + '"></button>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // ── Feature 6: Apparence ────────────────────────────────────────────────
+  html += '<div class="pv3-sec">APPARENCE</div>';
+  html += '<div class="pv3-card">';
+  html += '<div class="pv3-theme-grid">';
+  THEMES.forEach(function(th) {
+    var isActive = currentTheme === th.id;
+    html += '<div class="pv3-theme-card' + (isActive ? ' active' : '') + '" style="' + (isActive ? '--active-preview:' + th.preview : '') + '" onclick="applyTheme(' + JSON.stringify(th.id) + ')">';
+    html += '<div class="pv3-theme-swatch" style="background:' + th.preview + '"></div>';
+    html += '<div><div class="pv3-theme-name" style="color:' + (isActive ? th.preview : 'var(--w)') + '">' + th.label + '</div>';
+    html += '<div class="pv3-theme-desc">' + th.desc + '</div></div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  // Density
+  html += '<div style="padding:0 14px 8px;font-size:11px;color:var(--g2);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-top:4px">Densité</div>';
+  html += '<div class="pv3-density-row">';
+  ['compact','confort','spacieux'].forEach(function(d) {
+    var labels = {compact:'Compact', confort:'Confort', spacieux:'Spacieux'};
+    html += '<button class="pv3-dens-btn' + (density === d ? ' active' : '') + '" onclick="pv3SetDensity(' + JSON.stringify(d) + ')">' + labels[d] + '</button>';
+  });
+  html += '</div>';
+  html += '</div>';
+
+  // ── Feature 7: Données ──────────────────────────────────────────────────
+  html += '<div class="pv3-sec" id="pv3-notes-anchor">DONNÉES</div>';
+  html += '<div class="pv3-card">';
+  // Export
+  html += '<div class="pv3-data-btn" onclick="exportBackup()">';
+  html += '<div class="pv3-data-icon" style="background:rgba(0,212,255,.1)">&#x1F4BE;</div>';
+  html += '<div class="pv3-data-info"><div class="pv3-data-title">Exporter mes données</div><div class="pv3-data-sub">Télécharger un backup JSON</div></div>';
+  html += '<span class="pv3-data-arr">›</span>';
+  html += '</div>';
+  // Import
+  html += '<div class="pv3-data-btn" onclick="pv3ImportData()">';
+  html += '<div class="pv3-data-icon" style="background:rgba(0,229,160,.1)">&#x1F4E5;</div>';
+  html += '<div class="pv3-data-info"><div class="pv3-data-title">Importer des données</div><div class="pv3-data-sub">Restaurer depuis un backup</div></div>';
+  html += '<span class="pv3-data-arr">›</span>';
+  html += '</div>';
+  // Reset
+  html += '<div class="pv3-data-btn" onclick="pv3ResetApp()">';
+  html += '<div class="pv3-data-icon" style="background:rgba(255,58,92,.1)">&#x1F5D1;</div>';
+  html += '<div class="pv3-data-info"><div class="pv3-data-title" style="color:var(--red)">Éinitialiser l’app</div><div class="pv3-data-sub">Effacer toutes les données</div></div>';
+  html += '<span class="pv3-data-arr" style="color:var(--red)">›</span>';
+  html += '</div>';
+  html += '</div>';
+
+  // Notes quick list
+  html += '<div class="pv3-sec">NOTES RÉCENTES</div>';
+  html += '<div class="pv3-card">';
+  if (notes.length === 0) {
+    html += '<div style="padding:16px;text-align:center;color:var(--g1);font-size:13px">Aucune note encore</div>';
+  } else {
+    notes.forEach(function(n) {
+      html += '<div class="pv3-note-item">';
+      html += '<div class="pv3-note-date">' + n.date + (n.time ? ' ' + n.time : '') + '</div>';
+      html += '<div class="pv3-note-text">' + n.text + '</div>';
+      html += '</div>';
+    });
+  }
+  html += '<div class="pv3-note-add" onclick="pv3AddNote()">&#xFF0B; Note</div>';
+  html += '</div>';
+
+  html += '<div style="height:40px"></div>';
+  html += '</div>';
+  return html;
+};
+
+// ── Profile edit helpers ─────────────────────────────────────────────────────
+window.pv3EditProfile = function() {
+  var p = S.config.profile || {name:'Massimo', emoji:'⚡'};
+  var newEmoji = prompt('Emoji (1 caractère) :', p.emoji || '⚡');
+  if (newEmoji === null) return;
+  var newName = prompt('Votre nom :', p.name || 'Massimo');
+  if (newName === null) return;
+  S.config.profile = {name: newName.trim() || p.name, emoji: newEmoji.trim() || p.emoji};
+  save(); render();
+};
+window.pv3ChangeEmoji = function() {
+  var p = S.config.profile || {name:'Massimo', emoji:'⚡'};
+  var newEmoji = prompt('Nouvel emoji :', p.emoji || '⚡');
+  if (newEmoji === null || !newEmoji.trim()) return;
+  S.config.profile = {name: p.name || 'Massimo', emoji: newEmoji.trim()};
+  save(); render();
+};
+window.pv3ChangeName = function() {
+  var p = S.config.profile || {name:'Massimo', emoji:'⚡'};
+  var newName = prompt('Votre nom :', p.name || 'Massimo');
+  if (newName === null || !newName.trim()) return;
+  S.config.profile = {name: newName.trim(), emoji: p.emoji || '⚡'};
+  save(); render();
+};
+
+// ── Habit form helpers ───────────────────────────────────────────────────────
+window.pv3OpenForm = function() {
+  _pv3FormOpen = true; _pv3FormColor = 'var(--cyan)'; render();
+  setTimeout(function(){ var el = document.getElementById('pv3-h-label'); if(el) el.focus(); }, 80);
+};
+window.pv3CloseForm = function() { _pv3FormOpen = false; render(); };
+window.pv3SelectColor = function(c) { _pv3FormColor = c; render(); };
+window.pv3SaveHabit = function() {
+  var label = (document.getElementById('pv3-h-label')||{}).value || '';
+  var emoji = (document.getElementById('pv3-h-emoji')||{}).value || '🌟';
+  var target = parseInt((document.getElementById('pv3-h-target')||{}).value || '20', 10) || 20;
+  if (!label.trim()) { toast('Entrez un nom d’habitude', 'var(--red)'); return; }
+  if (!S.hcfg) S.hcfg = [];
+  S.hcfg.push({id: 'h_' + Date.now(), label: label.trim(), emoji: emoji.trim() || '🌟', monthTarget: target, color: _pv3FormColor, group: null});
+  _pv3FormOpen = false; _pv3FormColor = 'var(--cyan)'; save(); render();
+  toast('Habitude ajoutée ✓', 'var(--green)');
+};
+window.pv3ConfirmDel = function(id) { _pv3ConfirmId = id; render(); };
+window.pv3CancelDel  = function()   { _pv3ConfirmId = null; render(); };
+window.pv3DeleteHabit = function(id) {
+  if (!S.hcfg) return;
+  var idx = S.hcfg.findIndex(function(h){ return h.id === id; });
+  if (idx === -1) return;
+  S.hcfg.splice(idx, 1);
+  _pv3ConfirmId = null; save(); render();
+  toast('Habitude supprimée', 'var(--amber)');
+};
+
+// ── Prefs helpers ────────────────────────────────────────────────────────────
+window.pv3SaveStreakGoal = function() {
+  var v = parseInt((document.getElementById('pv3-streak-goal')||{}).value || '30', 10);
+  if (isNaN(v) || v < 1) return;
+  S.config.streakGoal = v; save();
+  toast('Objectif streak : ' + v + ' jours ✓', 'var(--cyan)');
+};
+window.pv3SaveSavingsGoal = function() {
+  var v = parseFloat((document.getElementById('pv3-savings-goal')||{}).value || '4000');
+  if (isNaN(v) || v < 0) return;
+  S.config.savingsGoal = v; save();
+  toast('Objectif épargne : ' + v + '€ ✓', 'var(--green)');
+};
+window.pv3ToggleMod = function(key) {
+  if (!S.config.homeModules) S.config.homeModules = {};
+  S.config.homeModules[key] = !( S.config.homeModules[key] !== false );
+  save(); render();
+};
+
+// ── Density helper ───────────────────────────────────────────────────────────
+window.pv3SetDensity = function(d) {
+  S.config.density = d;
+  document.body.classList.toggle('compact', d === 'compact');
+  save(); render();
+  toast('Densité : ' + d + ' ✓', 'var(--cyan)');
+};
+
+// ── Data management helpers ──────────────────────────────────────────────────
+window.pv3ImportData = function() {
+  var inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = function(e) {
+    var file = e.target.files[0]; if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        var parsed = JSON.parse(ev.target.result);
+        if (!confirm('Importer ces données ? Les données actuelles seront écrasées.')) return;
+        // Use window.S reference (avoid direct S = reassign outside IIFE)
+        Object.keys(S).forEach(function(k){ delete S[k]; });
+        Object.assign(S, parsed);
+        save(); render();
+        toast('Données importées ✓', 'var(--green)');
+      } catch(err) {
+        toast('Fichier invalide', 'var(--red)');
+      }
+    };
+    reader.readAsText(file);
+  };
+  document.body.appendChild(inp); inp.click(); document.body.removeChild(inp);
+};
+window.pv3ResetApp = function() {
+  if (!confirm('Êtes-vous sûr ?')) return;
+  if (!confirm('Confirmer la suppression ? Cette action est irréversible.')) return;
+  localStorage.clear(); location.reload();
+};
+
+// ── Notes helper ─────────────────────────────────────────────────────────────
+window.pv3AddNote = function() {
+  var text = prompt('Votre note :');
+  if (!text || !text.trim()) return;
+  if (!S.notes) S.notes = [];
+  var now = new Date();
+  var hh = String(now.getHours()).padStart(2,'0');
+  var mm = String(now.getMinutes()).padStart(2,'0');
+  S.notes.push({date: iso(), time: hh + ':' + mm, text: text.trim()});
+  save(); render();
+  toast('Note ajoutée ✓', 'var(--cyan)');
+};
+window.pv3ScrollNotes = function() {
+  nav('plus');
+  setTimeout(function(){
+    var el = document.getElementById('pv3-notes-anchor');
+    if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 150);
+};
+
+})();
 
 </script>
 </body>
