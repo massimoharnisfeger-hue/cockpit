@@ -826,6 +826,44 @@ body.compact .habit-row{padding:7px 0}
 
 
 
+<style id="aim-css">
+.aim-open-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--bg3);border:1px solid var(--b);border-radius:20px;color:var(--cyan);font-size:12px;font-weight:600;cursor:pointer}
+.aim-open-btn:active{opacity:.7}
+.aim-overlay{position:fixed;inset:0;background:rgba(6,9,13,.9);z-index:9000;display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:600px){.aim-overlay{align-items:center}}
+.aim-modal{background:var(--bg1);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+@media(min-width:600px){.aim-modal{border-radius:20px;margin:20px}}
+.aim-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--b);flex-shrink:0}
+.aim-title{font-size:16px;font-weight:700;color:var(--w)}
+.aim-cls{width:32px;height:32px;border-radius:50%;background:var(--bg3);border:none;color:var(--g1);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.aim-body{flex:1;overflow-y:auto;padding:16px}
+.aim-row2{margin-bottom:14px}
+.aim-lbl{display:block;font-size:12px;color:var(--g1);margin-bottom:6px;font-weight:600}
+.aim-sel{width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--b);border-radius:10px;color:var(--w);font-size:13px}
+.aim-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:24px;border:2px dashed var(--b);border-radius:14px;cursor:pointer;transition:border-color .2s;text-align:center}
+.aim-drop:hover,.aim-drag{border-color:var(--cyan)}
+.aim-drop-icon{font-size:32px}
+.aim-drop-txt{font-size:13px;color:var(--g1)}
+.aim-preview{background:var(--bg);border-radius:12px;border:1px solid var(--b);overflow:hidden;margin-top:4px}
+.aim-preview-hdr{padding:10px 14px;background:var(--bg3);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--g1)}
+.aim-preview-hdr label{display:flex;align-items:center;gap:5px;cursor:pointer}
+.aim-tbl-wrap{max-height:300px;overflow-y:auto}
+.aim-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.aim-tbl th{padding:6px 10px;background:var(--bg1);color:var(--g1);font-size:10px;text-align:left;position:sticky;top:0}
+.aim-row td{padding:7px 10px;border-bottom:1px solid var(--b)}
+.aim-dup-row{opacity:.45}
+.aim-date{color:var(--g1);font-family:var(--font-mono);white-space:nowrap}
+.aim-desc{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aim-pos{color:var(--green);font-weight:600;font-family:var(--font-mono)}
+.aim-neg{color:var(--red);font-weight:600;font-family:var(--font-mono)}
+.aim-dup{font-size:9px;padding:1px 5px;background:var(--amber);color:#000;border-radius:4px;margin-left:4px}
+.aim-more{padding:8px 14px;text-align:center;font-size:11px;color:var(--g2)}
+.aim-ftr{padding:14px 16px;border-top:1px solid var(--b);display:flex;gap:10px;flex-shrink:0}
+.aim-btn{flex:1;padding:12px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;border:none}
+.aim-ghost{background:var(--bg3);color:var(--g1);border:1px solid var(--b)}
+.aim-primary{background:var(--cyan);color:#000}
+.aim-primary:disabled{opacity:.4;cursor:not-allowed}
+</style>
 </head>
 <body>
 <div id="app">
@@ -12038,6 +12076,333 @@ window.renderHabitudesV1 = function() {
 /* regressions-v1 — applied 2026-04-09 — 48 fixes */
 
 
+
+
+/* argent-import-v1 */
+(function(){
+'use strict';
+
+// ── Category rules ────────────────────────────────────────────────────────
+var CATEGORY_RULES = [
+  {cat:'Alimentation', keywords:['carrefour','leclerc','lidl','aldi','monoprix','intermarch','casino','franprix','picard','auchan','super u','simply','biocoop','cora','netto','boulangerie','epicerie','marche']},
+  {cat:'Transport', keywords:['sncf','ratp','uber','bolt','taxi','total','esso','bp ','shell','autoroute','vinci','parking','blablacar','transavia','easyjet','ryanair','velib','navigo']},
+  {cat:'Loisirs', keywords:['netflix','spotify','apple music','google play','amazon prime','disney','canal','fnac','cinema','theatre','ticketmaster','steam','playstation','xbox','deezer']},
+  {cat:'Sante', keywords:['pharmacie','docteur','medecin','dentiste','opticien','mutuelle','cpam','kine','infirmier','laboratoire','hopital','clinique']},
+  {cat:'Restaurants', keywords:['restaurant','brasserie','mcdonald','burger','pizza','sushi','uber eat','deliveroo','just eat','kebab','snack']},
+  {cat:'Shopping', keywords:['zara','h&m','asos','zalando','amazon','cdiscount','darty','ikea','decathlon','boulanger','leroy merlin','castorama']},
+  {cat:'Logement', keywords:['loyer','edf','engie','sfr','orange','free ','bouygues','eau ','syndic','assurance','maif','axa']},
+  {cat:'Salaire', keywords:['salaire','virement sal','paie','virt sal','prime mensuelle']},
+  {cat:'Epargne', keywords:['livret','pel','assurance vie','epargne']}
+];
+
+var ALL_CATS = ['Alimentation','Transport','Loisirs','Sante','Restaurants','Shopping','Logement','Salaire','Epargne','Abonnements','Factures','Sport','Divers'];
+
+function autoCateg(desc) {
+  if (!desc) return 'Divers';
+  var d = desc.toLowerCase();
+  var cfg = window.S && window.S.config ? window.S.config : {};
+  var userRules = (cfg.importRules || []);
+  for (var i = 0; i < userRules.length; i++) {
+    if (userRules[i].keyword && d.indexOf(userRules[i].keyword.toLowerCase()) !== -1) return userRules[i].cat;
+  }
+  for (var r = 0; r < CATEGORY_RULES.length; r++) {
+    var rule = CATEGORY_RULES[r];
+    for (var k = 0; k < rule.keywords.length; k++) {
+      if (d.indexOf(rule.keywords[k]) !== -1) return rule.cat;
+    }
+  }
+  return 'Divers';
+}
+
+// ── Date / Amount parsers ─────────────────────────────────────────────────
+function parseDate(raw) {
+  if (!raw) return '';
+  raw = raw.trim().replace(/^["']|["']$/g, '');
+  if (/^\d{8}$/.test(raw)) return raw.slice(0,4)+'-'+raw.slice(4,6)+'-'+raw.slice(6,8);
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0,10);
+  var m = raw.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})/);
+  if (m) return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+  return '';
+}
+
+function parseAmt(raw) {
+  if (raw === null || raw === undefined || raw === '') return null;
+  raw = String(raw).trim().replace(/^["']|["']$/g,'').replace(/\u00a0/g,'').replace(/\s/g,'');
+  raw = raw.replace(/EUR|€/gi,'');
+  var neg = raw.startsWith('-') || (raw.startsWith('(') && raw.endsWith(')'));
+  raw = raw.replace(/[()]/g,'').replace(/^-/,'');
+  if (/,/.test(raw) && /\./.test(raw)) raw = raw.replace(/\./g,'').replace(',','.');
+  else raw = raw.replace(',','.');
+  var v = parseFloat(raw);
+  if (isNaN(v)) return null;
+  return neg ? -Math.abs(v) : v;
+}
+
+// ── OFX Parser ────────────────────────────────────────────────────────────
+function parseOFX(text) {
+  var txs = [];
+  var blocks = text.split(/<STMTTRN>/i);
+  for (var i = 1; i < blocks.length; i++) {
+    var b = blocks[i];
+    var getTag = function(tag) {
+      var re = new RegExp('<'+tag+'>([^\r\n<]+)','i');
+      var m = b.match(re);
+      return m ? m[1].trim() : '';
+    };
+    var dt = parseDate(getTag('DTPOSTED').slice(0,8));
+    var amt = parseAmt(getTag('TRNAMT'));
+    var desc = getTag('NAME') || getTag('MEMO') || getTag('PAYEE') || '';
+    if (dt && amt !== null) txs.push({date:dt, amt:amt, desc:desc, cat:autoCateg(desc)});
+  }
+  return txs;
+}
+
+// ── CSV line splitter ─────────────────────────────────────────────────────
+function splitLine(line, delim) {
+  var cols = [], cur = '', inQ = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === delim && !inQ) { cols.push(cur.trim().replace(/^["']|["']$/g,'')); cur = ''; }
+    else { cur += ch; }
+  }
+  cols.push(cur.trim().replace(/^["']|["']$/g,''));
+  return cols;
+}
+
+// ── CSV Parser ────────────────────────────────────────────────────────────
+function parseCSV(text, bank) {
+  // Normalize line endings: CR+LF or LF
+  var LF = String.fromCharCode(10);
+  var CR = String.fromCharCode(13);
+  var lines = text.split(LF).map(function(l){ return l.charAt(l.length-1)===CR ? l.slice(0,-1) : l; }).filter(function(l){ return l.trim(); });
+  if (lines.length < 2) return [];
+
+  var header = lines[0];
+  var delim = (header.split(';').length >= header.split(',').length) ? ';' : ',';
+  var headerCols = splitLine(header, delim).map(function(h){ return h.toLowerCase().trim(); });
+
+  function findCol(candidates) {
+    for (var c = 0; c < candidates.length; c++) {
+      for (var h = 0; h < headerCols.length; h++) {
+        if (headerCols[h].indexOf(candidates[c]) !== -1) return h;
+      }
+    }
+    return -1;
+  }
+
+  var dateCol   = findCol(['date']);
+  var descCol   = findCol(['libell','description','label','nom','name','payee']);
+  var amtCol    = findCol(['montant','amount']);
+  var debitCol  = findCol(['debit']);
+  var creditCol = findCol(['credit']);
+
+  // Bank-specific column overrides
+  if (bank === 'bnp') { dateCol=0; descCol=2; amtCol=3; debitCol=-1; creditCol=-1; }
+  else if (bank === 'sg') { dateCol=0; descCol=1; debitCol=2; creditCol=3; amtCol=-1; }
+  else if (bank === 'cic') { dateCol=0; descCol=1; amtCol=2; debitCol=-1; creditCol=-1; }
+  else if (bank === 'lcl') { dateCol=0; descCol=1; amtCol=2; debitCol=-1; creditCol=-1; }
+  else if (bank === 'ca') { dateCol=0; descCol=1; debitCol=2; creditCol=3; amtCol=-1; }
+  else if (bank === 'revolut') { dateCol=0; descCol=4; amtCol=5; debitCol=-1; creditCol=-1; }
+  else if (bank === 'bourso') { dateCol=0; descCol=1; amtCol=4; debitCol=-1; creditCol=-1; }
+
+  var txs = [];
+  for (var i = 1; i < lines.length; i++) {
+    if (/^[;,\s"]*$/.test(lines[i])) continue;
+    var cols = splitLine(lines[i], delim);
+    var rawDate = dateCol >= 0 ? (cols[dateCol]||'') : '';
+    var rawDesc = descCol >= 0 ? (cols[descCol]||'') : '';
+    var amt = null;
+    if (amtCol >= 0 && cols[amtCol] !== undefined) {
+      amt = parseAmt(cols[amtCol]);
+    } else {
+      var dv = (debitCol >= 0 && cols[debitCol]) ? parseAmt(cols[debitCol]) : null;
+      var cv = (creditCol >= 0 && cols[creditCol]) ? parseAmt(cols[creditCol]) : null;
+      if (dv) amt = -Math.abs(dv);
+      else if (cv) amt = Math.abs(cv);
+    }
+    var dt = parseDate(rawDate);
+    if (!dt || amt === null) continue;
+    txs.push({date:dt, amt:amt, desc:rawDesc, cat:autoCateg(rawDesc)});
+  }
+  return txs;
+}
+
+// ── Dedup check ───────────────────────────────────────────────────────────
+function isDuplicate(tx) {
+  var fin = (window.S && window.S.finance) || [];
+  return fin.some(function(e) {
+    return e && e.date === tx.date && Math.abs(e.amt - tx.amt) < 0.01;
+  });
+}
+
+// ── HTML escape ───────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── State ─────────────────────────────────────────────────────────────────
+var _parsed = [];
+var _bank = 'generic';
+
+// ── Render the modal ──────────────────────────────────────────────────────
+function renderModal() {
+  var el = document.getElementById('aim-wrap');
+  if (!el) return;
+
+  var checkedCount = _parsed.filter(function(t){ return t.checked; }).length;
+  var dupCount = _parsed.filter(function(t){ return t.dup; }).length;
+
+  var bankOpts = [
+    ['generic','Format g\u00e9n\u00e9rique'],['bnp','BNP Paribas'],['sg','Soci\u00e9t\u00e9 G\u00e9n\u00e9rale'],
+    ['cic','CIC'],['lcl','LCL'],['ca','Cr\u00e9dit Agricole'],['revolut','Revolut'],['bourso','Boursorama']
+  ].map(function(b){ return '<option value="'+b[0]+'"'+(_bank===b[0]?' selected':'')+'>'+b[1]+'</option>'; }).join('');
+
+  var rows = _parsed.slice(0,80).map(function(tx, idx) {
+    var amtCls = tx.amt >= 0 ? 'aim-pos' : 'aim-neg';
+    var amtStr = (tx.amt >= 0 ? '+' : '') + tx.amt.toFixed(2) + '\u20ac';
+    var catOpts = ALL_CATS.map(function(c){ return '<option value="'+c+'"'+(c===tx.cat?' selected':'')+'>'+c+'</option>'; }).join('');
+    var chkAttr = tx.checked ? ' checked' : '';
+    var dupBadge = tx.dup ? '<span class="aim-dup">doublon</span>' : '';
+    return '<tr class="aim-row'+(tx.dup?' aim-dup-row':'')+'">'+
+      '<td><input type="checkbox"'+chkAttr+' onchange="window._aimTgl('+idx+',this.checked)" style="cursor:pointer"></td>'+
+      '<td class="aim-date">'+esc(tx.date)+'</td>'+
+      '<td class="aim-desc">'+esc(tx.desc)+dupBadge+'</td>'+
+      '<td class="'+amtCls+'">'+amtStr+'</td>'+
+      '<td><select class="aim-sel" onchange="window._aimCat('+idx+',this.value)">'+catOpts+'</select></td>'+
+      '</tr>';
+  }).join('');
+
+  var previewHtml = _parsed.length ? (
+    '<div class="aim-preview">'+
+    '<div class="aim-preview-hdr">'+
+    '<span>'+_parsed.length+' transactions &mdash; '+dupCount+' doublons</span>'+
+    '<label><input type="checkbox"'+(checkedCount===_parsed.length?' checked':'')+' onchange="window._aimAll(this.checked)"> Tout</label>'+
+    '</div>'+
+    '<div class="aim-tbl-wrap"><table class="aim-tbl"><thead><tr>'+
+    '<th></th><th>Date</th><th>Description</th><th>Montant</th><th>Cat\u00e9gorie</th>'+
+    '</tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    (_parsed.length > 80 ? '<div class="aim-more">... et '+(_parsed.length-80)+' autres</div>' : '')+
+    '</div>'
+  ) : '';
+
+  el.innerHTML =
+    '<div class="aim-overlay" onclick="if(event.target===this)window.closeArgentImport()">'+
+    '<div class="aim-modal">'+
+    '<div class="aim-hdr"><span class="aim-title">\ud83c\udfe6 Importer des transactions</span>'+
+    '<button class="aim-cls" onclick="window.closeArgentImport()">\u00d7</button></div>'+
+    '<div class="aim-body">'+
+    '<div class="aim-row2"><label class="aim-lbl">Banque</label>'+
+    '<select class="aim-sel" id="aim-bank" onchange="window._aimBank(this.value)">'+bankOpts+'</select></div>'+
+    '<div class="aim-row2"><label class="aim-lbl">Fichier CSV / OFX</label>'+
+    '<label class="aim-drop" id="aim-drop" ondragover="event.preventDefault();this.classList.add(\'aim-drag\')" ondragleave="this.classList.remove(\'aim-drag\')" ondrop="window._aimDrop(event)">'+
+    '<span class="aim-drop-icon">\ud83d\udcc4</span>'+
+    '<span class="aim-drop-txt">Glisser ici ou <u>parcourir</u></span>'+
+    '<input type="file" id="aim-file" accept=".csv,.ofx,.qfx" style="display:none" onchange="window._aimFile(this.files[0])">'+
+    '</label></div>'+
+    (previewHtml || '')+
+    '</div>'+
+    '<div class="aim-ftr">'+
+    '<button class="aim-btn aim-ghost" onclick="window.closeArgentImport()">Annuler</button>'+
+    '<button class="aim-btn aim-primary" '+(checkedCount===0?'disabled':'')+' onclick="window._aimConfirm()">'+
+    'Importer ('+checkedCount+')</button>'+
+    '</div>'+
+    '</div></div>';
+}
+
+// ── Public API ────────────────────────────────────────────────────────────
+window.openArgentImport = function() {
+  _parsed = []; _bank = 'generic';
+  var wrap = document.getElementById('aim-wrap');
+  if (!wrap) { wrap = document.createElement('div'); wrap.id = 'aim-wrap'; document.body.appendChild(wrap); }
+  renderModal();
+};
+
+window.closeArgentImport = function() {
+  var w = document.getElementById('aim-wrap');
+  if (w) w.innerHTML = '';
+};
+
+window._aimBank = function(v) {
+  _bank = v;
+  if (window._aimLastText) {
+    var ext = window._aimLastExt || 'csv';
+    _parsed = ext === 'ofx' || ext === 'qfx' ? parseOFX(window._aimLastText) : parseCSV(window._aimLastText, _bank);
+    _parsed.forEach(function(t){ t.dup = isDuplicate(t); t.checked = !t.dup; });
+  }
+  renderModal();
+};
+
+window._aimFile = function(file) {
+  if (!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  window._aimLastExt = ext;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    window._aimLastText = e.target.result;
+    _parsed = ext === 'ofx' || ext === 'qfx' ? parseOFX(window._aimLastText) : parseCSV(window._aimLastText, _bank);
+    _parsed.forEach(function(t){ t.dup = isDuplicate(t); t.checked = !t.dup; });
+    renderModal();
+  };
+  reader.readAsText(file, 'UTF-8');
+};
+
+window._aimDrop = function(e) {
+  e.preventDefault();
+  var drop = document.getElementById('aim-drop');
+  if (drop) drop.classList.remove('aim-drag');
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) window._aimFile(f);
+};
+
+window._aimTgl = function(i, v) {
+  if (_parsed[i]) _parsed[i].checked = v;
+  var btn = document.querySelector('.aim-primary');
+  var n = _parsed.filter(function(t){ return t.checked; }).length;
+  if (btn) { btn.disabled = n === 0; btn.textContent = 'Importer ('+n+')'; }
+};
+
+window._aimAll = function(v) {
+  _parsed.forEach(function(t){ t.checked = v; }); renderModal();
+};
+
+window._aimCat = function(i, v) {
+  if (_parsed[i]) _parsed[i].cat = v;
+};
+
+window._aimConfirm = function() {
+  var toImport = _parsed.filter(function(t){ return t.checked; });
+  if (!toImport.length) return;
+  if (!window.S.finance) window.S.finance = [];
+  var now = Date.now();
+  toImport.forEach(function(tx, i) {
+    window.S.finance.push({
+      id: 'imp_'+now+'_'+i,
+      amt: tx.amt, cat: tx.cat, desc: tx.desc, date: tx.date,
+      tags: [], pending: false, note: ''
+    });
+  });
+  if (typeof save === 'function') save();
+  window.closeArgentImport();
+  if (typeof render === 'function') render();
+  if (typeof toast === 'function') toast(toImport.length+' transaction(s) import\u00e9e(s) \u2713', 'var(--green)');
+};
+
+// ── Patch renderArgentV8 ──────────────────────────────────────────────────
+var _origRenderArgentV8 = window.renderArgentV8;
+window.renderArgentV8 = function() {
+  var h = _origRenderArgentV8.apply(this, arguments);
+  return h.replace(
+    '<div class="page-title" style="margin-bottom:8px">\ud83d\udcb0 Finances</div>',
+    '<div class="page-title" style="margin-bottom:8px;display:flex;align-items:center;gap:10px">'+
+    '\ud83d\udcb0 Finances'+
+    '<button class="aim-open-btn" onclick="window.openArgentImport()">\ud83d\udce5 Importer CSV</button>'+
+    '</div>'
+  );
+};
+
+})();
+/* end argent-import-v1 */
 
 </script>
 </body>
