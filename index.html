@@ -277,11 +277,11 @@ body.compact .habit-row{padding:7px 0}
 .tv3r-quick-add{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--b);}
 .tv3r-qa-input{flex:1;background:var(--bg1);border:1px solid var(--b);border-radius:10px;padding:8px 12px;color:var(--w);font-size:13px;outline:none;}
 .tv3r-qa-input:focus{border-color:var(--cyan);}
-.tv3r-qa-btn{width:32px;height:32px;border-radius:8px;background:var(--cyan);border:none;color:#000;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+.tv3r-qa-btn{min-width:44px;min-height:44px;width:44px;height:44px;border-radius:8px;background:var(--cyan);border:none;color:#000;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
 .tv3r-cal-section{padding:0 16px;margin-bottom:8px;}
 .tv3r-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .tv3r-cal-month{font-size:15px;font-weight:800;color:var(--w);}
-.tv3r-cal-nav{width:32px;height:32px;border-radius:8px;background:var(--bg1);border:1px solid var(--b);color:var(--w);cursor:pointer;font-size:16px;}
+.tv3r-cal-nav{min-width:44px;min-height:44px;width:44px;height:44px;border-radius:8px;background:var(--bg1);border:1px solid var(--b);color:var(--w);cursor:pointer;font-size:16px;}
 .tv3r-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:12px;}
 .tv3r-cal-dow{text-align:center;font-size:10px;color:var(--g1);font-weight:700;padding:4px 0;}
 .tv3r-cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .15s;border:1.5px solid transparent;}
@@ -319,7 +319,7 @@ body.compact .habit-row{padding:7px 0}
 .av3-rec-meta{font-size:11px;color:var(--g1);}
 .av3-rec-amt{font-size:14px;font-weight:700;}
 .av3-rec-apply{padding:5px 10px;border-radius:8px;background:rgba(0,212,255,.12);color:var(--cyan);border:none;font-size:11px;font-weight:700;cursor:pointer;}
-.av3-rec-del{width:28px;height:28px;border-radius:8px;background:rgba(255,58,92,.1);color:var(--red);border:none;cursor:pointer;font-size:14px;}
+.av3-rec-del{min-width:44px;min-height:44px;width:44px;height:44px;border-radius:8px;background:rgba(255,58,92,.1);color:var(--red);border:none;cursor:pointer;font-size:14px;}
 </style>
 <style id="sv3-css">
 /* STATS V3 */
@@ -607,6 +607,267 @@ body.compact .habit-row{padding:7px 0}
 .hb-delete-confirm span{font-size:13px;color:var(--w);flex:1;}
 .hb-delete-confirm-btns{display:flex;gap:8px;}
 </style>
+<style id="hb2-css">
+/* habitudes-v2 */
+
+/* ── Keyframes ── */
+@keyframes hb2Pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes hb2FlameDance{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.15) rotate(3deg)}}
+@keyframes hb2SlideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes hb2Pop{0%{transform:scale(0.8);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes hb2Shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
+
+/* ── Page ── */
+.hb2-page{padding:0 0 120px;min-height:100vh;background:var(--bg);}
+
+/* ── Hero card ── */
+.hb2-hero{margin:16px 16px 12px;border-radius:20px;padding:20px;position:relative;overflow:hidden;border:1px solid rgba(0,212,255,.18);}
+.hb2-hero.grad0{background:linear-gradient(135deg,rgba(0,212,255,.12) 0%,rgba(0,229,160,.06) 100%);}
+.hb2-hero.grad1{background:linear-gradient(135deg,rgba(168,85,247,.14) 0%,rgba(0,212,255,.06) 100%);}
+.hb2-hero.grad2{background:linear-gradient(135deg,rgba(255,184,0,.12) 0%,rgba(255,58,92,.05) 100%);}
+.hb2-hero.grad3{background:linear-gradient(135deg,rgba(0,229,160,.14) 0%,rgba(168,85,247,.06) 100%);}
+.hb2-hero-top{display:flex;align-items:center;gap:16px;margin-bottom:14px;}
+.hb2-ring-wrap{position:relative;flex-shrink:0;}
+.hb2-ring-wrap.pulse circle.fill{animation:hb2Pulse 2s ease-in-out infinite;}
+.hb2-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.hb2-ring-pct{font-family:var(--font-mono);font-size:16px;font-weight:700;line-height:1;}
+.hb2-ring-lbl{font-size:9px;color:var(--g1);margin-top:1px;}
+.hb2-hero-info{flex:1;min-width:0;}
+.hb2-hero-greeting{font-size:12px;color:var(--g1);margin-bottom:3px;}
+.hb2-hero-title{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--w);line-height:1.1;}
+.hb2-hero-sub{font-size:12px;color:var(--g1);margin-top:4px;}
+.hb2-hero-sub .flame{animation:hb2FlameDance 1s ease-in-out infinite;}
+.hb2-hero-actions{display:flex;gap:6px;align-items:center;}
+.hb2-add-btn{width:36px;height:36px;border-radius:10px;background:rgba(0,212,255,.15);border:1.5px solid rgba(0,212,255,.3);color:var(--cyan);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.hb2-add-btn:hover{background:rgba(0,212,255,.25);}
+.hb2-pref-btn{width:32px;height:32px;border-radius:8px;background:var(--bg1);border:1px solid var(--b);color:var(--g1);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.hb2-mini-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:0;}
+.hb2-mini-stat{background:rgba(0,0,0,.25);border-radius:10px;padding:8px 10px;text-align:center;}
+.hb2-mini-val{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--w);line-height:1;}
+.hb2-mini-lbl{font-size:9px;color:var(--g1);margin-top:3px;line-height:1.2;}
+
+/* ── Motivation quote ── */
+.hb2-quote{margin:0 16px 12px;padding:10px 14px;background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.18);border-radius:12px;font-size:12px;color:var(--g1);font-style:italic;line-height:1.5;}
+.hb2-quote strong{color:var(--purp);font-style:normal;}
+
+/* ── Motivation banner ── */
+.hb2-motiv{margin:0 16px 10px;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.hb2-motiv.green{background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.25);color:var(--green);}
+.hb2-motiv.amber{background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.25);color:var(--amber);}
+.hb2-motiv.cyan{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);color:var(--cyan);}
+
+/* ── Week strip ── */
+.hb2-week-strip{margin:0 16px 12px;background:var(--bg1);border:1px solid var(--b);border-radius:14px;padding:12px 14px;}
+.hb2-week-strip-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g1);margin-bottom:10px;}
+.hb2-week-circles{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.hb2-day-circle{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.hb2-day-lbl{font-size:9px;color:var(--g1);font-weight:600;}
+.hb2-day-ring{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;transition:all .2s;border:2px solid var(--bg3);}
+.hb2-day-ring.today{border-color:var(--cyan);box-shadow:0 0 8px rgba(0,212,255,.3);}
+.hb2-day-ring.full{border-color:var(--green);}
+.hb2-day-ring-val{font-size:9px;font-family:var(--font-mono);font-weight:700;}
+.hb2-day-ring.future{opacity:.3;}
+
+/* ── Tabs ── */
+.hb2-tabs{display:flex;gap:4px;background:var(--bg2);border-radius:10px;padding:4px;margin:0 16px 14px;}
+.hb2-tab{flex:1;padding:8px 4px;text-align:center;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--g1);transition:all .18s;}
+.hb2-tab.active{background:var(--bg3);color:var(--w);}
+
+/* ── Today view ── */
+.hb2-section-header{display:flex;align-items:center;justify-content:space-between;padding:4px 16px 8px;}
+.hb2-section-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--g1);}
+.hb2-check-all-btn{font-size:11px;font-weight:600;color:var(--cyan);background:none;border:none;cursor:pointer;padding:4px 8px;}
+
+.hb2-card{background:var(--bg1);border:1px solid var(--b);border-radius:14px;margin:0 16px 10px;overflow:hidden;}
+.hb2-group-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--g1);padding:12px 16px 4px;display:flex;align-items:center;gap:6px;}
+.hb2-group-count{background:var(--bg1);color:var(--g2);border-radius:4px;padding:1px 5px;font-size:9px;}
+
+/* ── Habit row ── */
+.hb2-row{display:flex;flex-direction:column;border-bottom:1px solid var(--b);}
+.hb2-row:last-child{border-bottom:none;}
+.hb2-row-main{display:flex;align-items:center;gap:10px;padding:11px 14px;min-height:52px;transition:background .15s;}
+.hb2-row-main:active{background:var(--bg2);}
+.hb2-row.compact .hb2-row-main{min-height:36px;padding:7px 12px;}
+.hb2-row.done-row .hb2-label{color:var(--g1);text-decoration:line-through;}
+.hb2-row.done-row .hb2-emoji{opacity:.45;}
+.hb2-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.hb2-emoji{font-size:19px;flex-shrink:0;width:26px;text-align:center;}
+.hb2-info{flex:1;min-width:0;cursor:pointer;}
+.hb2-label{font-size:14px;font-weight:600;color:var(--w);line-height:1.3;}
+.hb2-row-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px;}
+.hb2-streak-txt{font-size:11px;color:var(--g1);}
+.hb2-streak-txt.s7{color:var(--amber);}
+.hb2-streak-txt.s30{color:var(--cyan);}
+.hb2-flame-anim{display:inline-block;animation:hb2FlameDance .8s ease-in-out infinite;}
+.hb2-xp-badge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;background:rgba(255,184,0,.12);color:var(--amber);border:1px solid rgba(255,184,0,.2);}
+.hb2-xp-badge.bonus{background:rgba(255,184,0,.22);color:var(--amber);}
+.hb2-time-badge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:5px;border:1px solid rgba(0,0,0,.1);}
+.hb2-time-badge.matin{background:rgba(255,184,0,.1);color:var(--amber);border-color:rgba(255,184,0,.2);}
+.hb2-time-badge.aprem{background:rgba(0,212,255,.1);color:var(--cyan);border-color:rgba(0,212,255,.2);}
+.hb2-time-badge.soir{background:rgba(168,85,247,.1);color:var(--purp);border-color:rgba(168,85,247,.2);}
+.hb2-time-badge.late{background:rgba(255,58,92,.1);color:var(--red);border-color:rgba(255,58,92,.2);}
+.hb2-challenge-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:rgba(255,184,0,.15);color:var(--amber);border:1px solid rgba(255,184,0,.3);}
+.hb2-challenge-bar{height:3px;background:var(--bg3);border-radius:2px;margin:0 14px 8px;overflow:hidden;}
+.hb2-challenge-fill{height:100%;background:var(--amber);border-radius:2px;transition:width .4s;}
+.hb2-check{width:30px;height:30px;border-radius:50%;border:2.5px solid var(--b2);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s;font-size:16px;cursor:pointer;}
+.hb2-check.checked{border-color:var(--check-color,var(--cyan));background:var(--check-color,var(--cyan));}
+
+/* ── Milestone / streak progress ── */
+.hb2-milestone-wrap{padding:4px 14px 10px;}
+.hb2-milestone-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.hb2-milestone-lbl{font-size:10px;color:var(--g1);width:80px;flex-shrink:0;}
+.hb2-milestone-bar{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.hb2-milestone-fill{height:100%;border-radius:3px;background:var(--amber);transition:width .5s;}
+.hb2-milestone-next{font-size:10px;color:var(--amber);font-weight:700;white-space:nowrap;}
+
+/* ── Semaine tab ── */
+.hb2-week-table{margin:0 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.hb2-week-table table{border-collapse:collapse;min-width:100%;}
+.hb2-week-table th{font-size:9px;font-weight:700;color:var(--g1);padding:6px 8px;text-align:center;white-space:nowrap;}
+.hb2-week-table th.today-col{color:var(--cyan);}
+.hb2-week-table td{padding:5px 8px;text-align:center;vertical-align:middle;}
+.hb2-week-table tr{border-bottom:1px solid var(--b);}
+.hb2-week-table tr:last-child{border-bottom:none;}
+.hb2-week-dot-cell{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;}
+.hb2-week-dot-cell.done{background:var(--cell-color,var(--cyan));color:#000;}
+.hb2-week-dot-cell.empty{background:var(--bg3);color:var(--g2);}
+.hb2-week-habit-name{font-size:12px;color:var(--w);text-align:left;white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis;}
+.hb2-week-total{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--g1);}
+
+/* ── Stats tab ── */
+.hb2-stats-section{margin:0 16px 14px;}
+.hb2-stats-card{background:var(--bg1);border:1px solid var(--b);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+.hb2-stats-title{font-size:11px;font-weight:700;color:var(--g1);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+.hb2-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.hb2-stat-box{background:var(--bg2);border-radius:10px;padding:10px 12px;}
+.hb2-stat-box-val{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--w);}
+.hb2-stat-box-lbl{font-size:10px;color:var(--g1);margin-top:3px;}
+.hb2-months-bars{display:flex;gap:3px;align-items:flex-end;height:60px;margin:8px 0;}
+.hb2-month-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.hb2-month-bar{width:100%;border-radius:3px 3px 0 0;min-height:2px;transition:height .4s;}
+.hb2-month-lbl{font-size:8px;color:var(--g2);}
+.hb2-podium{display:flex;gap:8px;align-items:flex-end;margin-top:8px;}
+.hb2-podium-item{flex:1;background:var(--bg2);border-radius:8px;padding:8px 6px;text-align:center;}
+.hb2-podium-rank{font-size:16px;}
+.hb2-podium-name{font-size:11px;color:var(--w);font-weight:600;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hb2-podium-count{font-size:10px;color:var(--g1);}
+.hb2-xp-hist{font-size:12px;color:var(--g1);}
+.hb2-xp-hist strong{color:var(--amber);}
+
+/* ── Overlay / Detail ── */
+.hb2-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:2000;display:flex;flex-direction:column;backdrop-filter:blur(6px);animation:hb2SlideIn .2s ease;}
+.hb2-overlay-inner{flex:1;overflow-y:auto;background:var(--bg);display:flex;flex-direction:column;}
+.hb2-overlay-header{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--b);flex-shrink:0;}
+.hb2-overlay-emoji{font-size:32px;}
+.hb2-overlay-title-wrap{flex:1;}
+.hb2-overlay-title{font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--w);}
+.hb2-overlay-streak{font-size:12px;color:var(--g1);margin-top:2px;}
+.hb2-overlay-close{width:36px;height:36px;border-radius:10px;background:var(--bg2);border:1px solid var(--b);color:var(--g1);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hb2-overlay-tabs{display:flex;gap:4px;padding:12px 16px 0;background:var(--bg);border-bottom:1px solid var(--b);}
+.hb2-overlay-tab{padding:8px 14px;border-radius:8px 8px 0 0;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;color:var(--g1);transition:all .18s;border-bottom:2px solid transparent;}
+.hb2-overlay-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.hb2-overlay-body{flex:1;padding:16px;overflow-y:auto;}
+
+/* ── Annual Heatmap ── */
+.hb2-annual-heatmap{overflow-x:auto;}
+.hb2-annual-inner{display:flex;gap:2px;}
+.hb2-annual-col{display:flex;flex-direction:column;gap:2px;}
+.hb2-annual-cell{width:9px;height:9px;border-radius:1.5px;flex-shrink:0;}
+.hb2-annual-cell.today{box-shadow:0 0 0 1.5px var(--w);}
+.hb2-heatmap-legend{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:10px;color:var(--g1);}
+.hb2-legend-cells{display:flex;gap:2px;}
+.hb2-legend-cell{width:9px;height:9px;border-radius:1.5px;}
+
+/* ── Preferences panel ── */
+.hb2-prefs-panel{margin:0 16px 14px;background:var(--bg1);border:1px solid var(--b);border-radius:14px;padding:14px 16px;animation:hb2SlideIn .2s ease;}
+.hb2-prefs-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b);}
+.hb2-prefs-row:last-child{border-bottom:none;}
+.hb2-prefs-lbl{font-size:13px;color:var(--w);}
+.hb2-prefs-sub{font-size:11px;color:var(--g1);margin-top:1px;}
+.hb2-toggle{width:40px;height:22px;border-radius:11px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.hb2-toggle.on{background:var(--cyan);}
+.hb2-toggle.off{background:var(--bg3);}
+.hb2-toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s;}
+.hb2-toggle.on::after{transform:translateX(18px);}
+.hb2-grad-row{display:flex;gap:8px;margin-top:6px;}
+.hb2-grad-swatch{width:32px;height:32px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all .2s;}
+.hb2-grad-swatch.active{border-color:var(--w);transform:scale(1.15);}
+
+/* ── Import/Export ── */
+.hb2-export-panel{margin:0 16px 12px;background:var(--bg1);border:1px solid var(--b);border-radius:14px;padding:14px 16px;}
+.hb2-export-row{display:flex;gap:8px;margin-bottom:10px;}
+.hb2-global-stats{background:var(--bg2);border-radius:10px;padding:12px;margin-top:8px;}
+.hb2-global-stat-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--b);}
+.hb2-global-stat-row:last-child{border-bottom:none;}
+.hb2-global-stat-row .val{font-family:var(--font-mono);font-weight:700;color:var(--cyan);}
+
+/* ── Celebration overlay ── */
+.hb2-celebration{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);}
+.hb2-celeb-box{background:var(--bg1);border:1px solid var(--b);border-radius:20px;padding:32px 24px;text-align:center;max-width:320px;animation:hb2Pop .35s ease;}
+.hb2-celeb-emoji{font-size:56px;display:block;margin-bottom:12px;}
+.hb2-celeb-title{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--w);margin-bottom:8px;}
+.hb2-celeb-sub{font-size:14px;color:var(--g1);margin-bottom:20px;line-height:1.5;}
+
+/* ── Reorder mode ── */
+.hb2-reorder-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--b);}
+.hb2-reorder-handle{color:var(--g2);font-size:16px;cursor:grab;}
+.hb2-reorder-up,.hb2-reorder-dn{width:28px;height:28px;border-radius:7px;background:var(--bg2);border:1px solid var(--b);color:var(--g1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.hb2-reorder-up:hover,.hb2-reorder-dn:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* ── Day modal (tap on week day) ── */
+.hb2-day-modal{position:fixed;inset:0;z-index:3000;display:flex;align-items:flex-end;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);}
+.hb2-day-modal-inner{width:100%;background:var(--bg1);border-radius:20px 20px 0 0;padding:20px 16px 40px;border-top:1px solid var(--b);max-height:70vh;overflow-y:auto;animation:hb2SlideIn .2s ease;}
+.hb2-day-modal-title{font-size:15px;font-weight:800;color:var(--w);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+
+/* ── Compact tweaks ── */
+.hb2-page.compact .hb2-row-meta{display:none;}
+.hb2-page.compact .hb2-row-main{min-height:36px;padding:7px 12px;}
+</style>
+
+<style id="aim-css">
+/* argent-import-v1 */
+.aim-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;backdrop-filter:blur(6px);overflow-y:auto;padding:12px 0 32px;}
+.aim-modal{background:var(--bg1);border:1px solid var(--b);border-radius:16px;width:min(560px,calc(100vw - 24px));max-width:100%;position:relative;display:flex;flex-direction:column;}
+.aim-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--b);}
+.aim-title{font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--w);}
+.aim-close{background:none;border:none;color:var(--g1);font-size:22px;cursor:pointer;padding:2px 6px;border-radius:6px;line-height:1;}
+.aim-close:hover{color:var(--w);background:var(--bg3);}
+.aim-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px;}
+.aim-row{display:flex;flex-direction:column;gap:5px;}
+.aim-label{font-size:12px;color:var(--g1);font-weight:600;letter-spacing:0.04em;}
+.aim-file-zone{border:2px dashed var(--b2);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;background:var(--bg2);}
+.aim-file-zone:hover,.aim-file-zone.drag{border-color:var(--cyan);}
+.aim-file-hint{font-size:13px;color:var(--g1);margin-top:6px;}
+.aim-select{width:100%;}
+.aim-preview-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--b);margin-top:4px;}
+.aim-preview-table{width:100%;border-collapse:collapse;font-size:12px;}
+.aim-preview-table th{background:var(--bg2);color:var(--g1);font-weight:700;padding:8px 10px;text-align:left;border-bottom:1px solid var(--b);white-space:nowrap;}
+.aim-preview-table td{padding:7px 10px;border-bottom:1px solid var(--b);vertical-align:middle;}
+.aim-preview-table tr:last-child td{border-bottom:none;}
+.aim-preview-table tr.dup-row td{opacity:0.65;}
+.aim-amt-pos{color:var(--green);font-family:var(--font-mono);font-weight:700;}
+.aim-amt-neg{color:var(--red);font-family:var(--font-mono);font-weight:700;}
+.aim-dup-badge{display:inline-block;font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(255,184,0,0.15);color:var(--amber);border:1px solid rgba(255,184,0,0.3);margin-left:4px;vertical-align:middle;}
+.aim-cat-select{background:var(--bg2);border:1px solid var(--b);border-radius:6px;color:var(--w);font-size:11px;padding:3px 6px;width:100%;min-width:90px;}
+.aim-footer{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--b);flex-wrap:wrap;}
+.aim-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:10px;border:none;cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:700;transition:all .18s;}
+.aim-btn-primary{background:var(--cyan);color:#06090D;flex:1;}
+.aim-btn-primary:hover{background:#00bde8;}
+.aim-btn-primary:disabled{opacity:0.45;cursor:not-allowed;}
+.aim-btn-ghost{background:transparent;color:var(--g1);border:1px solid var(--b);}
+.aim-btn-ghost:hover{background:var(--bg3);color:var(--w);}
+.aim-rules-toggle{background:none;border:none;color:var(--cyan);font-size:12px;cursor:pointer;padding:0;font-weight:600;}
+.aim-rules-section{border:1px solid var(--b);border-radius:10px;padding:12px 14px;background:var(--bg2);}
+.aim-rule-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.aim-rule-kw{flex:1;font-size:12px;padding:5px 8px;}
+.aim-rule-cat{flex:1;font-size:12px;padding:5px 8px;}
+.aim-rule-del{background:rgba(255,58,92,.12);border:none;color:var(--red);border-radius:6px;padding:5px 8px;cursor:pointer;font-size:13px;}
+.aim-import-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;background:rgba(0,212,255,.12);color:var(--cyan);border:1px solid rgba(0,212,255,.25);font-size:12px;font-weight:700;cursor:pointer;transition:all .18s;margin-left:8px;}
+.aim-import-btn:hover{background:rgba(0,212,255,.22);}
+.aim-empty{padding:20px;text-align:center;color:var(--g1);font-size:13px;}
+.aim-parse-error{color:var(--red);font-size:12px;padding:10px 0;}
+</style>
+
 </head>
 <body>
 <div id="app">
@@ -806,7 +1067,7 @@ function celebrate(type='confetti'){
 
 /* ── RUNNING BALANCE ───────────────────────────────────────────────────── */
 function runningBalanceData(){
-  const sorted=[...S.finance].sort((a,b)=>a.date.localeCompare(b.date));
+  const sorted=[...S.finance].sort((a,b)=>(a.date||"").localeCompare(b.date||""));
   if(!sorted.length)return[];
   let bal=0;
   const points=[];
@@ -1033,7 +1294,7 @@ function exportPDF(){
     </table>`:''}
     <h2>Transactions récentes</h2>
     <table><tr><th>Date</th><th>Description</th><th>Catégorie</th><th>Montant</th></tr>
-    ${[...S.finance].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20).map(t=>`<tr><td>${fmtDate(t.date)}</td><td>${t.desc}</td><td>${t.cat}</td><td class="${t.amt>=0?'pos':'neg'}">${fmtAmt(t.amt)}</td></tr>`).join('')}
+    ${[...S.finance].sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,20).map(t=>`<tr><td>${fmtDate(t.date)}</td><td>${t.desc}</td><td>${t.cat}</td><td class="${t.amt>=0?'pos':'neg'}">${fmtAmt(t.amt)}</td></tr>`).join('')}
     </table>
     </body></html>`);
   printWin.document.close();
@@ -1756,7 +2017,7 @@ function renderFinHistory(){
   const mk=mKey();
   const proj=projectedBalance(mk);
   const budgets=S.config.budgets||{};
-  let allTx=[...S.finance].sort((a,b)=>b.date.localeCompare(a.date));
+  let allTx=[...S.finance].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
   if(_fSearch){
     const q=_fSearch.toLowerCase();
     allTx=allTx.filter(t=>t.desc.toLowerCase().includes(q)||t.cat.toLowerCase().includes(q)||(t.tags||[]).some(tg=>tg.toLowerCase().includes(q)));
@@ -7008,7 +7269,7 @@ function renderGoalRecurring(g){
   html2+='</div>';
   var doneToday=(g.completions||[]).some(function(c){return c.date===today;});
   html2+='<button class="og-mark-btn" onclick="markGoalDone(\''+g.id+'\')">'+
-    (doneToday?'✓ Marquer non fait':'+ Marquer fait aujourd’hui')+
+    (doneToday?'✓ Marquer non fait':'+ Marquer fait aujourd\u2019hui')+
     '</button>';
   html2+='</div>';
   return html2;
@@ -7927,13 +8188,13 @@ function renderZoneMaintenant(tasks){
   if(h>=5&&h<12){
     if(urgent.length) sections.push({label:'URGENT',cls:'urgent',items:urgent});
     if(overdue.length) sections.push({label:'EN RETARD',cls:'urgent',items:overdue});
-    if(dueToday.length) sections.push({label:'AUJOURD’HUI',cls:'',items:dueToday});
+    if(dueToday.length) sections.push({label:'AUJOURD\u2019HUI',cls:'',items:dueToday});
     if(doing.length) sections.push({label:'EN COURS',cls:'',items:doing});
   } else if(h>=12&&h<19){
     if(doing.length) sections.push({label:'EN COURS',cls:'',items:doing});
     if(urgent.length) sections.push({label:'URGENT',cls:'urgent',items:urgent});
     if(overdue.length) sections.push({label:'EN RETARD',cls:'urgent',items:overdue});
-    if(dueToday.length) sections.push({label:'AUJOURD’HUI',cls:'',items:dueToday});
+    if(dueToday.length) sections.push({label:'AUJOURD\u2019HUI',cls:'',items:dueToday});
   } else {
     var unfinished=tasks.filter(function(t){return (t.dueDate===today||t.status==='doing')&&t.status!=='done';});
     if(unfinished.length) sections.push({label:'NON FINIES',cls:'',items:unfinished});
@@ -8628,7 +8889,7 @@ window.ogFocusBlock=function(goals){
   if(g.deadline){
     var daysLeft=Math.round((new Date(g.deadline)-new Date())/86400000);
     if(daysLeft<0)timeStr='Deadline dépassée';
-    else if(daysLeft===0)timeStr='Deadline aujourd’hui';
+    else if(daysLeft===0)timeStr='Deadline aujourd\u2019hui';
     else if(daysLeft<7)timeStr=daysLeft+' jour'+(daysLeft>1?'s':'')+' restant'+(daysLeft>1?'s':'');
     else if(daysLeft<60){var w=Math.round(daysLeft/7);timeStr=w+' sem. restante'+(w>1?'s':'');}
     else{var mo=Math.round(daysLeft/30);timeStr=mo+' mois restant'+(mo>1?'s':'');}
@@ -8645,7 +8906,7 @@ window.ogFocusBlock=function(goals){
   if(timeStr)h+='<span style="color:'+(rhythm==='late'?'#FF3A5C':'#8B9BAD')+'">'+timeStr+'</span>';
   h+='</div>';
   if(nextAction)h+='<div class="og-focus-action">→ '+nextAction+'</div>';
-  if(todayCount>0)h+='<div class="og-focus-tasks">⚡ '+todayCount+' tâche'+(todayCount>1?'s':'')+' liée'+(todayCount>1?'s':'')+' pour aujourd’hui</div>';
+  if(todayCount>0)h+='<div class="og-focus-tasks">⚡ '+todayCount+' tâche'+(todayCount>1?'s':'')+' liée'+(todayCount>1?'s':'')+' pour aujourd\u2019hui</div>';
   h+='</div>';
   return h;
 };
@@ -8781,7 +9042,7 @@ if(typeof PAGES_V8!=='undefined'&&!PAGES_V8.includes('objectifs')){
 window.renderStatsGoalsTab = function() {
   var goals = S.goals || [];
   if (goals.length === 0) {
-    return "<div style=\"text-align:center;padding:40px 20px;color:var(--g1)\"><div style=\"font-size:40px;margin-bottom:12px\">🎯</div><div style=\"font-size:15px;font-weight:600;color:var(--w);margin-bottom:6px\">Aucun objectif</div><div style=\"font-size:13px\">Crée ton premier objectif dans l’onglet Objectifs</div><button onclick=\"nav('objectifs')\" style=\"margin-top:16px;background:var(--cyan);color:#000;border:none;border-radius:10px;padding:10px 24px;font-weight:700;cursor:pointer\">Voir Objectifs →</button></div>";
+    return "<div style=\"text-align:center;padding:40px 20px;color:var(--g1)\"><div style=\"font-size:40px;margin-bottom:12px\">🎯</div><div style=\"font-size:15px;font-weight:600;color:var(--w);margin-bottom:6px\">Aucun objectif</div><div style=\"font-size:13px\">Crée ton premier objectif dans l\u2019onglet Objectifs</div><button onclick=\"nav('objectifs')\" style=\"margin-top:16px;background:var(--cyan);color:#000;border:none;border-radius:10px;padding:10px 24px;font-weight:700;cursor:pointer\">Voir Objectifs →</button></div>";
   }
   var statusLabel = {in_progress:'En cours', todo:'\u00C0 d\u00E9marrer', done:'Termin\u00E9'};
   var statusColor = {in_progress:'var(--cyan)', todo:'var(--g1)', done:'var(--green)'};
@@ -9046,7 +9307,7 @@ function tv3rRenderCalendar(tasks) {
   var selTodo = (tasksByDay[selDay]||[]).filter(function(t){return t.status!=='done';});
   var selDone = (tasksByDay[selDay]||[]).filter(function(t){return t.status==='done';});
   if(selTodo.length || selDone.length) {
-    var lbl = selDay===todayStr ? 'Aujourd’hui' : selDay;
+    var lbl = selDay===todayStr ? 'Aujourd\u2019hui' : selDay;
     html += '<div class="tv3r-section"><span>'+lbl.toUpperCase()+'</span><span class="tv3r-section-count">'+selTodo.length+' à faire</span></div>';
     selTodo.forEach(function(t){ html += tv3rTaskCard(t); });
     if(selDone.length){
@@ -9406,7 +9667,7 @@ function sv3RenderObjectifs() {
   });
 
   if (!goals.length) {
-    html2 += '<div style="text-align:center;color:var(--g1);padding:32px 0;font-size:14px">Aucun objectif pour l’instant</div>';
+    html2 += '<div style="text-align:center;color:var(--g1);padding:32px 0;font-size:14px">Aucun objectif pour l\u2019instant</div>';
   }
 
   html2 += '</div>';
@@ -9629,7 +9890,7 @@ window.renderPlusV8 = function(){
   html += '</div>';
   // Savings goal
   html += '<div class="pv3-pref-row">';
-  html += '<div><div class="pv3-pref-lbl">Objectif d’épargne</div><div class="pv3-pref-sub">Montant cible en €</div></div>';
+  html += '<div><div class="pv3-pref-lbl">Objectif d\u2019épargne</div><div class="pv3-pref-sub">Montant cible en €</div></div>';
   html += '<input class="pv3-pref-input" id="pv3-savings-goal" type="number" min="0" value="' + (S.config.savingsGoal || 4000) + '" onchange="pv3SaveSavingsGoal()">';
   html += '</div>';
   // Home modules toggles
@@ -9684,7 +9945,7 @@ window.renderPlusV8 = function(){
   // Reset
   html += '<div class="pv3-data-btn" onclick="pv3ResetApp()">';
   html += '<div class="pv3-data-icon" style="background:rgba(255,58,92,.1)">&#x1F5D1;</div>';
-  html += '<div class="pv3-data-info"><div class="pv3-data-title" style="color:var(--red)">Éinitialiser l’app</div><div class="pv3-data-sub">Effacer toutes les données</div></div>';
+  html += '<div class="pv3-data-info"><div class="pv3-data-title" style="color:var(--red)">Réinitialiser l\u2019app</div><div class="pv3-data-sub">Effacer toutes les données</div></div>';
   html += '<span class="pv3-data-arr" style="color:var(--red)">›</span>';
   html += '</div>';
   html += '</div>';
@@ -9873,7 +10134,7 @@ window.renderHomeV8 = function() {
   var today = iso();
   var habs = H();
   var dayData = S.habits[today] || {};
-  var score = habs.length > 0 ? Math.round(habs.filter(function(h) { return !!dayData[h.id]; }).length / habs.length * 100) : 0;
+  var score = (typeof scoreDay === "function") ? scoreDay(today) : (habs.length > 0 ? Math.round(habs.filter(function(h) { return !!dayData[h.id]; }).length / habs.length * 100) : 0);
   var streak = currentStreak();
   var bestStreak = S.config.bestStreak || 0;
   var xp = S.config.xp || 0;
@@ -9955,7 +10216,7 @@ window.renderHomeV8 = function() {
   if (mods.checkin !== false) {
     var allDone = habs.length > 0 && habs.every(function(hb) { return !!dayData[hb.id]; });
     h += '<div class="hv2-checkin">';
-    h += '<div class="hv2-section-label">Aujourd’hui &mdash; ' + dateStr + '</div>';
+    h += '<div class="hv2-section-label">Aujourd\u2019hui &mdash; ' + dateStr + '</div>';
     if (allDone) {
       h += '<div class="hv2-all-done">Toutes les habitudes faites ! 🎉</div>';
     } else {
@@ -9979,7 +10240,7 @@ window.renderHomeV8 = function() {
 
   // Feature 5: Goal hero
   if (mods.goals !== false) {
-    var goals = (S.goals || []).filter(function(g) { return g.status !== "done" && g.type === "project"; });
+    var goals = (S.goals || []).filter(function(g) { return g.status === "in_progress" && g.type === "project"; });
     goals.sort(function(a, b) {
       if (!a.deadline) return 1;
       if (!b.deadline) return -1;
@@ -10412,7 +10673,7 @@ window.renderHabitudesV1 = function() {
     h += '<div class="hb-score-label hb-score-all-done">🎉 Toutes faites !</div>';
     h += '<div class="hb-score-sub">' + done + '/' + total + ' habitudes complétées</div>';
   } else {
-    h += '<div class="hb-score-label">Aujourd’hui</div>';
+    h += '<div class="hb-score-label">Aujourd\u2019hui</div>';
     h += '<div class="hb-score-sub">' + done + '/' + total + ' habitudes</div>';
   }
   h += '</div></div>';
@@ -10590,6 +10851,1738 @@ window.renderHabitudesV1 = function() {
     }
   }
 })();
+
+
+/* habitudes-v2 */
+
+// ── V2 state ──────────────────────────────────────────────────────────────
+window._hbTab = window._hbTab || 'today';
+window._hbOverlay = window._hbOverlay || null; // habit id for detail overlay
+window._hbOverlayTab = window._hbOverlayTab || 'heatmap';
+window._hbDayModal = window._hbDayModal || null; // date string
+window._hbShowPrefs = window._hbShowPrefs || false;
+window._hbShowExport = window._hbShowExport || false;
+window._hbGlobalStats = window._hbGlobalStats || false;
+window._hbReorderMode = window._hbReorderMode || false;
+window._hbCelebration = window._hbCelebration || null;
+
+// ── Quotes pool ───────────────────────────────────────────────────────────
+var HB2_QUOTES = [
+  "La discipline est le pont entre les objectifs et les réalisations.",
+  "Nous sommes ce que nous faisons répétitivement. L\u2019excellence n\u2019est donc pas un acte, mais une habitude.",
+  "Les petites actions quotidiennes construisent les grandes vies.",
+  "Ce n\u2019est pas l\u2019envie d\u2019être le meilleur, c\u2019est la volonté de se préparer qui compte.",
+  "Chaque jour est une nouvelle chance de progresser.",
+  "La régularité bat toujours le talent.",
+  "Une bonne habitude est plus précieuse que mille bonnes intentions.",
+  "Le succès est la somme de petits efforts répétés jour après jour.",
+  "Construis ta routine et ta routine te construira.",
+  "Chaque check est une victoire sur ta version d\u2019hier.",
+  "La constance crée la confiance.",
+  "Tu n\u2019as pas à être parfait, juste présent.",
+  "Les habitudes sont les intérêts composés de l\u2019amélioration de soi.",
+  "Un pas en avant chaque jour, c\u2019est 365 pas en un an.",
+  "Le moment idéal, c\u2019est maintenant."
+];
+
+// ── Milestones ─────────────────────────────────────────────────────────────
+var HB2_MILESTONES = [7, 14, 21, 30, 60, 100, 365];
+
+function hb2NextMilestone(streak) {
+  for (var i = 0; i < HB2_MILESTONES.length; i++) {
+    if (streak < HB2_MILESTONES[i]) return HB2_MILESTONES[i];
+  }
+  return HB2_MILESTONES[HB2_MILESTONES.length - 1];
+}
+
+// ── Get/set prefs ──────────────────────────────────────────────────────────
+function hb2Prefs() {
+  var cfg = (window.S && window.S.config) || {};
+  if (!cfg.habitudesPrefs) cfg.habitudesPrefs = {};
+  return cfg.habitudesPrefs;
+}
+
+// ── XP reward for habit ────────────────────────────────────────────────────
+function hb2XpReward(hcfg, streak) {
+  var base = hcfg.xpReward || 10;
+  if (streak >= 30) return Math.round(base * 2);
+  if (streak >= 7) return Math.round(base * 1.5);
+  return base;
+}
+
+// ── Date helpers ───────────────────────────────────────────────────────────
+var HB2_DAYS_FR = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+var HB2_DAYS_FULL = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+var HB2_MONTHS_SHORT = ['jan','fév','mar','avr','mai','juin','juil','aoû','sep','oct','nov','déc'];
+
+function hb2IsoOffset(offsetDays) {
+  var d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toISOString().slice(0, 10);
+}
+
+function hb2ScoreForDay(dayKey, hcfgList) {
+  var habits = (window.S && window.S.habits) || {};
+  var dayData = habits[dayKey] || {};
+  if (!hcfgList || hcfgList.length === 0) return 0;
+  var done = hcfgList.filter(function(h) { return !!dayData[h.id]; }).length;
+  return Math.round(done / hcfgList.length * 100);
+}
+
+function hb2Avg7Score(hcfgList) {
+  var total = 0;
+  for (var i = 0; i < 7; i++) {
+    total += hb2ScoreForDay(hb2IsoOffset(-i), hcfgList);
+  }
+  return Math.round(total / 7);
+}
+
+function hb2MonthDone(hcfgList) {
+  var today = new Date();
+  var ym = today.toISOString().slice(0, 7);
+  var habits = (window.S && window.S.habits) || {};
+  var daysCount = 0;
+  Object.keys(habits).forEach(function(k) {
+    if (k.slice(0, 7) !== ym) return;
+    var d = habits[k];
+    var sc = hcfgList.length > 0 ? hcfgList.filter(function(h) { return !!d[h.id]; }).length / hcfgList.length : 0;
+    if (sc > 0) daysCount++;
+  });
+  return daysCount;
+}
+
+function hb2BestDayOfWeek(hcfgList) {
+  var scores = [0, 0, 0, 0, 0, 0, 0];
+  var counts = [0, 0, 0, 0, 0, 0, 0];
+  var habits = (window.S && window.S.habits) || {};
+  Object.keys(habits).forEach(function(k) {
+    var d = new Date(k + 'T12:00:00');
+    var dow = d.getDay();
+    var sc = hb2ScoreForDay(k, hcfgList);
+    scores[dow] += sc;
+    counts[dow]++;
+  });
+  var best = 0, bestIdx = 0;
+  for (var i = 0; i < 7; i++) {
+    var avg = counts[i] > 0 ? scores[i] / counts[i] : 0;
+    if (avg > best) { best = avg; bestIdx = i; }
+  }
+  return HB2_DAYS_FULL[bestIdx];
+}
+
+// ── All-time completions per habit ─────────────────────────────────────────
+function hb2AllTimeCount(hid) {
+  var habits = (window.S && window.S.habits) || {};
+  var count = 0;
+  Object.keys(habits).forEach(function(k) {
+    if (habits[k][hid]) count++;
+  });
+  return count;
+}
+
+// ── Month-by-month completion % (last 12) ────────────────────────────────
+function hb2Monthly12(hcfgList) {
+  var result = [];
+  var now = new Date();
+  for (var m = 11; m >= 0; m--) {
+    var d = new Date(now.getFullYear(), now.getMonth() - m, 1);
+    var ym = d.toISOString().slice(0, 7);
+    var habits = (window.S && window.S.habits) || {};
+    var total = 0, done = 0;
+    Object.keys(habits).forEach(function(k) {
+      if (k.slice(0, 7) !== ym) return;
+      total++;
+      var sc = hcfgList.length > 0 ? hcfgList.filter(function(h) { return !!habits[k][h.id]; }).length / hcfgList.length : 0;
+      done += sc;
+    });
+    result.push({
+      lbl: HB2_MONTHS_SHORT[d.getMonth()],
+      pct: total > 0 ? Math.round(done / total * 100) : 0
+    });
+  }
+  return result;
+}
+
+// ── XP earned from habits this month ─────────────────────────────────────
+function hb2MonthXp(hcfgList) {
+  var now = new Date();
+  var ym = now.toISOString().slice(0, 7);
+  var habits = (window.S && window.S.habits) || {};
+  var total = 0;
+  Object.keys(habits).forEach(function(k) {
+    if (k.slice(0, 7) !== ym) return;
+    hcfgList.forEach(function(h) {
+      if (habits[k][h.id]) total += (h.xpReward || 10);
+    });
+  });
+  return total;
+}
+
+// ── Annual heatmap (52 weeks) ─────────────────────────────────────────────
+function hb2BuildAnnualHeatmap(hid, color) {
+  var today = new Date();
+  var todayKey = today.toISOString().slice(0, 10);
+  // go back to Monday 52 weeks ago
+  var dow = today.getDay();
+  var mondayOffset = dow === 0 ? 6 : dow - 1;
+  var start = new Date(today);
+  start.setDate(today.getDate() - mondayOffset - 51 * 7);
+
+  var cols = [];
+  for (var w = 0; w < 52; w++) {
+    var col = [];
+    for (var d = 0; d < 7; d++) {
+      var cell = new Date(start);
+      cell.setDate(start.getDate() + w * 7 + d);
+      var key = cell.toISOString().slice(0, 10);
+      var dd = (window.S && window.S.habits && window.S.habits[key]) || {};
+      col.push({ key: key, done: !!dd[hid], isToday: key === todayKey, future: cell > today });
+    }
+    cols.push(col);
+  }
+
+  var h = '<div class="hb2-annual-heatmap"><div class="hb2-annual-inner">';
+  cols.forEach(function(col) {
+    h += '<div class="hb2-annual-col">';
+    col.forEach(function(cell) {
+      var bg = cell.future ? 'rgba(255,255,255,.03)' : (cell.done ? color : 'var(--bg3)');
+      h += '<div class="hb2-annual-cell' + (cell.isToday ? ' today' : '') + '" style="background:' + bg + '" title="' + cell.key + '"></div>';
+    });
+    h += '</div>';
+  });
+  h += '</div>';
+  h += '<div class="hb2-heatmap-legend">';
+  h += '<span>Moins</span><div class="hb2-legend-cells">';
+  var opacities = ['.1','.3','.5','.75','1'];
+  opacities.forEach(function(op) {
+    h += '<div class="hb2-legend-cell" style="background:' + color + ';opacity:' + op + '"></div>';
+  });
+  h += '</div><span>Plus</span></div></div>';
+  return h;
+}
+
+// ── Check milestone celebration ────────────────────────────────────────────
+window.hb2CheckMilestone = function(hid, streak) {
+  if (HB2_MILESTONES.indexOf(streak) === -1) return;
+  var hcfg = ((window.S && window.S.hcfg) || []).find(function(h) { return h.id === hid; });
+  var label = hcfg ? (hcfg.emoji + ' ' + hcfg.label) : 'Habitude';
+  window._hbCelebration = { type: 'milestone', streak: streak, label: label };
+  if (typeof addXP === 'function') addXP(50, 'Jalon ' + streak + 'j — ' + label);
+  if (typeof toast === 'function') toast('🎉 Jalon ' + streak + ' jours ! +50 XP', 'var(--amber)');
+  if (typeof render === 'function') render();
+};
+
+// ── Challenge helpers ──────────────────────────────────────────────────────
+window.hb2StartChallenge = function(hid) {
+  var hcfgList = (window.S && window.S.hcfg) || [];
+  var idx = hcfgList.findIndex(function(h) { return h.id === hid; });
+  if (idx < 0) return;
+  hcfgList[idx].challenge = { startDate: (typeof iso === 'function' ? iso() : new Date().toISOString().slice(0, 10)), target: 30 };
+  if (typeof save === 'function') save();
+  if (typeof render === 'function') render();
+  if (typeof toast === 'function') toast('🏆 Challenge 30j lancé !', 'var(--amber)');
+};
+
+window.hb2ResetChallenge = function(hid) {
+  var hcfgList = (window.S && window.S.hcfg) || [];
+  var idx = hcfgList.findIndex(function(h) { return h.id === hid; });
+  if (idx < 0) return;
+  delete hcfgList[idx].challenge;
+  if (typeof save === 'function') save();
+  if (typeof render === 'function') render();
+};
+
+function hb2ChallengeDay(challenge, habits, hid) {
+  if (!challenge || !challenge.startDate) return 0;
+  var start = challenge.startDate;
+  var count = 0;
+  var d = new Date(start + 'T12:00:00');
+  var today = new Date();
+  while (d <= today) {
+    var key = d.toISOString().slice(0, 10);
+    var dd = (habits && habits[key]) || {};
+    if (dd[hid]) { count++; }
+    else if (key !== (typeof iso === 'function' ? iso() : today.toISOString().slice(0, 10))) {
+      // missed day — reset needed
+      return -1;
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return count;
+}
+
+// ── Reorder ───────────────────────────────────────────────────────────────
+window.hb2MoveHabit = function(hid, dir) {
+  var hcfgList = (window.S && window.S.hcfg) || [];
+  var idx = hcfgList.findIndex(function(h) { return h.id === hid; });
+  if (idx < 0) return;
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= hcfgList.length) return;
+  var tmp = hcfgList[idx];
+  hcfgList[idx] = hcfgList[newIdx];
+  hcfgList[newIdx] = tmp;
+  if (typeof save === 'function') save();
+  if (typeof render === 'function') render();
+};
+
+// ── Toggle prefs ──────────────────────────────────────────────────────────
+window.hb2SetPref = function(key, val) {
+  var cfg = (window.S && window.S.config) || {};
+  if (!cfg.habitudesPrefs) cfg.habitudesPrefs = {};
+  cfg.habitudesPrefs[key] = val;
+  if (typeof save === 'function') save();
+  if (typeof render === 'function') render();
+};
+
+window.hb2SetGradient = function(idx) {
+  hb2SetPref('heroGradient', idx);
+};
+
+// ── Overlay helpers ───────────────────────────────────────────────────────
+window.hb2OpenOverlay = function(hid) {
+  window._hbOverlay = hid;
+  window._hbOverlayTab = 'heatmap';
+  if (typeof render === 'function') render();
+};
+window.hb2CloseOverlay = function() {
+  window._hbOverlay = null;
+  if (typeof render === 'function') render();
+};
+window.hb2SetOverlayTab = function(tab) {
+  window._hbOverlayTab = tab;
+  if (typeof render === 'function') render();
+};
+
+// ── Day modal ─────────────────────────────────────────────────────────────
+window.hb2OpenDayModal = function(dateKey) {
+  var today = (typeof iso === 'function') ? iso() : new Date().toISOString().slice(0, 10);
+  if (dateKey >= today) return; // don't open for today / future
+  window._hbDayModal = dateKey;
+  if (typeof render === 'function') render();
+};
+window.hb2CloseDayModal = function() {
+  window._hbDayModal = null;
+  if (typeof render === 'function') render();
+};
+
+// ── Tab helpers ───────────────────────────────────────────────────────────
+window.hb2SetTab = function(tab) {
+  window._hbTab = tab;
+  if (typeof render === 'function') render();
+};
+
+// ── Celebration close ─────────────────────────────────────────────────────
+window.hb2CloseCelebration = function() {
+  window._hbCelebration = null;
+  if (typeof render === 'function') render();
+};
+
+// ── Export CSV ────────────────────────────────────────────────────────────
+window.hb2ExportCSV = function() {
+  var hcfgList = (window.S && window.S.hcfg) || [];
+  var habits = (window.S && window.S.habits) || {};
+  var rows = ['date,habit_id,habit_label,completed'];
+  var keys = Object.keys(habits).sort();
+  keys.forEach(function(k) {
+    hcfgList.forEach(function(h) {
+      rows.push(k + ',' + h.id + ',' + JSON.stringify(h.label) + ',' + (!!habits[k][h.id]));
+    });
+  });
+  var csv = rows.join('\n');
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'habitudes_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+// ── Override toggleHabit to handle V2 features ───────────────────────────
+var _hb2OrigToggle = window.toggleHabit;
+window.toggleHabit = function(hid) {
+  var today = (typeof iso === 'function') ? iso() : new Date().toISOString().slice(0, 10);
+  if (!window.S.habits) window.S.habits = {};
+  if (!window.S.habits[today]) window.S.habits[today] = {};
+  var wasOff = !window.S.habits[today][hid];
+  window.S.habits[today][hid] = wasOff;
+
+  if (wasOff) {
+    var hcfg = (window.S.hcfg || []).find(function(h) { return h.id === hid; });
+    var label = hcfg ? hcfg.label : 'Habitude';
+    var streak = window.habitStreak(hid);
+    var xp = hb2XpReward(hcfg || {}, streak);
+    if (typeof addXP === 'function') addXP(xp, label);
+    if (typeof toast === 'function') {
+      var xpLabel = xp > (hcfg && hcfg.xpReward || 10) ? '+' + xp + ' XP 🔥' : '+' + xp + ' XP';
+      toast('✓ ' + label + ' — ' + xpLabel, 'var(--green)');
+    }
+    // Check milestone
+    var newStreak = streak + 1;
+    if (HB2_MILESTONES.indexOf(newStreak) !== -1) {
+      setTimeout(function() { window.hb2CheckMilestone(hid, newStreak); }, 400);
+    }
+    // Challenge check
+    if (hcfg && hcfg.challenge) {
+      var chDay = hb2ChallengeDay(hcfg.challenge, window.S.habits, hid);
+      if (chDay >= 30) {
+        window._hbCelebration = { type: 'challenge', label: hcfg.emoji + ' ' + hcfg.label };
+        hcfg.challenge.completed = true;
+        if (typeof addXP === 'function') addXP(200, 'Challenge 30j completé : ' + label);
+      }
+    }
+  } else {
+    // Unchecking — check if challenge fails
+    var hcfg2 = (window.S.hcfg || []).find(function(h) { return h.id === hid; });
+    if (hcfg2 && hcfg2.challenge && !hcfg2.challenge.completed) {
+      delete hcfg2.challenge;
+      if (typeof toast === 'function') toast('Challenge réinitialisé', 'var(--amber)');
+    }
+  }
+
+  if (typeof save === 'function') save();
+  if (typeof render === 'function') render();
+};
+
+// ── V2 form — override hbSaveForm to also save xpReward + timeSlot ────────
+var _hb2OrigSaveForm = window.hbSaveForm;
+window.hbSaveForm = function() {
+  var label = (document.getElementById('hb-f-label') || {}).value || '';
+  label = label.trim();
+  if (!label) { if (typeof toast === 'function') toast('Label requis', 'var(--red)'); return; }
+  var emoji = ((document.getElementById('hb-f-emoji') || {}).value || '⭐').trim() || '⭐';
+  var color = window._hbFormColor || 'var(--cyan)';
+  var monthTarget = parseInt((document.getElementById('hb-f-target') || {}).value || '20', 10) || 20;
+  var group = ((document.getElementById('hb-f-group') || {}).value || '').trim();
+  var xpReward = parseInt((document.getElementById('hb-f-xp') || {}).value || '10', 10) || 10;
+  var timeSlot = ((document.getElementById('hb-f-timeslot') || {}).value || 'flexible');
+  if (!window.S.hcfg) window.S.hcfg = [];
+  if (window._hbForm && window._hbForm !== 'new') {
+    var idx = window.S.hcfg.findIndex(function(h) { return h.id === window._hbForm; });
+    if (idx >= 0) {
+      window.S.hcfg[idx].label = label;
+      window.S.hcfg[idx].emoji = emoji;
+      window.S.hcfg[idx].color = color;
+      window.S.hcfg[idx].monthTarget = monthTarget;
+      window.S.hcfg[idx].group = group;
+      window.S.hcfg[idx].xpReward = xpReward;
+      window.S.hcfg[idx].timeSlot = timeSlot;
+    }
+  } else {
+    window.S.hcfg.push({
+      id: 'h_' + Date.now(),
+      label: label, emoji: emoji, color: color,
+      monthTarget: monthTarget, group: group,
+      xpReward: xpReward, timeSlot: timeSlot
+    });
+  }
+  if (typeof save === 'function') save();
+  window._hbForm = null;
+  window._hbFormColor = null;
+  if (typeof render === 'function') render();
+  if (typeof toast === 'function') toast('✓ Habitude enregistrée', 'var(--green)');
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN RENDER — overrides renderHabitudesV1
+// ─────────────────────────────────────────────────────────────────────────────
+window.renderHabitudesV1 = function() {
+  var hcfg = (window.S && window.S.hcfg) || [];
+  var habits = (window.S && window.S.habits) || {};
+  var todayKey = (typeof iso === 'function') ? iso() : new Date().toISOString().slice(0, 10);
+  var today = habits[todayKey] || {};
+  var cfg = (window.S && window.S.config) || {};
+  var prefs = cfg.habitudesPrefs || {};
+
+  var total = hcfg.length;
+  var done = hcfg.filter(function(h) { return !!today[h.id]; }).length;
+  var pct = total > 0 ? Math.round(done / total * 100) : 0;
+  var globalStreak = (typeof currentStreak === 'function') ? currentStreak() : (cfg.bestStreak || 0);
+  var avg7 = hb2Avg7Score(hcfg);
+  var monthDone = hb2MonthDone(hcfg);
+  var gradIdx = prefs.heroGradient || 0;
+  var compact = prefs.compact ? ' compact' : '';
+
+  var h = '<div class="hb2-page' + compact + '">';
+
+  // ── Celebration overlay ──────────────────────────────────────────────────
+  if (window._hbCelebration) {
+    var cel = window._hbCelebration;
+    var celTitle = cel.type === 'challenge' ? '🏆 Challenge completé !' : '🔥 Jalon atteint !';
+    var celSub = cel.type === 'challenge'
+      ? (cel.label + '<br>30 jours consécutifs ! +200 XP')
+      : (cel.label + '<br>' + cel.streak + ' jours de suite ! +50 XP');
+    h += '<div class="hb2-celebration" onclick="hb2CloseCelebration()">';
+    h += '<div class="hb2-celeb-box">';
+    h += '<span class="hb2-celeb-emoji">' + (cel.type === 'challenge' ? '🏆' : '🔥') + '</span>';
+    h += '<div class="hb2-celeb-title">' + celTitle + '</div>';
+    h += '<div class="hb2-celeb-sub">' + celSub + '</div>';
+    h += '<button class="btn btn-primary" onclick="hb2CloseCelebration()">Super !</button>';
+    h += '</div></div>';
+  }
+
+  // ── Day modal ─────────────────────────────────────────────────────────────
+  if (window._hbDayModal) {
+    var dmKey = window._hbDayModal;
+    var dmDate = new Date(dmKey + 'T12:00:00');
+    var dmDayData = habits[dmKey] || {};
+    var dmTitle = HB2_DAYS_FULL[dmDate.getDay()] + ' ' + dmDate.getDate() + ' ' + HB2_MONTHS_SHORT[dmDate.getMonth()];
+    h += '<div class="hb2-day-modal" onclick="if(event.target===this)hb2CloseDayModal()">';
+    h += '<div class="hb2-day-modal-inner">';
+    h += '<div class="hb2-day-modal-title"><span>' + dmTitle + '</span><button class="hb2-overlay-close" onclick="hb2CloseDayModal()">✕</button></div>';
+    if (hcfg.length === 0) {
+      h += '<div style="color:var(--g1);font-size:13px">Aucune habitude configurée.</div>';
+    } else {
+      hcfg.forEach(function(hh) {
+        var isDone = !!dmDayData[hh.id];
+        h += '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--b)">';
+        h += '<div style="width:8px;height:8px;border-radius:50%;background:' + (hh.color || 'var(--cyan)') + ';flex-shrink:0"></div>';
+        h += '<span style="font-size:18px">' + hh.emoji + '</span>';
+        h += '<span style="flex:1;font-size:13px;color:' + (isDone ? 'var(--g1)' : 'var(--w)') + ';' + (isDone ? 'text-decoration:line-through' : '') + '">' + hh.label + '</span>';
+        h += '<span style="font-size:16px">' + (isDone ? '✅' : '○') + '</span>';
+        h += '</div>';
+      });
+    }
+    h += '</div></div>';
+  }
+
+  // ── Detail overlay ────────────────────────────────────────────────────────
+  if (window._hbOverlay) {
+    var ohid = window._hbOverlay;
+    var ohcfg = hcfg.find(function(hh) { return hh.id === ohid; });
+    if (ohcfg) {
+      var oStreak = window.habitStreak(ohid);
+      var oBest = window.habitBestStreak(ohid);
+      var oColor = ohcfg.color || 'var(--cyan)';
+      var oTab = window._hbOverlayTab || 'heatmap';
+
+      h += '<div class="hb2-overlay">';
+      h += '<div class="hb2-overlay-inner">';
+
+      // Header
+      h += '<div class="hb2-overlay-header">';
+      h += '<div class="hb2-overlay-emoji">' + ohcfg.emoji + '</div>';
+      h += '<div class="hb2-overlay-title-wrap">';
+      h += '<div class="hb2-overlay-title" style="color:' + oColor + '">' + ohcfg.label + '</div>';
+      h += '<div class="hb2-overlay-streak">🔥 ' + oStreak + 'j — Record: ' + oBest + 'j</div>';
+      h += '</div>';
+      h += '<button class="hb2-overlay-close" onclick="hb2CloseOverlay()">✕</button>';
+      h += '</div>';
+
+      // Tabs
+      h += '<div class="hb2-overlay-tabs">';
+      ['heatmap','stats','params'].forEach(function(t) {
+        var lbl = t === 'heatmap' ? 'Heatmap' : t === 'stats' ? 'Stats' : 'Paramètres';
+        h += '<button class="hb2-overlay-tab' + (oTab === t ? ' active' : '') + '" onclick="hb2SetOverlayTab(' + JSON.stringify(t) + ')">' + lbl + '</button>';
+      });
+      h += '</div>';
+
+      // Body
+      h += '<div class="hb2-overlay-body">';
+
+      if (oTab === 'heatmap') {
+        // Annual heatmap (365 days / 52 weeks)
+        h += '<div style="font-size:11px;font-weight:700;color:var(--g1);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Année entière</div>';
+        h += hb2BuildAnnualHeatmap(ohid, oColor);
+      } else if (oTab === 'stats') {
+        // Stats: monthly bars + info
+        var rate30 = window.habitRate30(ohid);
+        var monthCount = window.habitMonthCount(ohid);
+        var monthTarget = ohcfg.monthTarget || 20;
+        var monthPct = Math.round(monthCount / monthTarget * 100);
+        var allTime = hb2AllTimeCount(ohid);
+        var monthly12 = hb2Monthly12([ohcfg]);
+        var maxPct = Math.max.apply(null, monthly12.map(function(m) { return m.pct; }).concat([1]));
+
+        h += '<div class="hb2-stats-grid" style="margin-bottom:14px">';
+        h += '<div class="hb2-stat-box"><div class="hb2-stat-box-val" style="color:' + oColor + '">' + rate30 + '%</div><div class="hb2-stat-box-lbl">Taux 30j</div></div>';
+        h += '<div class="hb2-stat-box"><div class="hb2-stat-box-val">' + oBest + '</div><div class="hb2-stat-box-lbl">Meilleur streak</div></div>';
+        h += '<div class="hb2-stat-box"><div class="hb2-stat-box-val">' + monthCount + '/' + monthTarget + '</div><div class="hb2-stat-box-lbl">Ce mois (' + monthPct + '%)</div></div>';
+        h += '<div class="hb2-stat-box"><div class="hb2-stat-box-val">' + allTime + '</div><div class="hb2-stat-box-lbl">Total all-time</div></div>';
+        h += '</div>';
+
+        h += '<div style="font-size:11px;font-weight:700;color:var(--g1);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">12 derniers mois</div>';
+        h += '<div class="hb2-months-bars">';
+        monthly12.forEach(function(m) {
+          var barH = Math.max(2, Math.round(m.pct / maxPct * 56));
+          var bc = m.pct < 40 ? 'var(--red)' : m.pct < 70 ? 'var(--amber)' : oColor;
+          h += '<div class="hb2-month-bar-wrap">';
+          h += '<div class="hb2-month-bar" style="height:' + barH + 'px;background:' + bc + '"></div>';
+          h += '<div class="hb2-month-lbl">' + m.lbl + '</div>';
+          h += '</div>';
+        });
+        h += '</div>';
+
+        // Goal link
+        if (ohcfg.linkedGoal && window.S && window.S.goals) {
+          var linkedGoal = (window.S.goals || []).find(function(g) { return g.id === ohcfg.linkedGoal; });
+          if (linkedGoal) {
+            var gPct = linkedGoal.target > 0 ? Math.round((linkedGoal.progress || 0) / linkedGoal.target * 100) : 0;
+            h += '<div style="margin-top:14px;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--b);cursor:pointer" onclick="nav(\u0027objectifs\u0027)">';
+            h += '<div style="font-size:10px;font-weight:700;color:var(--purp);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">Objectif lié</div>';
+            h += '<div style="font-size:14px;font-weight:700;color:var(--w);margin-bottom:6px">' + (linkedGoal.emoji || '🎯') + ' ' + linkedGoal.title + '</div>';
+            h += '<div class="progress-bar"><div class="progress-fill" style="width:' + gPct + '%;background:var(--purp)"></div></div>';
+            h += '<div style="font-size:11px;color:var(--g1);margin-top:4px">' + gPct + '% — Tap pour voir les objectifs</div>';
+            h += '</div>';
+          }
+        }
+      } else {
+        // Params tab (edit)
+        var defColor = ohcfg.color || 'var(--cyan)';
+        if (!window._hbFormColor) window._hbFormColor = defColor;
+        var COLORS = [
+          {val:'var(--cyan)',hex:'#00D4FF',lbl:'Cyan'},
+          {val:'var(--green)',hex:'#00E5A0',lbl:'Green'},
+          {val:'var(--amber)',hex:'#FFB800',lbl:'Amber'},
+          {val:'var(--red)',hex:'#FF3A5C',lbl:'Red'},
+          {val:'var(--purp)',hex:'#A855F7',lbl:'Purp'},
+          {val:'#F0F4F8',hex:'#F0F4F8',lbl:'White'}
+        ];
+        var XP_OPTIONS = [5,10,15,20,25,50];
+        var TIME_OPTIONS = [
+          {val:'flexible',lbl:'Flexible'},
+          {val:'matin',lbl:'🌅 Matin'},
+          {val:'aprem',lbl:'☀️ Après-midi'},
+          {val:'soir',lbl:'🌙 Soir'}
+        ];
+
+        h += '<div class="form-group"><label>Label</label><input id="hb-f-label" type="text" maxlength="40" value="' + ohcfg.label.replace(/"/g,'&quot;') + '"></div>';
+        h += '<div class="grid2">';
+        h += '<div class="form-group"><label>Emoji</label><input id="hb-f-emoji" type="text" maxlength="2" style="width:80px" value="' + ohcfg.emoji + '"></div>';
+        h += '<div class="form-group"><label>XP Reward</label><select id="hb-f-xp">';
+        XP_OPTIONS.forEach(function(xp) {
+          h += '<option value="' + xp + '"' + (xp === (ohcfg.xpReward || 10) ? ' selected' : '') + '>' + xp + ' XP</option>';
+        });
+        h += '</select></div>';
+        h += '</div>';
+        h += '<div class="form-group"><label>Couleur</label><div class="hb-color-swatches">';
+        COLORS.forEach(function(c) {
+          var sel = (window._hbFormColor === c.val) ? ' selected' : '';
+          h += '<div class="hb-swatch' + sel + '" style="background:' + c.hex + '" data-color="' + c.val + '" onclick="hbSetColor(' + JSON.stringify(c.val) + ')" title="' + c.lbl + '"></div>';
+        });
+        h += '</div></div>';
+        h += '<div class="grid2">';
+        h += '<div class="form-group"><label>Objectif mensuel</label><input id="hb-f-target" type="number" min="1" max="31" value="' + (ohcfg.monthTarget || 20) + '"></div>';
+        h += '<div class="form-group"><label>Groupe</label><input id="hb-f-group" type="text" maxlength="30" value="' + (ohcfg.group || '') + '"></div>';
+        h += '</div>';
+        h += '<div class="form-group"><label>Horaire</label><select id="hb-f-timeslot">';
+        TIME_OPTIONS.forEach(function(t) {
+          h += '<option value="' + t.val + '"' + (t.val === (ohcfg.timeSlot || 'flexible') ? ' selected' : '') + '>' + t.lbl + '</option>';
+        });
+        h += '</select></div>';
+        h += '<div style="display:flex;gap:8px;margin-top:8px">';
+        h += '<button class="btn btn-primary" style="flex:1" onclick="window._hbForm=' + JSON.stringify(ohid) + ';hbSaveForm();hb2CloseOverlay()">Enregistrer</button>';
+        h += '<button class="btn btn-danger btn-sm" onclick="hbConfirmDelete(' + JSON.stringify(ohid) + ');hb2CloseOverlay()">Supprimer</button>';
+        h += '</div>';
+        // Challenge section
+        var chDay = ohcfg.challenge ? hb2ChallengeDay(ohcfg.challenge, habits, ohid) : 0;
+        h += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--b)">';
+        h += '<div style="font-size:11px;font-weight:700;color:var(--g1);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Challenge 30 jours</div>';
+        if (ohcfg.challenge && !ohcfg.challenge.completed && chDay >= 0) {
+          h += '<div class="hb2-challenge-badge">🏆 Challenge J.' + chDay + '/30</div>';
+          h += '<div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:' + Math.round(chDay/30*100) + '%;background:var(--amber)"></div></div>';
+          h += '<button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="hb2ResetChallenge(' + JSON.stringify(ohid) + ')">Annuler le challenge</button>';
+        } else if (ohcfg.challenge && ohcfg.challenge.completed) {
+          h += '<div style="color:var(--amber);font-size:13px;font-weight:700">🏆 Challenge completé !</div>';
+        } else if (ohcfg.challenge && chDay < 0) {
+          h += '<div style="color:var(--red);font-size:12px;margin-bottom:8px">Challenge échoué (jour manqué)</div>';
+          h += '<button class="btn btn-primary btn-sm" onclick="hb2StartChallenge(' + JSON.stringify(ohid) + ')">Redémarrer</button>';
+        } else {
+          h += '<button class="btn btn-ghost btn-sm" onclick="hb2StartChallenge(' + JSON.stringify(ohid) + ')">Démarrer un challenge 30j</button>';
+        }
+        h += '</div>';
+      }
+
+      h += '</div>'; // overlay-body
+      h += '</div>'; // overlay-inner
+      h += '</div>'; // overlay
+    }
+  }
+
+  // ── Header ────────────────────────────────────────────────────────────────
+  var dateObj = new Date(todayKey + 'T12:00:00');
+  var dateStr = HB2_DAYS_FULL[dateObj.getDay()] + ' ' + dateObj.getDate() + ' ' + HB2_MONTHS_SHORT[dateObj.getMonth()];
+  var scoreColor = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--amber)' : 'var(--cyan)';
+
+  // Ring SVG 72px
+  var R = 30, CX = 36, CY = 36;
+  var circ = Math.round(2 * Math.PI * R * 10) / 10;
+  var dash = Math.round(circ * pct / 100 * 10) / 10;
+  var gap = circ - dash;
+  var pulseClass = pct < 50 ? ' pulse' : '';
+
+  h += '<div class="hb2-hero grad' + gradIdx + '">';
+  h += '<div class="hb2-hero-top">';
+
+  // Ring
+  h += '<div class="hb2-ring-wrap' + pulseClass + '">';
+  h += '<svg width="72" height="72" viewBox="0 0 72 72">';
+  h += '<circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="none" stroke="var(--bg3)" stroke-width="6"/>';
+  h += '<circle class="fill" cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="none" stroke="' + scoreColor + '" stroke-width="6"';
+  h += ' stroke-dasharray="' + dash + ' ' + gap + '" stroke-linecap="round" transform="rotate(-90 ' + CX + ' ' + CY + ')"/>';
+  h += '</svg>';
+  h += '<div class="hb2-ring-center"><div class="hb2-ring-pct" style="color:' + scoreColor + '">' + pct + '%</div><div class="hb2-ring-lbl">score</div></div>';
+  h += '</div>';
+
+  h += '<div class="hb2-hero-info">';
+  h += '<div class="hb2-hero-greeting">' + dateStr + '</div>';
+  if (done === total && total > 0) {
+    h += '<div class="hb2-hero-title">🎉 Toutes faites !</div>';
+  } else {
+    h += '<div class="hb2-hero-title">Habitudes</div>';
+  }
+  h += '<div class="hb2-hero-sub">' + done + '/' + total + ' habitudes · <span class="flame">🔥</span> ' + globalStreak + ' streak</div>';
+  h += '</div>';
+
+  h += '<div class="hb2-hero-actions">';
+  h += '<button class="hb2-add-btn" onclick="hbOpenForm()" title="Nouvelle habitude">+</button>';
+  h += '<button class="hb2-pref-btn" onclick="window._hbShowPrefs=!window._hbShowPrefs;render()" title="Préférences">⚙️</button>';
+  h += '</div>';
+  h += '</div>'; // hero-top
+
+  // Mini stats row
+  var bestDayName = hb2BestDayOfWeek(hcfg);
+  var totalTarget = hcfg.reduce(function(s, h2) { return s + (h2.monthTarget || 20); }, 0);
+  var totalMonthDone = hcfg.reduce(function(s, h2) { return s + window.habitMonthCount(h2.id); }, 0);
+  var monthProgress = totalTarget > 0 ? (totalMonthDone + '/' + totalTarget) : '—';
+
+  h += '<div class="hb2-mini-stats">';
+  h += '<div class="hb2-mini-stat"><div class="hb2-mini-val">' + avg7 + '%</div><div class="hb2-mini-lbl">Score<br>semaine</div></div>';
+  h += '<div class="hb2-mini-stat"><div class="hb2-mini-val" style="font-size:11px">' + bestDayName.slice(0,3) + '</div><div class="hb2-mini-lbl">Meilleur<br>jour</div></div>';
+  h += '<div class="hb2-mini-stat"><div class="hb2-mini-val" style="font-size:12px">' + monthProgress + '</div><div class="hb2-mini-lbl">Mois<br>actuel</div></div>';
+  h += '</div>';
+  h += '</div>'; // hero
+
+  // ── Motivation message ────────────────────────────────────────────────────
+  var hour = new Date().getHours();
+  var motivMsg = '', motivCls = 'cyan';
+  if (pct >= 80) {
+    motivMsg = '🌟 Excellente journée, continue comme ça !';
+    motivCls = 'green';
+  } else if (pct === 0 && hour < 14) {
+    motivMsg = '☀️ C\u2019est le moment de commencer ta routine !';
+    motivCls = 'amber';
+  } else if (pct === 0 && hour >= 14) {
+    motivMsg = '💪 Il n\u2019est pas trop tard, lance-toi !';
+    motivCls = 'amber';
+  } else {
+    // Check if streak was broken yesterday
+    var yesterKey = hb2IsoOffset(-1);
+    var yesterData = habits[yesterKey] || {};
+    var yesterDone = hcfg.filter(function(h2) { return !!yesterData[h2.id]; }).length;
+    var yesterPct = total > 0 ? Math.round(yesterDone / total * 100) : 0;
+    if (yesterPct < 50 && pct < 50) {
+      motivMsg = '💫 Ne lâche pas ! Chaque habitude compte.';
+      motivCls = 'cyan';
+    }
+  }
+  if (motivMsg) {
+    h += '<div class="hb2-motiv ' + motivCls + '"><span>' + motivMsg + '</span></div>';
+  }
+
+  // ── Quote ─────────────────────────────────────────────────────────────────
+  var quoteIdx = new Date().getDate() % HB2_QUOTES.length;
+  var quote = HB2_QUOTES[quoteIdx];
+  h += '<div class="hb2-quote"><strong>“</strong> ' + quote + ' <strong>”</strong></div>';
+
+  // ── Prefs panel ───────────────────────────────────────────────────────────
+  if (window._hbShowPrefs) {
+    var GRAD_COLORS = ['#00D4FF','#A855F7','#FFB800','#00E5A0'];
+    h += '<div class="hb2-prefs-panel">';
+    h += '<div style="font-size:13px;font-weight:800;color:var(--w);margin-bottom:10px">Préférences</div>';
+
+    h += '<div class="hb2-prefs-row">';
+    h += '<div><div class="hb2-prefs-lbl">Mode compact</div><div class="hb2-prefs-sub">Réduit les lignes</div></div>';
+    h += '<button class="hb2-toggle ' + (prefs.compact ? 'on' : 'off') + '" onclick="hb2SetPref(\u0027compact\u0027,' + (!prefs.compact) + ')"></button>';
+    h += '</div>';
+
+    h += '<div class="hb2-prefs-row">';
+    h += '<div><div class="hb2-prefs-lbl">Masquer les faites</div><div class="hb2-prefs-sub">Cache complètement</div></div>';
+    h += '<button class="hb2-toggle ' + (prefs.hideChecked ? 'on' : 'off') + '" onclick="hb2SetPref(\u0027hideChecked\u0027,' + (!prefs.hideChecked) + ')"></button>';
+    h += '</div>';
+
+    h += '<div class="hb2-prefs-row">';
+    h += '<div><div class="hb2-prefs-lbl">Réorganiser</div><div class="hb2-prefs-sub">Mode ↑↓ par habitude</div></div>';
+    h += '<button class="hb2-toggle ' + (window._hbReorderMode ? 'on' : 'off') + '" onclick="window._hbReorderMode=!window._hbReorderMode;render()"></button>';
+    h += '</div>';
+
+    h += '<div class="hb2-prefs-row">';
+    h += '<div>';
+    h += '<div class="hb2-prefs-lbl">Couleur du hero</div>';
+    h += '<div class="hb2-grad-row">';
+    GRAD_COLORS.forEach(function(gc, gi) {
+      h += '<div class="hb2-grad-swatch' + (gradIdx === gi ? ' active' : '') + '" style="background:' + gc + '" onclick="hb2SetGradient(' + gi + ')"></div>';
+    });
+    h += '</div></div></div>';
+
+    h += '</div>'; // prefs-panel
+  }
+
+  // ── Week strip ────────────────────────────────────────────────────────────
+  h += '<div class="hb2-week-strip">';
+  h += '<div class="hb2-week-strip-title">Cette semaine</div>';
+  h += '<div class="hb2-week-circles">';
+  var DOW_SHORT = ['L','M','M','J','V','S','D'];
+  var dowToday = dateObj.getDay();
+  var mondayOffset = dowToday === 0 ? -6 : 1 - dowToday;
+  for (var wi = 0; wi < 7; wi++) {
+    var wDate = new Date(dateObj);
+    wDate.setDate(dateObj.getDate() + mondayOffset + wi);
+    var wKey = wDate.toISOString().slice(0, 10);
+    var wScore = hb2ScoreForDay(wKey, hcfg);
+    var wIsToday = wKey === todayKey;
+    var wIsFuture = wDate > dateObj;
+    var wColor = wScore >= 80 ? 'var(--green)' : wScore >= 50 ? 'var(--amber)' : wScore > 0 ? 'var(--cyan)' : 'var(--g2)';
+    var ringCls = 'hb2-day-ring' + (wIsToday ? ' today' : '') + (wScore === 100 ? ' full' : '') + (wIsFuture ? ' future' : '');
+    var wVal = wScore === 100 ? '🔥' : wScore + '%';
+    h += '<div class="hb2-day-circle" onclick="hb2OpenDayModal(' + JSON.stringify(wKey) + ')">';
+    h += '<div class="hb2-day-lbl">' + DOW_SHORT[wi] + '</div>';
+    h += '<div class="' + ringCls + '" style="color:' + wColor + '">';
+    h += '<span class="hb2-day-ring-val">' + (wIsFuture ? '' : wVal) + '</span>';
+    h += '</div>';
+    h += '</div>';
+  }
+  h += '</div></div>'; // week-circles + week-strip
+
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+  h += '<div class="hb2-tabs">';
+  var TABS = [{k:'today',l:"Aujourd\u2019hui"},{k:'semaine',l:'Semaine'},{k:'stats',l:'Stats'}];
+  TABS.forEach(function(t) {
+    h += '<button class="hb2-tab' + (window._hbTab === t.k ? ' active' : '') + '" onclick="hb2SetTab(' + JSON.stringify(t.k) + ')">' + t.l + '</button>';
+  });
+  h += '</div>';
+
+  // ── Form ──────────────────────────────────────────────────────────────────
+  if (window._hbForm) {
+    var editHab = null;
+    if (window._hbForm !== 'new') {
+      editHab = hcfg.find(function(x) { return x.id === window._hbForm; });
+    }
+    var defColor2 = (editHab && editHab.color) || 'var(--cyan)';
+    if (!window._hbFormColor) window._hbFormColor = defColor2;
+    var COLORS2 = [
+      {val:'var(--cyan)',hex:'#00D4FF',lbl:'Cyan'},
+      {val:'var(--green)',hex:'#00E5A0',lbl:'Green'},
+      {val:'var(--amber)',hex:'#FFB800',lbl:'Amber'},
+      {val:'var(--red)',hex:'#FF3A5C',lbl:'Red'},
+      {val:'var(--purp)',hex:'#A855F7',lbl:'Purp'},
+      {val:'#F0F4F8',hex:'#F0F4F8',lbl:'White'}
+    ];
+    var XP_OPTIONS2 = [5,10,15,20,25,50];
+    var TIME_OPTIONS2 = [
+      {val:'flexible',lbl:'Flexible'},
+      {val:'matin',lbl:'🌅 Matin'},
+      {val:'aprem',lbl:'☀️ Après-midi'},
+      {val:'soir',lbl:'🌙 Soir'}
+    ];
+
+    h += '<div class="hb-form-wrap">';
+    h += '<div class="hb-form-title">' + (editHab ? 'Modifier' : 'Nouvelle habitude') + '</div>';
+    h += '<div class="form-group"><label>Label</label><input id="hb-f-label" type="text" placeholder="Ex: Méditation" maxlength="40" value="' + (editHab ? editHab.label.replace(/"/g,'&quot;') : '') + '"></div>';
+    h += '<div class="grid2">';
+    h += '<div class="form-group"><label>Emoji</label><input id="hb-f-emoji" type="text" placeholder="⭐" maxlength="2" style="width:80px" value="' + (editHab ? editHab.emoji : '⭐') + '"></div>';
+    h += '<div class="form-group"><label>XP Reward</label><select id="hb-f-xp">';
+    XP_OPTIONS2.forEach(function(xp) {
+      h += '<option value="' + xp + '"' + (xp === (editHab ? (editHab.xpReward || 10) : 10) ? ' selected' : '') + '>' + xp + ' XP</option>';
+    });
+    h += '</select></div></div>';
+    h += '<div class="form-group"><label>Couleur</label><div class="hb-color-swatches">';
+    COLORS2.forEach(function(c) {
+      var sel = (window._hbFormColor === c.val) ? ' selected' : '';
+      h += '<div class="hb-swatch' + sel + '" style="background:' + c.hex + '" data-color="' + c.val + '" onclick="hbSetColor(' + JSON.stringify(c.val) + ')" title="' + c.lbl + '"></div>';
+    });
+    h += '</div></div>';
+    h += '<div class="grid2">';
+    h += '<div class="form-group"><label>Objectif mensuel</label><input id="hb-f-target" type="number" min="1" max="31" value="' + (editHab ? (editHab.monthTarget || 20) : 20) + '"></div>';
+    h += '<div class="form-group"><label>Groupe</label><input id="hb-f-group" type="text" placeholder="Ex: Matin" maxlength="30" value="' + (editHab ? (editHab.group || '') : '') + '"></div>';
+    h += '</div>';
+    h += '<div class="form-group"><label>Horaire</label><select id="hb-f-timeslot">';
+    TIME_OPTIONS2.forEach(function(t) {
+      h += '<option value="' + t.val + '"' + (t.val === (editHab ? (editHab.timeSlot || 'flexible') : 'flexible') ? ' selected' : '') + '>' + t.lbl + '</option>';
+    });
+    h += '</select></div>';
+    h += '<div style="display:flex;gap:8px;margin-top:4px">';
+    h += '<button class="btn btn-primary" style="flex:1" onclick="hbSaveForm()">' + (editHab ? 'Enregistrer' : 'Ajouter') + '</button>';
+    h += '<button class="btn btn-ghost" onclick="hbCloseForm()">Annuler</button>';
+    h += '</div></div>';
+  }
+
+  // ── Empty state ───────────────────────────────────────────────────────────
+  if (total === 0 && !window._hbForm) {
+    h += '<div class="hb-empty"><span class="hb-empty-emoji">🎯</span><h3>Aucune habitude</h3>';
+    h += '<p style="font-size:13px">Crée ta première habitude en appuyant sur le + en haut</p></div>';
+    h += '</div>';
+    return h;
+  }
+
+  // ── Delete confirm ────────────────────────────────────────────────────────
+  if (window._hbDeleteConfirm) {
+    var dh = hcfg.find(function(x) { return x.id === window._hbDeleteConfirm; });
+    var dlbl = dh ? (dh.emoji + ' ' + dh.label) : 'cette habitude';
+    h += '<div class="hb-delete-confirm">'
+      + '<span>Supprimer « ' + dlbl + ' » ?</span>'
+      + '<div class="hb-delete-confirm-btns">'
+      + '<button class="btn btn-danger btn-sm" onclick="hbDelete(' + JSON.stringify(window._hbDeleteConfirm) + ')">Supprimer</button>'
+      + '<button class="btn btn-ghost btn-sm" onclick="hbCloseMenu()">Annuler</button>'
+      + '</div></div>';
+  }
+
+  // ── Action menu ───────────────────────────────────────────────────────────
+  if (window._hbActionMenu) {
+    var amh = hcfg.find(function(x) { return x.id === window._hbActionMenu; });
+    var amlbl = amh ? (amh.emoji + ' ' + amh.label) : '';
+    h += '<div class="hb-action-menu">';
+    h += '<div style="padding:10px 16px 6px;font-size:12px;font-weight:700;color:var(--g1)">' + amlbl + '</div>';
+    h += '<div class="hb-action-item" onclick="hb2OpenOverlay(' + JSON.stringify(window._hbActionMenu) + ');hbCloseMenu()">📈 Détails & stats</div>';
+    h += '<div class="hb-action-item" onclick="hbOpenForm(' + JSON.stringify(window._hbActionMenu) + ')">✏️ Modifier</div>';
+    h += '<div class="hb-action-item" onclick="hb2StartChallenge(' + JSON.stringify(window._hbActionMenu) + ');hbCloseMenu()">🏆 Challenge 30j</div>';
+    h += '<div class="hb-action-item danger" onclick="hbConfirmDelete(' + JSON.stringify(window._hbActionMenu) + ')">🗑️ Supprimer</div>';
+    h += '<div class="hb-action-item" onclick="hbCloseMenu()" style="color:var(--g1)">Annuler</div>';
+    h += '</div>';
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // TAB: TODAY
+  // ════════════════════════════════════════════════════════════════════════════
+  if (window._hbTab === 'today') {
+    // Sort by time slot: matin → aprem → soir → flexible
+    var slotOrder = {matin:0, aprem:1, soir:2, flexible:3};
+    var unchecked = hcfg.filter(function(h2) { return !today[h2.id]; });
+    var checked = hcfg.filter(function(h2) { return !!today[h2.id]; });
+    // Sort unchecked by timeSlot
+    unchecked.sort(function(a, b) {
+      return (slotOrder[a.timeSlot||'flexible']||3) - (slotOrder[b.timeSlot||'flexible']||3);
+    });
+    var sorted;
+    if (prefs.hideChecked) {
+      sorted = unchecked;
+    } else {
+      sorted = unchecked.concat(checked);
+    }
+
+    // Section header
+    h += '<div class="hb2-section-header">';
+    h += '<span class="hb2-section-title">Aujourd\u2019hui</span>';
+    h += '<button class="hb2-check-all-btn" onclick="hcfg.forEach(function(hh){if(!today[hh.id])window.toggleHabit(hh.id)})" style="font-size:11px;color:var(--cyan);background:none;border:none;cursor:pointer">Tout cocher ✓</button>';
+    h += '</div>';
+
+    // Reorder mode
+    if (window._hbReorderMode) {
+      h += '<div class="hb2-card">';
+      hcfg.forEach(function(hh, idx) {
+        h += '<div class="hb2-reorder-row">';
+        h += '<span class="hb2-reorder-handle">☰</span>';
+        h += '<span style="font-size:18px">' + hh.emoji + '</span>';
+        h += '<span style="flex:1;font-size:13px;color:var(--w)">' + hh.label + '</span>';
+        h += '<button class="hb2-reorder-up" onclick="hb2MoveHabit(' + JSON.stringify(hh.id) + ',-1)">↑</button>';
+        h += '<button class="hb2-reorder-dn" onclick="hb2MoveHabit(' + JSON.stringify(hh.id) + ',1)">↓</button>';
+        h += '</div>';
+      });
+      h += '</div>';
+    } else {
+      // Group habits
+      var groups = {}, noGroup = [];
+      sorted.forEach(function(hh) {
+        if (hh.group) {
+          if (!groups[hh.group]) groups[hh.group] = [];
+          groups[hh.group].push(hh);
+        } else { noGroup.push(hh); }
+      });
+
+      function renderHabitRow(hh) {
+        var isDone = !!today[hh.id];
+        var streak = window.habitStreak(hh.id);
+        var best = window.habitBestStreak(hh.id);
+        var xpR = hb2XpReward(hh, streak);
+        var baseXp = hh.xpReward || 10;
+        var hasBonus = xpR > baseXp;
+        var nextMilestone = hb2NextMilestone(streak);
+        var prevMilestone = streak >= 7 ? HB2_MILESTONES[HB2_MILESTONES.indexOf(nextMilestone) - 1] || 0 : 0;
+        var milPct = nextMilestone > prevMilestone ? Math.round((streak - prevMilestone) / (nextMilestone - prevMilestone) * 100) : 0;
+        var streakCls = streak >= 30 ? 's30' : streak >= 7 ? 's7' : '';
+        var colorVal = hh.color || 'var(--cyan)';
+        var doneCls = isDone ? ' done-row' : '';
+        var isLate = !isDone && (hh.timeSlot === 'matin') && new Date().getHours() >= 12;
+        var timeLabel = '';
+        if (hh.timeSlot === 'matin') timeLabel = isLate ? '<span class="hb2-time-badge late">🌅 Matin</span>' : '<span class="hb2-time-badge matin">🌅 Matin</span>';
+        else if (hh.timeSlot === 'aprem') timeLabel = '<span class="hb2-time-badge aprem">☀️ Après-midi</span>';
+        else if (hh.timeSlot === 'soir') timeLabel = '<span class="hb2-time-badge soir">🌙 Soir</span>';
+
+        // Challenge badge
+        var challengeHtml = '';
+        if (hh.challenge && !hh.challenge.completed) {
+          var chDay2 = hb2ChallengeDay(hh.challenge, habits, hh.id);
+          if (chDay2 >= 0) {
+            challengeHtml = '<span class="hb2-challenge-badge">🏆 J.' + chDay2 + '/30</span>';
+          } else {
+            // missed — auto reset
+            delete hh.challenge;
+            if (typeof save === 'function') save();
+            if (typeof toast === 'function') toast('Challenge ' + hh.label + ' réinitialisé', 'var(--amber)');
+          }
+        }
+        if (hh.challenge && hh.challenge.completed) {
+          challengeHtml = '<span class="hb2-challenge-badge">🏆 Completé</span>';
+        }
+
+        var out = '<div class="hb2-row' + doneCls + '">';
+        out += '<div class="hb2-row-main"'
+          + ' onmousedown="hbStartLongPress(' + JSON.stringify(hh.id) + ')"'
+          + ' ontouchstart="hbStartLongPress(' + JSON.stringify(hh.id) + ')"'
+          + ' onmouseup="hbCancelLongPress()"'
+          + ' ontouchend="hbCancelLongPress()"'
+          + ' onmouseleave="hbCancelLongPress()"'
+          + '>';
+        out += '<div class="hb2-dot" style="background:' + colorVal + '"></div>';
+        out += '<div class="hb2-emoji">' + hh.emoji + '</div>';
+        out += '<div class="hb2-info" onclick="hb2OpenOverlay(' + JSON.stringify(hh.id) + ')">';
+        out += '<div class="hb2-label">' + hh.label + '</div>';
+        out += '<div class="hb2-row-meta">';
+        if (streak > 0) {
+          out += '<span class="hb2-streak-txt ' + streakCls + '">';
+          out += (streak >= 7 ? '<span class="hb2-flame-anim">🔥</span>' : '🔥') + ' ' + streak + 'j';
+          if (best > streak) out += ' <span style="color:var(--g2);font-size:10px">record:' + best + '</span>';
+          out += '</span>';
+        }
+        if (timeLabel) out += timeLabel;
+        // XP badge
+        out += '<span class="hb2-xp-badge' + (hasBonus ? ' bonus' : '') + '">+' + xpR + ' XP' + (hasBonus ? ' 🔥' : '') + '</span>';
+        if (challengeHtml) out += challengeHtml;
+        out += '</div></div>'; // info
+        // Milestone progress (if streak active)
+        if (streak > 0 && streak < 365) {
+          out += '<div class="hb2-milestone-wrap">';
+          out += '<div class="hb2-milestone-row">';
+          out += '<div class="hb2-milestone-lbl">Prochain: ' + nextMilestone + 'j</div>';
+          out += '<div class="hb2-milestone-bar"><div class="hb2-milestone-fill" style="width:' + milPct + '%"></div></div>';
+          out += '<div class="hb2-milestone-next">' + streak + '/' + nextMilestone + '</div>';
+          out += '</div></div>';
+        }
+        // Challenge progress bar
+        if (hh.challenge && !hh.challenge.completed) {
+          var cd = hb2ChallengeDay(hh.challenge, habits, hh.id);
+          if (cd >= 0) {
+            out += '<div class="hb2-challenge-bar"><div class="hb2-challenge-fill" style="width:' + Math.round(cd/30*100) + '%"></div></div>';
+          }
+        }
+
+        out += '<button class="hb2-check' + (isDone ? ' checked' : '') + '"'
+          + ' style="--check-color:' + colorVal + '"'
+          + ' onclick="toggleHabit(' + JSON.stringify(hh.id) + ')">'
+          + (isDone ? '✓' : '')
+          + '</button>';
+        out += '</div>'; // row-main
+        out += '</div>'; // hb2-row
+        return out;
+      }
+
+      if (noGroup.length > 0) {
+        h += '<div class="hb2-card">';
+        noGroup.forEach(function(hh) { h += renderHabitRow(hh); });
+        h += '</div>';
+      }
+      Object.keys(groups).forEach(function(grp) {
+        h += '<div class="hb2-group-label">' + grp + '<span class="hb2-group-count">' + groups[grp].length + '</span></div>';
+        h += '<div class="hb2-card">';
+        groups[grp].forEach(function(hh) { h += renderHabitRow(hh); });
+        h += '</div>';
+      });
+    }
+
+    // Export buttons at bottom of today tab
+    h += '<div class="hb2-export-panel">';
+    h += '<div style="font-size:11px;font-weight:700;color:var(--g1);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Données</div>';
+    h += '<div class="hb2-export-row">';
+    h += '<button class="btn btn-ghost btn-sm" onclick="hb2ExportCSV()">📥 Export CSV</button>';
+    h += '<button class="btn btn-ghost btn-sm" onclick="window._hbGlobalStats=!window._hbGlobalStats;render()">📊 Stats globales</button>';
+    h += '</div>';
+    if (window._hbGlobalStats) {
+      var allKeys = Object.keys(habits);
+      var totalDays = allKeys.length;
+      var totalCompletions = 0;
+      allKeys.forEach(function(k) {
+        hcfg.forEach(function(hh) { if (habits[k][hh.id]) totalCompletions++; });
+      });
+      var globalRate = totalDays > 0 && hcfg.length > 0 ? Math.round(totalCompletions / (totalDays * hcfg.length) * 100) : 0;
+      h += '<div class="hb2-global-stats">';
+      h += '<div style="font-size:11px;font-weight:700;color:var(--g1);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Résumé global</div>';
+      h += '<div class="hb2-global-stat-row"><span>Jours trackés</span><span class="val">' + totalDays + '</span></div>';
+      h += '<div class="hb2-global-stat-row"><span>Total complétions</span><span class="val">' + totalCompletions + '</span></div>';
+      h += '<div class="hb2-global-stat-row"><span>Taux global</span><span class="val">' + globalRate + '%</span></div>';
+      h += '<div class="hb2-global-stat-row"><span>Habitudes actives</span><span class="val">' + hcfg.length + '</span></div>';
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // TAB: SEMAINE
+  // ════════════════════════════════════════════════════════════════════════════
+  else if (window._hbTab === 'semaine') {
+    // Build 7 days (last 7, Mon-Sun of current week)
+    var weekDays = [];
+    for (var wi2 = 0; wi2 < 7; wi2++) {
+      var wDate2 = new Date(dateObj);
+      wDate2.setDate(dateObj.getDate() + mondayOffset + wi2);
+      var wKey2 = wDate2.toISOString().slice(0, 10);
+      weekDays.push({
+        key: wKey2,
+        short: DOW_SHORT[wi2],
+        date: wDate2.getDate(),
+        isToday: wKey2 === todayKey,
+        isFuture: wDate2 > dateObj
+      });
+    }
+
+    h += '<div class="hb2-week-table"><table>';
+    // Header
+    h += '<thead><tr><th style="text-align:left">Habitude</th>';
+    weekDays.forEach(function(wd) {
+      h += '<th class="' + (wd.isToday ? 'today-col' : '') + '">' + wd.short + '<br><span style="font-weight:400">' + wd.date + '</span></th>';
+    });
+    h += '<th>Total</th></tr></thead>';
+
+    // Rows
+    h += '<tbody>';
+    hcfg.forEach(function(hh) {
+      var colorVal2 = hh.color || 'var(--cyan)';
+      h += '<tr>';
+      h += '<td><div class="hb2-week-habit-name">' + hh.emoji + ' ' + hh.label + '</div></td>';
+      var rowTotal = 0;
+      weekDays.forEach(function(wd) {
+        var dd = habits[wd.key] || {};
+        var done2 = !!dd[hh.id];
+        if (done2) rowTotal++;
+        h += '<td>';
+        h += '<div class="hb2-week-dot-cell ' + (done2 ? 'done' : 'empty') + '" style="--cell-color:' + colorVal2 + '">';
+        h += done2 ? '✓' : '';
+        h += '</div></td>';
+      });
+      h += '<td><span class="hb2-week-total">' + rowTotal + '/7</span></td>';
+      h += '</tr>';
+    });
+
+    // Totals row
+    h += '<tr style="border-top:2px solid var(--b)">';
+    h += '<td><span style="font-size:11px;font-weight:700;color:var(--g1)">Total</span></td>';
+    weekDays.forEach(function(wd) {
+      var dd = habits[wd.key] || {};
+      var cnt = hcfg.filter(function(hh) { return !!dd[hh.id]; }).length;
+      var col = cnt === hcfg.length && hcfg.length > 0 ? 'var(--green)' : cnt > 0 ? 'var(--amber)' : 'var(--g2)';
+      h += '<td><span class="hb2-week-total" style="color:' + col + '">' + cnt + '/' + hcfg.length + '</span></td>';
+    });
+    h += '<td></td></tr>';
+    h += '</tbody></table></div>';
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // TAB: STATS
+  // ════════════════════════════════════════════════════════════════════════════
+  else if (window._hbTab === 'stats') {
+    h += '<div class="hb2-stats-section">';
+
+    // Global completion rate
+    var allKeys2 = Object.keys(habits);
+    var totalDays2 = allKeys2.length;
+    var totalComp2 = 0;
+    allKeys2.forEach(function(k) {
+      hcfg.forEach(function(hh) { if (habits[k][hh.id]) totalComp2++; });
+    });
+    var globalRate2 = totalDays2 > 0 && hcfg.length > 0 ? Math.round(totalComp2 / (totalDays2 * hcfg.length) * 100) : 0;
+
+    h += '<div class="hb2-stats-card">';
+    h += '<div class="hb2-stats-title">Vue d\u2019ensemble</div>';
+    h += '<div class="hb2-stats-grid">';
+    h += '<div class="hb2-stat-box"><div class="hb2-stat-box-val">' + globalRate2 + '%</div><div class="hb2-stat-box-lbl">Taux global (all time)</div></div>';
+    h += '<div class="hb2-stat-box"><div class="hb2-stat-box-val">' + totalDays2 + '</div><div class="hb2-stat-box-lbl">Jours trackés</div></div>';
+    h += '<div class="hb2-stat-box"><div class="hb2-stat-box-val">' + totalComp2 + '</div><div class="hb2-stat-box-lbl">Complétions all-time</div></div>';
+    h += '<div class="hb2-stat-box"><div class="hb2-stat-box-val">' + hb2BestDayOfWeek(hcfg).slice(0,3) + '</div><div class="hb2-stat-box-lbl">Meilleur jour</div></div>';
+    h += '</div></div>';
+
+    // 12-month bars
+    var monthly12Global = hb2Monthly12(hcfg);
+    var maxGlobal = Math.max.apply(null, monthly12Global.map(function(m) { return m.pct; }).concat([1]));
+    h += '<div class="hb2-stats-card">';
+    h += '<div class="hb2-stats-title">Completion mensuelle</div>';
+    h += '<div class="hb2-months-bars">';
+    monthly12Global.forEach(function(m) {
+      var barH = Math.max(2, Math.round(m.pct / maxGlobal * 56));
+      var bc = m.pct < 40 ? 'var(--red)' : m.pct < 70 ? 'var(--amber)' : 'var(--green)';
+      h += '<div class="hb2-month-bar-wrap">';
+      h += '<div class="hb2-month-bar" style="height:' + barH + 'px;background:' + bc + '"></div>';
+      h += '<div class="hb2-month-lbl">' + m.lbl + '</div>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+
+    // Best & worst habit this month
+    var ym2 = new Date().toISOString().slice(0, 7);
+    var habitMonthRates = hcfg.map(function(hh) {
+      var daysInMonth = Object.keys(habits).filter(function(k) { return k.slice(0,7) === ym2; });
+      var cnt = daysInMonth.filter(function(k) { return habits[k][hh.id]; }).length;
+      var rate = daysInMonth.length > 0 ? Math.round(cnt / daysInMonth.length * 100) : 0;
+      return { id: hh.id, label: hh.label, emoji: hh.emoji, rate: rate };
+    });
+    if (habitMonthRates.length > 0) {
+      habitMonthRates.sort(function(a,b) { return b.rate - a.rate; });
+      var bestHabit = habitMonthRates[0];
+      var worstHabit = habitMonthRates[habitMonthRates.length - 1];
+      h += '<div class="hb2-stats-card">';
+      h += '<div class="hb2-stats-title">Ce mois</div>';
+      h += '<div style="display:flex;gap:8px">';
+      h += '<div class="hb2-stat-box" style="flex:1"><div style="font-size:18px">' + bestHabit.emoji + '</div>';
+      h += '<div style="font-size:12px;font-weight:700;color:var(--green);margin:2px 0">' + bestHabit.rate + '%</div>';
+      h += '<div class="hb2-stat-box-lbl">Meilleure habitude</div><div style="font-size:11px;color:var(--w);margin-top:2px">' + bestHabit.label + '</div></div>';
+      h += '<div class="hb2-stat-box" style="flex:1"><div style="font-size:18px">' + worstHabit.emoji + '</div>';
+      h += '<div style="font-size:12px;font-weight:700;color:var(--red);margin:2px 0">' + worstHabit.rate + '%</div>';
+      h += '<div class="hb2-stat-box-lbl">Plus difficile</div><div style="font-size:11px;color:var(--w);margin-top:2px">' + worstHabit.label + '</div></div>';
+      h += '</div></div>';
+    }
+
+    // Top 3 podium all-time
+    var allTimeCounts = hcfg.map(function(hh) {
+      return { label: hh.label, emoji: hh.emoji, count: hb2AllTimeCount(hh.id) };
+    });
+    allTimeCounts.sort(function(a,b) { return b.count - a.count; });
+    var podium = allTimeCounts.slice(0, 3);
+    if (podium.length > 0) {
+      h += '<div class="hb2-stats-card">';
+      h += '<div class="hb2-stats-title">Top 3 all-time</div>';
+      h += '<div class="hb2-podium">';
+      var medals = ['🥇','🥈','🥉'];
+      podium.forEach(function(p, i) {
+        h += '<div class="hb2-podium-item">';
+        h += '<div class="hb2-podium-rank">' + medals[i] + '</div>';
+        h += '<div style="font-size:20px;margin:4px 0">' + p.emoji + '</div>';
+        h += '<div class="hb2-podium-name">' + p.label + '</div>';
+        h += '<div class="hb2-podium-count">' + p.count + 'x</div>';
+        h += '</div>';
+      });
+      h += '</div></div>';
+    }
+
+    // XP from habits this month
+    var monthXp = hb2MonthXp(hcfg);
+    h += '<div class="hb2-stats-card">';
+    h += '<div class="hb2-stats-title">XP Habitudes</div>';
+    h += '<div class="hb2-xp-hist">XP gagné grâce aux habitudes ce mois : <strong>' + monthXp + ' XP</strong></div>';
+    h += '</div>';
+
+    h += '</div>'; // stats-section
+  }
+
+  h += '</div>'; // hb2-page
+  return h;
+};
+
+
+
+/* regressions-v1 — applied 2026-04-09 — 48 fixes */
+
+
+/* argent-import-v1 */
+(function(){
+'use strict';
+
+// ── Category rules ────────────────────────────────────────────────────────
+var CATEGORY_RULES = [
+  {cat:'Alimentation', keywords:['carrefour','leclerc','lidl','aldi','monoprix','intermarche','casino','franprix','picard','auchan','super u','simply','biocoop','franprix','cora','netto']},
+  {cat:'Transport', keywords:['sncf','ratp','uber','bolt','taxi','total','esso','bp','shell','autoroute','vinci','parking','blablacar','transavia','easyjet','ryanair']},
+  {cat:'Loisirs', keywords:['netflix','spotify','apple','amazon prime','disney','canal','fnac','cinema','theatre','ticketmaster','steam','playstation','xbox']},
+  {cat:'Santé', keywords:['pharmacie','docteur','medecin','dentiste','opticien','mutuelle','cpam','kine','infirmier','laboratoire','hopital']},
+  {cat:'Restaurants', keywords:['restaurant','brasserie','cafe','mcdonald','burger','pizza','sushi','uber eat','deliveroo','just eat','kebab','snack','boulangerie','patisserie']},
+  {cat:'Shopping', keywords:['zara','h&m','asos','zalando','amazon','cdiscount','darty','ikea','decathlon','boulanger','leroy merlin','bricorama','castorama']},
+  {cat:'Logement', keywords:['loyer','edf','engie','sfr','orange','free','bouygues','eau','syndic','electricite','gaz','assurance','maif','axa']},
+  {cat:'Revenus', keywords:['salaire','virement','remboursement','prime','freelance','virt sal','paie','acompte']}
+];
+
+// ── Auto-categorize ────────────────────────────────────────────────────────
+function autoCateg(desc) {
+  if (!desc) return 'Divers';
+  var d = desc.toLowerCase();
+  var cfg = window.S && window.S.config ? window.S.config : {};
+  var userRules = cfg.importRules || [];
+  for (var i = 0; i < userRules.length; i++) {
+    if (userRules[i].keyword && d.indexOf(userRules[i].keyword.toLowerCase()) !== -1) {
+      return userRules[i].cat;
+    }
+  }
+  for (var r = 0; r < CATEGORY_RULES.length; r++) {
+    var rule = CATEGORY_RULES[r];
+    for (var k = 0; k < rule.keywords.length; k++) {
+      if (d.indexOf(rule.keywords[k]) !== -1) return rule.cat;
+    }
+  }
+  return 'Divers';
+}
+
+// ── Date normalization ─────────────────────────────────────────────────────
+function parseDate(raw) {
+  if (!raw) return '';
+  raw = raw.trim();
+  // YYYYMMDD
+  if (/^\d{8}$/.test(raw)) {
+    return raw.slice(0,4) + '-' + raw.slice(4,6) + '-' + raw.slice(6,8);
+  }
+  // YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  // DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY
+  var m = raw.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+  if (m) return m[3] + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0');
+  // MM/DD/YYYY
+  var m2 = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m2) {
+    var mo = parseInt(m2[1]), da = parseInt(m2[2]);
+    if (mo > 12) return m2[3] + '-' + m2[2].padStart(2,'0') + '-' + m2[1].padStart(2,'0');
+    return m2[3] + '-' + m2[1].padStart(2,'0') + '-' + m2[2].padStart(2,'0');
+  }
+  return raw;
+}
+
+// ── Amount normalization ───────────────────────────────────────────────────
+function parseAmt(raw) {
+  if (!raw && raw !== 0) return null;
+  raw = String(raw).trim();
+  if (!raw) return null;
+  // parentheses = negative
+  var neg = raw.startsWith('-') || (raw.startsWith('(') && raw.endsWith(')'));
+  raw = raw.replace(/[()]/g,'').replace(/-/g,'');
+  // handle both . and , as decimal
+  raw = raw.replace(/\s/g,'');
+  if (/,/.test(raw) && /\./.test(raw)) {
+    // 1.234,56 format
+    raw = raw.replace(/\./g,'').replace(',','.');
+  } else {
+    raw = raw.replace(',','.');
+  }
+  var v = parseFloat(raw);
+  if (isNaN(v)) return null;
+  return neg ? -Math.abs(v) : v;
+}
+
+// ── OFX Parser ────────────────────────────────────────────────────────────
+function parseOFX(text) {
+  var txs = [];
+  var blocks = text.split(/<STMTTRN>/i);
+  for (var i = 1; i < blocks.length; i++) {
+    var b = blocks[i];
+    var getTag = function(tag) {
+      var re = new RegExp('<' + tag + '>([^\r\n<]+)', 'i');
+      var m = b.match(re);
+      return m ? m[1].trim() : '';
+    };
+    var dt = parseDate(getTag('DTPOSTED').slice(0,8));
+    var amt = parseAmt(getTag('TRNAMT'));
+    var desc = getTag('NAME') || getTag('MEMO') || getTag('PAYEE') || '';
+    if (dt && amt !== null) {
+      txs.push({date: dt, amt: amt, desc: desc, cat: autoCateg(desc)});
+    }
+  }
+  return txs;
+}
+
+// ── CSV Parser ────────────────────────────────────────────────────────────
+function parseCSV(text, bank) {
+  // Detect delimiter
+  var lines = text.split(/?
+/).filter(function(l){ return l.trim(); });
+  if (lines.length < 2) return [];
+  var delim = (lines[0].split(';').length >= lines[0].split(',').length) ? ';' : ',';
+
+  var headerRaw = lines[0].split(delim).map(function(h){ return h.trim().replace(/^["']|["']$/g,'').toLowerCase(); });
+
+  // Column detection helpers
+  function findCol(candidates) {
+    for (var c = 0; c < candidates.length; c++) {
+      for (var h = 0; h < headerRaw.length; h++) {
+        if (headerRaw[h].indexOf(candidates[c]) !== -1) return h;
+      }
+    }
+    return -1;
+  }
+
+  var dateCol   = findCol(['date']);
+  var descCol   = findCol(['libellé','libelle','description','label','nom','name','payee']);
+  var amtCol    = findCol(['montant','amount','solde compris']);
+  var debitCol  = findCol(['débit','debit']);
+  var creditCol = findCol(['crédit','credit']);
+
+  // Bank-specific overrides
+  if (bank === 'bnp') {
+    // BNP: Date;*;Libellé;Montant;Devise — col 0=date,1=*,2=libellé,3=montant
+    dateCol = 0; descCol = 2; amtCol = 3;
+  } else if (bank === 'sg') {
+    // SG: Date de comptabilisation;Libellé;Débit;Crédit;Solde
+    dateCol = 0; descCol = 1; debitCol = 2; creditCol = 3; amtCol = -1;
+  } else if (bank === 'cic') {
+    // CIC: Date;Libellé;Montant;Solde
+    dateCol = 0; descCol = 1; amtCol = 2;
+  } else if (bank === 'lcl') {
+    dateCol = 0; descCol = 1; amtCol = 2;
+  } else if (bank === 'ca') {
+    dateCol = 0; descCol = 1; debitCol = 2; creditCol = 3; amtCol = -1;
+  } else if (bank === 'laposte') {
+    dateCol = 0; descCol = 1; amtCol = 2;
+  }
+
+  var txs = [];
+  for (var i = 1; i < lines.length; i++) {
+    var line = lines[i];
+    // Skip empty or separator lines
+    if (!line.trim() || /^[;,\s]+$/.test(line)) continue;
+    var cols = splitCSVLine(line, delim);
+
+    var rawDate = dateCol >= 0 ? (cols[dateCol] || '') : '';
+    var rawDesc = descCol >= 0 ? (cols[descCol] || '') : '';
+    rawDate = rawDate.replace(/^["']|["']$/g,'').trim();
+    rawDesc = rawDesc.replace(/^["']|["']$/g,'').trim();
+
+    var amt = null;
+    if (amtCol >= 0 && cols[amtCol] !== undefined) {
+      amt = parseAmt(cols[amtCol]);
+    } else if (debitCol >= 0 || creditCol >= 0) {
+      var dv = debitCol >= 0 ? parseAmt(cols[debitCol]) : null;
+      var cv = creditCol >= 0 ? parseAmt(cols[creditCol]) : null;
+      if (dv !== null && dv !== 0) amt = -Math.abs(dv);
+      else if (cv !== null && cv !== 0) amt = Math.abs(cv);
+    }
+
+    var dt = parseDate(rawDate);
+    if (!dt || amt === null) continue;
+
+    txs.push({date: dt, amt: amt, desc: rawDesc, cat: autoCateg(rawDesc)});
+  }
+  return txs;
+}
+
+// ── Split CSV line respecting quotes ──────────────────────────────────────
+function splitCSVLine(line, delim) {
+  var cols = [];
+  var cur = '';
+  var inQ = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (ch === '"' || ch === "'") { inQ = !inQ; }
+    else if (ch === delim && !inQ) { cols.push(cur); cur = ''; }
+    else { cur += ch; }
+  }
+  cols.push(cur);
+  return cols;
+}
+
+// ── Deduplication ─────────────────────────────────────────────────────────
+function isDuplicate(tx) {
+  var finance = (window.S && window.S.finance) ? window.S.finance : [];
+  return finance.some(function(e) {
+    if (!e) return false;
+    if (e.date !== tx.date) return false;
+    if (Math.abs(e.amt - tx.amt) > 0.001) return false;
+    var ea = (e.desc || '').slice(0,20).toLowerCase();
+    var ta = (tx.desc || '').slice(0,20).toLowerCase();
+    return ea === ta;
+  });
+}
+
+// ── All categories list ───────────────────────────────────────────────────
+var ALL_CATS = ['Alimentation','Transport','Loisirs','Santé','Restaurants','Shopping','Logement','Revenus','Épargne','Salaire','Abonnements','Factures','Sport','Divers'];
+
+// ── State ─────────────────────────────────────────────────────────────────
+var _parsed = [];    // [{date,amt,desc,cat,dup,checked}]
+var _bank = 'generic';
+var _showRules = false;
+
+// ── Render helpers ────────────────────────────────────────────────────────
+function catOptions(selected) {
+  return ALL_CATS.map(function(c) {
+    return '<option value="' + c + '"' + (c === selected ? ' selected' : '') + '>' + c + '</option>';
+  }).join('');
+}
+
+function buildPreviewHtml() {
+  if (!_parsed.length) return '';
+  var rows = _parsed.map(function(tx, idx) {
+    var dupBadge = tx.dup ? '<span class="aim-dup-badge">⚠️ Doublon</span>' : '';
+    var amtClass = tx.amt >= 0 ? 'aim-amt-pos' : 'aim-amt-neg';
+    var amtStr = (tx.amt >= 0 ? '+' : '') + tx.amt.toFixed(2) + '€';
+    var chk = tx.checked ? ' checked' : '';
+    return '<tr class="' + (tx.dup ? 'dup-row' : '') + '">'
+      + '<td><input type="checkbox"' + chk + ' onchange="window._aimToggle(' + idx + ',this.checked)" style="cursor:pointer"></td>'
+      + '<td style="white-space:nowrap">' + tx.date + '</td>'
+      + '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(tx.desc) + dupBadge + '</td>'
+      + '<td class="' + amtClass + '">' + amtStr + '</td>'
+      + '<td><select class="aim-cat-select" onchange="window._aimSetCat(' + idx + ',this.value)">'
+        + catOptions(tx.cat)
+      + '</select></td>'
+      + '</tr>';
+  }).join('');
+  var checkedCount = _parsed.filter(function(t){ return t.checked; }).length;
+  return '<div class="aim-preview-wrap">'
+    + '<div style="padding:8px 10px;background:var(--bg2);border-bottom:1px solid var(--b);font-size:11px;color:var(--g1);display:flex;justify-content:space-between;align-items:center">'
+    + '<span>' + _parsed.length + ' transaction(s) détectée(s) · ' + _parsed.filter(function(t){return t.dup;}).length + ' doublon(s)</span>'
+    + '<label style="font-size:11px;color:var(--g1);display:inline-flex;align-items:center;gap:4px;cursor:pointer">'
+    + '<input type="checkbox" id="aim-chk-all" ' + (checkedCount === _parsed.length ? 'checked' : '') + ' onchange="window._aimToggleAll(this.checked)"> Tout sélectionner</label>'
+    + '</div>'
+    + '<table class="aim-preview-table">'
+    + '<thead><tr><th></th><th>Date</th><th>Description</th><th>Montant</th><th>Catégorie</th></tr></thead>'
+    + '<tbody>' + rows + '</tbody>'
+    + '</table></div>';
+}
+
+function buildRulesHtml() {
+  var cfg = (window.S && window.S.config) ? window.S.config : {};
+  var rules = cfg.importRules || [];
+  var rows = rules.map(function(r, i) {
+    return '<div class="aim-rule-row">'
+      + '<input class="aim-rule-kw" type="text" value="' + escHtml(r.keyword||'') + '" onchange="window._aimUpdateRule(' + i + ','keyword',this.value)" placeholder="Mot-clé">'
+      + '<select class="aim-rule-cat" onchange="window._aimUpdateRule(' + i + ','cat',this.value)">' + catOptions(r.cat) + '</select>'
+      + '<button class="aim-rule-del" onclick="window._aimDeleteRule(' + i + ')">&#215;</button>'
+      + '</div>';
+  }).join('');
+  return '<div>'
+    + (rows || '<div style="font-size:12px;color:var(--g1);margin-bottom:8px">Aucune règle personnalisée</div>')
+    + '<button onclick="window._aimAddRule()" class="aim-btn aim-btn-ghost" style="font-size:12px;padding:6px 12px;margin-top:4px">+ Ajouter une règle</button>'
+    + '</div>';
+}
+
+function renderModal() {
+  var el = document.getElementById('aim-modal-wrap');
+  if (!el) return;
+  var previewHtml = _parsed.length ? buildPreviewHtml() : '';
+  var checkedCount = _parsed.filter(function(t){ return t.checked; }).length;
+  var confirmDisabled = checkedCount === 0 ? ' disabled' : '';
+
+  el.innerHTML = '<div class="aim-overlay" id="aim-overlay" onclick="window._aimBgClose(event)">'
+    + '<div class="aim-modal" onclick="event.stopPropagation()">'
+
+    // Header
+    + '<div class="aim-header">'
+    + '<span class="aim-title">Importer des transactions</span>'
+    + '<button class="aim-close" onclick="window.closeArgentImport()" aria-label="Fermer">&#215;</button>'
+    + '</div>'
+
+    // Body
+    + '<div class="aim-body">'
+
+    // File input
+    + '<div class="aim-row">'
+    + '<label class="aim-label">Fichier CSV ou OFX/QFX</label>'
+    + '<div class="aim-file-zone" id="aim-drop-zone" onclick="document.getElementById('aim-file-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="window._aimHandleDrop(event)">'
+    + '<div style="font-size:24px;margin-bottom:6px">📄</div>'
+    + '<div style="font-size:13px;color:var(--w);font-weight:600">Glissez un fichier ici ou cliquez</div>'
+    + '<div class="aim-file-hint">.csv · .ofx · .qfx acceptés</div>'
+    + '<input type="file" id="aim-file-input" accept=".csv,.ofx,.qfx" style="display:none" onchange="window._aimHandleFile(this.files[0])">'
+    + '</div>'
+    + '</div>'
+
+    // Bank selector
+    + '<div class="aim-row">'
+    + '<label class="aim-label">Banque / Format</label>'
+    + '<select class="aim-select" id="aim-bank-sel" onchange="window._aimSetBank(this.value)">'
+    + '<option value="generic"' + (_bank==='generic'?' selected':'') + '>Format générique</option>'
+    + '<option value="bnp"' + (_bank==='bnp'?' selected':'') + '>BNP Paribas</option>'
+    + '<option value="sg"' + (_bank==='sg'?' selected':'') + '>Société Générale</option>'
+    + '<option value="cic"' + (_bank==='cic'?' selected':'') + '>CIC</option>'
+    + '<option value="lcl"' + (_bank==='lcl'?' selected':'') + '>LCL</option>'
+    + '<option value="ca"' + (_bank==='ca'?' selected':'') + '>Crédit Agricole</option>'
+    + '<option value="laposte"' + (_bank==='laposte'?' selected':'') + '>Banque Postale</option>'
+    + '</select>'
+    + '</div>'
+
+    // Preview
+    + (previewHtml ? '<div class="aim-row"><label class="aim-label">Prévisualisation</label>' + previewHtml + '</div>' : '')
+
+    // Custom rules (collapsible)
+    + '<div class="aim-row">'
+    + '<button class="aim-rules-toggle" onclick="window._aimToggleRules()">'
+    + (_showRules ? '▼' : '►') + ' Règles personnalisées de catégorisation'
+    + '</button>'
+    + (_showRules ? '<div class="aim-rules-section" style="margin-top:8px">' + buildRulesHtml() + '</div>' : '')
+    + '</div>'
+
+    + '</div>' // end aim-body
+
+    // Footer
+    + '<div class="aim-footer">'
+    + '<button class="aim-btn aim-btn-ghost" onclick="window.closeArgentImport()">Annuler</button>'
+    + '<button class="aim-btn aim-btn-primary" id="aim-confirm-btn"' + confirmDisabled + ' onclick="window._aimConfirm()">'
+    + 'Confirmer (' + checkedCount + ' transactions)'
+    + '</button>'
+    + '</div>'
+
+    + '</div>' // end aim-modal
+    + '</div>'; // end aim-overlay
+}
+
+// ── Public API ────────────────────────────────────────────────────────────
+window.openArgentImport = function() {
+  _parsed = [];
+  _showRules = false;
+  var wrap = document.getElementById('aim-modal-wrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'aim-modal-wrap';
+    document.body.appendChild(wrap);
+  }
+  renderModal();
+};
+
+window.closeArgentImport = function() {
+  var wrap = document.getElementById('aim-modal-wrap');
+  if (wrap) wrap.innerHTML = '';
+};
+
+window._aimBgClose = function(e) {
+  if (e.target && e.target.id === 'aim-overlay') window.closeArgentImport();
+};
+
+window._aimSetBank = function(v) {
+  _bank = v;
+  // Re-parse if file was already loaded
+  if (window._aimLastText && window._aimLastExt) {
+    _parsed = doParse(window._aimLastText, window._aimLastExt, _bank);
+    _parsed.forEach(function(tx){ tx.dup = isDuplicate(tx); tx.checked = !tx.dup; });
+  }
+  renderModal();
+};
+
+window._aimToggle = function(idx, val) {
+  if (_parsed[idx]) _parsed[idx].checked = val;
+  // re-render only footer count
+  var btn = document.getElementById('aim-confirm-btn');
+  if (btn) {
+    var n = _parsed.filter(function(t){ return t.checked; }).length;
+    btn.textContent = 'Confirmer (' + n + ' transactions)';
+    btn.disabled = n === 0;
+  }
+  var allChk = document.getElementById('aim-chk-all');
+  if (allChk) allChk.checked = (n === _parsed.length);
+};
+
+window._aimToggleAll = function(val) {
+  _parsed.forEach(function(tx){ tx.checked = val; });
+  renderModal();
+};
+
+window._aimSetCat = function(idx, cat) {
+  if (_parsed[idx]) _parsed[idx].cat = cat;
+};
+
+window._aimToggleRules = function() {
+  _showRules = !_showRules;
+  renderModal();
+};
+
+window._aimAddRule = function() {
+  var cfg = (window.S && window.S.config) ? window.S.config : {};
+  if (!cfg.importRules) cfg.importRules = [];
+  cfg.importRules.push({keyword: '', cat: 'Divers'});
+  if (window.S) window.S.config = cfg;
+  if (window.save) window.save();
+  renderModal();
+};
+
+window._aimUpdateRule = function(i, field, val) {
+  var cfg = (window.S && window.S.config) ? window.S.config : {};
+  if (!cfg.importRules || !cfg.importRules[i]) return;
+  cfg.importRules[i][field] = val;
+  if (window.S) window.S.config = cfg;
+  if (window.save) window.save();
+};
+
+window._aimDeleteRule = function(i) {
+  var cfg = (window.S && window.S.config) ? window.S.config : {};
+  if (!cfg.importRules) return;
+  cfg.importRules.splice(i, 1);
+  if (window.S) window.S.config = cfg;
+  if (window.save) window.save();
+  renderModal();
+};
+
+window._aimHandleDrop = function(e) {
+  e.preventDefault();
+  var dropZone = document.getElementById('aim-drop-zone');
+  if (dropZone) dropZone.classList.remove('drag');
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) window._aimHandleFile(f);
+};
+
+window._aimHandleFile = function(file) {
+  if (!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  var reader = new FileReader();
+  reader.onload = function(e2) {
+    var text = e2.target.result;
+    window._aimLastText = text;
+    window._aimLastExt = ext;
+    _parsed = doParse(text, ext, _bank);
+    _parsed.forEach(function(tx){ tx.dup = isDuplicate(tx); tx.checked = !tx.dup; });
+    renderModal();
+  };
+  reader.readAsText(file, 'UTF-8');
+};
+
+function doParse(text, ext, bank) {
+  if (ext === 'ofx' || ext === 'qfx') return parseOFX(text);
+  return parseCSV(text, bank);
+}
+
+window._aimConfirm = function() {
+  var toImport = _parsed.filter(function(t){ return t.checked; });
+  if (!toImport.length) return;
+  var finance = (window.S && window.S.finance) ? window.S.finance : [];
+  var now = Date.now();
+  toImport.forEach(function(tx, i) {
+    finance.push({
+      id: 'imp_' + now + '_' + i,
+      amt: tx.amt,
+      cat: tx.cat,
+      desc: tx.desc,
+      date: tx.date,
+      tags: [],
+      pending: false,
+      note: ''
+    });
+  });
+  if (window.S) window.S.finance = finance;
+
+  // Import history (last 5)
+  var cfg = (window.S && window.S.config) ? window.S.config : {};
+  if (!cfg.importHistory) cfg.importHistory = [];
+  cfg.importHistory.unshift({date: new Date().toISOString().slice(0,10), count: toImport.length, source: _bank});
+  if (cfg.importHistory.length > 5) cfg.importHistory = cfg.importHistory.slice(0,5);
+  if (window.S) window.S.config = cfg;
+
+  if (window.save) window.save();
+  window.closeArgentImport();
+  if (window.toast) window.toast(toImport.length + ' transaction(s) importée(s) ✓');
+  if (window.render) window.render();
+};
+
+// ── HTML escape helper ────────────────────────────────────────────────────
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Patch renderArgentV8 to inject import button ──────────────────────────
+var _origRenderArgentV8 = window.renderArgentV8;
+window.renderArgentV8 = function() {
+  var html = _origRenderArgentV8.apply(this, arguments);
+  // Inject import button after the page-title
+  html = html.replace(
+    '<div class="page-title" style="margin-bottom:8px">💰 Finances</div>',
+    '<div class="page-title" style="margin-bottom:8px;display:flex;align-items:center;gap:10px">'
+    + '💰 Finances'
+    + '<button class="aim-import-btn" onclick="window.openArgentImport()">'
+    + '📥 Importer'
+    + '</button>'
+    + '</div>'
+  );
+  return html;
+};
+
+})();
+/* end argent-import-v1 */
 
 </script>
 </body>
