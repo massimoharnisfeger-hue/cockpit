@@ -894,6 +894,36 @@ body.compact .habit-row{padding:7px 0}
 }
 </style>
 
+
+<style id="ttc-css">
+.ttc-counter {
+  font-size: 13px;
+  color: var(--g1);
+  padding: 2px 16px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ttc-done-count {
+  color: var(--green);
+  font-weight: 600;
+}
+.ttc-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--bg3);
+  border-radius: 2px;
+  overflow: hidden;
+  max-width: 80px;
+}
+.ttc-bar-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+</style>
+
 </head>
 <body>
 <div id="app">
@@ -12444,6 +12474,7 @@ window.renderArgentV8 = function() {
 /* end argent-import-v1 */
 
 
+
 /* tasks-today-counter-v1 */
 (function() {
   var _origRender = window.renderTachesV8;
@@ -12458,17 +12489,21 @@ window.renderArgentV8 = function() {
       return t.dueDate === today;
     }).length;
     var pct = totalToday > 0 ? Math.round(doneToday / totalToday * 100) : 0;
-    var label = doneToday + ' / ' + totalToday
-      + ' tâche' + (totalToday !== 1 ? 's' : '')
-      + ' terminée' + (doneToday !== 1 ? 's' : '')
-      + ' aujourd’hui';
     var counter = '<div class="ttc-counter">'
       + '<span class="ttc-done-count">' + doneToday + '</span>'
-      + '<span style="color:var(--g2)">/ ' + totalToday + ' terminée' + (doneToday !== 1 ? 's' : '') + ' aujourd’hui</span>'
-      + '<div class="ttc-bar"><div class="ttc-bar-fill" style="width:' + pct + '%"></div></div>'
+      + '<span style="color:var(--g2)"> / ' + totalToday + ' terminée' + (doneToday !== 1 ? 's' : '') + ' aujourd’hui</span>'
+      + '<div class="ttc-bar"><div class="ttc-bar-fill" style="width:' + pct + '%">'
+      + '</div></div>'
       + '</div>';
-    // Injecter apres le tv4-subtitle
-    return base.replace(/(class="tv4-subtitle">[^<]*<\/div>)/, '$1' + counter);
+    // Injection apres le tv4-subtitle : on cherche le marqueur unique sans regex </
+    var marker = 'class="tv4-subtitle"';
+    var mIdx = base.indexOf(marker);
+    if (mIdx === -1) return counter + base;
+    var closeTag = '</div>';
+    var closeIdx = base.indexOf(closeTag, mIdx);
+    if (closeIdx === -1) return counter + base;
+    var insertAt = closeIdx + closeTag.length;
+    return base.slice(0, insertAt) + counter + base.slice(insertAt);
   };
 })();
 
