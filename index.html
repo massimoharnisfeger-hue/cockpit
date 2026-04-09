@@ -456,6 +456,81 @@ body.compact .habit-row{padding:7px 0}
 .pv3-note-add{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;cursor:pointer;font-size:14px;font-weight:600;color:var(--cyan);border-top:1px solid var(--bg3);}
 .pv3-note-add:hover{background:rgba(0,212,255,.04);}
 </style>
+<style>
+/* home-v2-redesign */
+.hv2-page{padding:16px;max-width:680px;margin:0 auto;padding-bottom:90px}
+@media(min-width:768px){.hv2-page{padding:24px;padding-bottom:32px}}
+.hv2-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+.hv2-greeting{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--w);line-height:1.2}
+.hv2-date{font-size:12px;color:var(--g1);margin-top:3px}
+.hv2-lvl-badge{background:var(--bg3);border:1px solid var(--b2);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;color:var(--cyan);white-space:nowrap;margin-top:2px}
+.hv2-score-card{display:flex;align-items:center;gap:16px;background:var(--bg1);border:1px solid var(--b);border-radius:var(--r);padding:16px;margin-bottom:12px;cursor:pointer;transition:border-color .18s}
+.hv2-score-card:hover,.hv2-score-card:active{border-color:var(--cyan)}
+.hv2-ring-wrap{position:relative;width:88px;height:88px;flex-shrink:0}
+.hv2-ring-wrap svg{transform:rotate(-90deg)}
+.hv2-ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;line-height:1}
+.hv2-ring-pct{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--w)}
+.hv2-ring-label{font-size:10px;color:var(--g1)}
+.hv2-streak-col{display:flex;flex-direction:column;gap:6px}
+.hv2-streak-main{font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--w);line-height:1}
+.hv2-streak-sub{font-size:12px;color:var(--g1)}
+.hv2-best-streak{font-size:11px;color:var(--g2)}
+.hv2-week{background:var(--bg1);border:1px solid var(--b);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.hv2-week-bars{display:flex;align-items:flex-end;gap:6px;height:48px;margin-top:8px}
+.hv2-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:3px}
+.hv2-bar-dot{width:5px;height:5px;border-radius:50%;background:var(--cyan)}
+.hv2-bar{border-radius:3px 3px 0 0;width:100%;min-height:3px;transition:height .3s}
+.hv2-bar-day{font-size:9px;color:var(--g2);text-transform:uppercase;margin-top:3px}
+.hv2-bar-day.today{color:var(--cyan);font-weight:700}
+.hv2-checkin{background:var(--bg1);border:1px solid var(--b);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.hv2-hab-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--b);cursor:pointer;transition:background .15s;border-radius:var(--r2)}
+.hv2-hab-row:last-child{border-bottom:none}
+.hv2-hab-row:active{background:var(--bg3)}
+.hv2-hab-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.hv2-hab-emoji{font-size:18px;width:28px;text-align:center;flex-shrink:0}
+.hv2-hab-label{font-size:14px;color:var(--w);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hv2-check-circle{width:26px;height:26px;border-radius:50%;border:2px solid var(--g2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.hv2-check-circle.done{background:var(--green);border-color:var(--green)}
+.hv2-all-done{text-align:center;padding:12px;color:var(--green);font-weight:600;font-size:14px}
+.hv2-goal{background:var(--bg1);border:1px solid var(--b);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;cursor:pointer;transition:border-color .18s}
+.hv2-goal:hover{border-color:var(--purp)}
+.hv2-goal-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.hv2-goal-emoji{font-size:20px}
+.hv2-goal-title{font-size:15px;font-weight:700;color:var(--w);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hv2-rhythm-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.hv2-rhythm-ahead{background:rgba(0,229,160,.15);color:var(--green)}
+.hv2-rhythm-on{background:rgba(0,212,255,.15);color:var(--cyan)}
+.hv2-rhythm-late{background:rgba(255,58,92,.15);color:var(--red)}
+.hv2-rhythm-neutral{background:rgba(139,155,173,.15);color:var(--g1)}
+.hv2-goal-bar-wrap{background:var(--bg3);border-radius:4px;height:6px;margin-bottom:8px;overflow:hidden}
+.hv2-goal-bar-fill{height:100%;border-radius:4px;background:var(--purp);transition:width .4s}
+.hv2-goal-action{font-size:12px;color:var(--g1)}
+.hv2-goal-empty{text-align:center;padding:12px;color:var(--g1);font-size:14px;cursor:pointer}
+.hv2-goal-empty span{color:var(--cyan);font-weight:600}
+.hv2-tasks{background:var(--bg1);border:1px solid var(--b);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.hv2-task-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--b);cursor:pointer}
+.hv2-task-row:last-child{border-bottom:none}
+.hv2-task-cb{width:20px;height:20px;border-radius:50%;border:2px solid var(--g2);flex-shrink:0;transition:all .15s}
+.hv2-task-text{flex:1;font-size:13px;color:var(--w);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hv2-task-text.urgent{color:var(--red)}
+.hv2-task-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hv2-dot-urgente{background:var(--red)}
+.hv2-dot-haute{background:var(--amber)}
+.hv2-dot-normale{background:var(--g2)}
+.hv2-dot-basse{background:var(--bg3)}
+.hv2-tasks-more{font-size:12px;color:var(--cyan);padding-top:8px;cursor:pointer;text-align:center}
+.hv2-tasks-empty{font-size:13px;color:var(--g2);padding:8px 0}
+.hv2-fin{background:var(--bg1);border:1px solid var(--b);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;cursor:pointer;transition:border-color .18s}
+.hv2-fin:hover{border-color:var(--green)}
+.hv2-fin-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.hv2-fin-label{font-size:11px;color:var(--g1)}
+.hv2-fin-val{font-size:12px;color:var(--g1)}
+.hv2-fin-net{font-family:var(--font-display);font-size:26px;font-weight:800}
+.hv2-fin-net.pos{color:var(--green)}
+.hv2-fin-net.neg{color:var(--red)}
+.hv2-fin-balance{font-size:12px;color:var(--g1);margin-top:4px}
+.hv2-section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--g1);margin-bottom:8px}
+</style>
 </head>
 <body>
 <div id="app">
@@ -9693,6 +9768,228 @@ window.pv3ScrollNotes = function() {
 
 /* audit-v1-fixes — applied 2026-04-09 */
 
+
+/* == Home V2 redesign == */
+window.toggleHabitV2 = function(habitId) {
+  var d = iso();
+  if (!S.habits[d]) S.habits[d] = {};
+  var wasChecked = !!S.habits[d][habitId];
+  S.habits[d][habitId] = !wasChecked;
+  save();
+  render();
+  if (!wasChecked) addXP(5, "Habitude");
+};
+
+window.completeTaskV2 = function(taskId) {
+  var t = (S.tasks || []).find(function(x) { return x.id === taskId; });
+  if (!t || t.status === "done") return;
+  t.status = "done";
+  t.completedAt = iso();
+  addXP(t.xpReward || 10, "Tâche");
+  save();
+  render();
+  toast("Tâche terminée ✓", "var(--green)");
+};
+
+window.renderHomeV8 = function() {
+  var today = iso();
+  var habs = H();
+  var dayData = S.habits[today] || {};
+  var score = habs.length > 0 ? Math.round(habs.filter(function(h) { return !!dayData[h.id]; }).length / habs.length * 100) : 0;
+  var streak = currentStreak();
+  var bestStreak = S.config.bestStreak || 0;
+  var xp = S.config.xp || 0;
+  var lvl = getLevelInfo(xp);
+  var cfg = S.config || {};
+  var mods = cfg.homeModules || {};
+  var profileName = (cfg.profile && cfg.profile.name) ? cfg.profile.name : "Cockpit";
+  var profileEmoji = (cfg.profile && cfg.profile.emoji) ? cfg.profile.emoji : "🚀";
+
+  var dateObj = new Date();
+  var days = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+  var months = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+  var dateStr = days[dateObj.getDay()] + " " + dateObj.getDate() + " " + months[dateObj.getMonth()] + " " + dateObj.getFullYear();
+
+  var h = '<div class="hv2-page">';
+
+  // Feature 1: Greeting header
+  h += '<div class="hv2-header">';
+  h += '<div>';
+  h += '<div class="hv2-greeting">Bonjour ' + profileName + ' ' + profileEmoji + '</div>';
+  h += '<div class="hv2-date">' + dateStr + '</div>';
+  h += '</div>';
+  h += '<div class="hv2-lvl-badge">Niv. ' + lvl.level + '</div>';
+  h += '</div>';
+
+  // Feature 2: Score ring + streak
+  var ringColor = score < 40 ? "var(--red)" : score < 70 ? "var(--amber)" : "var(--green)";
+  var ringR = 38, ringCx = 44, ringCy = 44;
+  var circ = Math.round(2 * Math.PI * ringR);
+  var dash = Math.round(circ * score / 100);
+  var gap = circ - dash;
+  h += '<div class="hv2-score-card" onclick="nav(\'stats\')">';
+  h += '<div class="hv2-ring-wrap">';
+  h += '<svg width="88" height="88" viewBox="0 0 88 88">';
+  h += '<circle cx="' + ringCx + '" cy="' + ringCy + '" r="' + ringR + '" fill="none" stroke="var(--bg3)" stroke-width="8"/>';
+  h += '<circle cx="' + ringCx + '" cy="' + ringCy + '" r="' + ringR + '" fill="none" stroke="' + ringColor + '" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + dash + ' ' + gap + '"/>';
+  h += '</svg>';
+  h += '<div class="hv2-ring-center"><div class="hv2-ring-pct">' + score + '%</div><div class="hv2-ring-label">score</div></div>';
+  h += '</div>';
+  h += '<div class="hv2-streak-col">';
+  h += '<div class="hv2-streak-main">' + streak + ' 🔥</div>';
+  h += '<div class="hv2-streak-sub">jours de suite</div>';
+  h += '<div class="hv2-best-streak">Record : ' + bestStreak + ' jours</div>';
+  h += '</div></div>';
+
+  // Feature 3: Week sparkline
+  if (mods.weekBars !== false) {
+    var weekStart = new Date(dateObj);
+    var dow = dateObj.getDay();
+    var diffToMon = (dow === 0) ? -6 : 1 - dow;
+    weekStart.setDate(dateObj.getDate() + diffToMon);
+    var barDays = ["L", "M", "M", "J", "V", "S", "D"];
+    var barData = [];
+    for (var wi = 0; wi < 7; wi++) {
+      var bd = new Date(weekStart);
+      bd.setDate(weekStart.getDate() + wi);
+      var bdKey = bd.toISOString().slice(0, 10);
+      var bdHabs = S.habits[bdKey] || {};
+      var bdScore = habs.length > 0 ? Math.round(habs.filter(function(hh) { return !!bdHabs[hh.id]; }).length / habs.length * 100) : 0;
+      barData.push({ key: bdKey, score: bdScore, label: barDays[wi], isToday: bdKey === today });
+    }
+    var maxScore = Math.max.apply(null, barData.map(function(b) { return b.score; }).concat([1]));
+    h += '<div class="hv2-week">';
+    h += '<div class="hv2-section-label">Cette semaine</div>';
+    h += '<div class="hv2-week-bars">';
+    barData.forEach(function(b) {
+      var barH = Math.max(3, Math.round(b.score / maxScore * 44));
+      var bc = b.score < 40 ? "var(--red)" : b.score < 70 ? "var(--amber)" : "var(--green)";
+      h += '<div class="hv2-bar-col">';
+      h += b.isToday ? '<div class="hv2-bar-dot"></div>' : '<div style="width:5px;height:5px"></div>';
+      h += '<div class="hv2-bar" style="height:' + barH + 'px;background:' + bc + ';opacity:' + (b.score === 0 ? "0.25" : "1") + '"></div>';
+      h += '<div class="hv2-bar-day' + (b.isToday ? " today" : "") + '">' + b.label + '</div>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+  }
+
+  // Feature 4: Habits check-in
+  if (mods.checkin !== false) {
+    var allDone = habs.length > 0 && habs.every(function(hb) { return !!dayData[hb.id]; });
+    h += '<div class="hv2-checkin">';
+    h += '<div class="hv2-section-label">Aujourd’hui &mdash; ' + dateStr + '</div>';
+    if (allDone) {
+      h += '<div class="hv2-all-done">Toutes les habitudes faites ! 🎉</div>';
+    } else {
+      habs.forEach(function(hb) {
+        var checked = !!dayData[hb.id];
+        h += '<div class="hv2-hab-row" onclick="toggleHabitV2(' + JSON.stringify(hb.id) + ')">'  ;
+        h += '<div class="hv2-hab-left">';
+        h += '<div class="hv2-hab-emoji">' + (hb.emoji || "○") + '</div>';
+        h += '<div class="hv2-hab-label">' + (hb.label || hb.id) + '</div>';
+        h += '</div>';
+        if (checked) {
+          h += '<div class="hv2-check-circle done"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="#06090D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+        } else {
+          h += '<div class="hv2-check-circle"></div>';
+        }
+        h += '</div>';
+      });
+    }
+    h += '</div>';
+  }
+
+  // Feature 5: Goal hero
+  if (mods.goals !== false) {
+    var goals = (S.goals || []).filter(function(g) { return g.status === "active" && g.type === "project"; });
+    goals.sort(function(a, b) {
+      if (!a.deadline) return 1;
+      if (!b.deadline) return -1;
+      return new Date(a.deadline) - new Date(b.deadline);
+    });
+    var heroGoal = goals[0] || null;
+    h += '<div>';
+    h += '<div class="hv2-section-label" style="margin-top:4px">Focus du jour</div>';
+    if (heroGoal) {
+      var gPct = typeof goalProgress === "function" ? Math.round(goalProgress(heroGoal)) : 0;
+      var rhythm = (typeof window.ogRhythm === "function") ? window.ogRhythm(heroGoal) : "neutral";
+      var rhythmLabel = rhythm === "ahead" ? "En avance" : rhythm === "on" ? "Dans les temps" : rhythm === "late" ? "En retard" : "Neutre";
+      var rhythmClass = rhythm === "ahead" ? "hv2-rhythm-ahead" : rhythm === "on" ? "hv2-rhythm-on" : rhythm === "late" ? "hv2-rhythm-late" : "hv2-rhythm-neutral";
+      var nextAction = "";
+      if (heroGoal.subGoals && heroGoal.subGoals.length) {
+        var nextSub = heroGoal.subGoals.find(function(sg) { return !sg.done; });
+        if (nextSub) nextAction = nextSub.text || nextSub.title || "";
+      }
+      h += '<div class="hv2-goal" onclick="if(typeof openGoalDetail===\'function\')openGoalDetail(' + JSON.stringify(heroGoal.id) + ');else nav(\'objectifs\')">';
+      h += '<div class="hv2-goal-header">';
+      h += '<div class="hv2-goal-emoji">' + (heroGoal.emoji || "🎯") + '</div>';
+      h += '<div class="hv2-goal-title">' + (heroGoal.title || "") + '</div>';
+      h += '<div class="hv2-rhythm-badge ' + rhythmClass + '">' + rhythmLabel + '</div>';
+      h += '</div>';
+      h += '<div class="hv2-goal-bar-wrap"><div class="hv2-goal-bar-fill" style="width:' + gPct + '%"></div></div>';
+      if (nextAction) h += '<div class="hv2-goal-action">→ ' + nextAction + '</div>';
+      h += '</div>';
+    } else {
+      h += '<div class="hv2-goal" onclick="nav(\'objectifs\')">';
+      h += '<div class="hv2-goal-empty">Aucun objectif en cours &mdash; <span>Créer →</span></div>';
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+
+  // Feature 6: Tasks quick list
+  var urgentTasks = (S.tasks || []).filter(function(t) {
+    if (t.status === "done") return false;
+    return t.dueDate === today || t.priority === "urgente";
+  });
+  var shownTasks = urgentTasks.slice(0, 5);
+  var moreTasks = urgentTasks.length - shownTasks.length;
+  h += '<div class="hv2-tasks">';
+  h += '<div class="hv2-section-label">Tâches du jour</div>';
+  if (shownTasks.length === 0) {
+    h += '<div class="hv2-tasks-empty">Aucune tâche urgente</div>';
+  } else {
+    shownTasks.forEach(function(t) {
+      var isUrgent = t.priority === "urgente";
+      var dotClass = "hv2-dot-" + (t.priority || "normale");
+      h += '<div class="hv2-task-row" onclick="completeTaskV2(' + JSON.stringify(t.id) + ')">'  ;
+      h += '<div class="hv2-task-cb"></div>';
+      h += '<div class="hv2-task-text' + (isUrgent ? " urgent" : "") + '">' + (t.text || "") + '</div>';
+      h += '<div class="hv2-task-dot ' + dotClass + '"></div>';
+      h += '</div>';
+    });
+    if (moreTasks > 0) {
+      h += '<div class="hv2-tasks-more" onclick="nav(\'taches\')">Voir tout (' + urgentTasks.length + ')</div>';
+    }
+  }
+  h += '</div>';
+
+  // Feature 7: Finance snapshot
+  if (mods.finAlert !== false) {
+    var mk = mKey();
+    var monthFin = (S.finance || []).filter(function(tx) { return (tx.date || "").slice(0, 7) === mk && !tx.pending; });
+    var income = monthFin.filter(function(tx) { return (tx.amt || 0) > 0; }).reduce(function(s, tx) { return s + (tx.amt || 0); }, 0);
+    var expenses = monthFin.filter(function(tx) { return (tx.amt || 0) < 0; }).reduce(function(s, tx) { return s + (tx.amt || 0); }, 0);
+    var net = income + expenses;
+    var netClass = net >= 0 ? "pos" : "neg";
+    var allFin = (S.finance || []).filter(function(tx) { return !tx.pending; });
+    var balance = allFin.reduce(function(s, tx) { return s + (tx.amt || 0); }, 0);
+    var fmtE = function(v) { return (v >= 0 ? "+" : "") + Math.round(v).toLocaleString("fr-FR") + " €"; };
+    var fmtAbs = function(v) { return Math.round(Math.abs(v)).toLocaleString("fr-FR") + " €"; };
+    h += '<div class="hv2-fin" onclick="nav(\'argent\')">';
+    h += '<div class="hv2-fin-row">';
+    h += '<div class="hv2-fin-label">Ce mois</div>';
+    h += '<div class="hv2-fin-val">Dépenses ' + fmtAbs(expenses) + ' / Revenus ' + fmtAbs(income) + '</div>';
+    h += '</div>';
+    h += '<div class="hv2-fin-net ' + netClass + '">' + fmtE(net) + '</div>';
+    h += '<div class="hv2-fin-balance">Solde : ' + fmtE(balance) + '</div>';
+    h += '</div>';
+  }
+
+  h += '</div>';
+  return h;
+};
+/* == end Home V2 == */
 </script>
 </body>
 </html>
