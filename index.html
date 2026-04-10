@@ -865,34 +865,7 @@ body.compact .habit-row{padding:7px 0}
 .aim-primary:disabled{opacity:.4;cursor:not-allowed}
 </style>
 
-<style id="ttc-css">
-.ttc-counter {
-  font-size: 13px;
-  color: var(--g1);
-  padding: 2px 16px 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.ttc-done-count {
-  color: var(--green);
-  font-weight: 600;
-}
-.ttc-bar {
-  flex: 1;
-  height: 3px;
-  background: var(--bg3);
-  border-radius: 2px;
-  overflow: hidden;
-  max-width: 80px;
-}
-.ttc-bar-fill {
-  height: 100%;
-  background: var(--green);
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-</style>
+
 
 
 <style id="ttc-css">
@@ -6864,7 +6837,7 @@ window.addTag = function(id, tag){
   var t=(S.tasks||[]).find(function(x){return x.id===id;});
   if(!t) return;
   if(!t.tags) t.tags=[];
-  tag=tag.trim().toLowerCase().replace(/s+/g,'_');
+  tag=tag.trim().toLowerCase().replace(/\s+/g,'_');
   if(tag&&t.tags.indexOf(tag)===-1) t.tags.push(tag);
   save(); render();
 };
@@ -9209,7 +9182,7 @@ window.tv3rQuickAdd = function() {
   if(!inp || !inp.value.trim()) return;
   var id = 't_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
   if(!S.tasks) S.tasks = [];
-  S.tasks.push({id:id, text:inp.value.trim(), status:'todo', priority:'moyenne', dueDate:iso(), createdAt:iso(), xpReward:10, notes:'', subtasks:[]});
+  S.tasks.push({id:id, text:inp.value.trim(), status:'todo', priority:'moyenne', dueDate:iso(), createdAt:iso(), xpReward:10, note:'', subtasks:[]});
   save(); render();
   toast('Tâche ajoutée ✓', 'var(--green)');
 };
@@ -9414,6 +9387,7 @@ window.renderTachesV8 = function() {
   var doneCnt = todayTasks.filter(function(t){ return t.status==='done'; }).length;
   var ipCnt = todayTasks.filter(function(t){ return t.status==='in_progress'; }).length;
   var urgentAll = tasks.filter(function(t){ return t.priority==='urgente' && t.status!=='done'; });
+  urgentAll.sort(function(a,b){ if(!a.dueDate&&!b.dueDate)return 0; if(!a.dueDate)return 1; if(!b.dueDate)return -1; return a.dueDate<b.dueDate?-1:1; });
   var pct = todayTasks.length > 0 ? Math.round(doneCnt/todayTasks.length*100) : 0;
   var progLabel = doneCnt+' tâches faites aujourd\u2019hui · '+ipCnt+' en cours · '+urgentAll.length+' urgentes';
   var filter = window._tv3rFilter || 'today';
@@ -12518,15 +12492,12 @@ window.renderArgentV8 = function() {
       + '<div class="ttc-bar"><div class="ttc-bar-fill" style="width:' + pct + '%">'
       + '</div></div>'
       + '</div>';
-    // Injection apres le tv4-subtitle : on cherche le marqueur unique sans regex </
-    var marker = 'class="tv4-subtitle"';
+    // Injection apres le tv3r-filters (V3R) : cherche la div de fermeture des chips
+    var marker = 'class="tv3r-filters"';
     var mIdx = base.indexOf(marker);
-    if (mIdx === -1) return counter + base;
-    var closeTag = '</div>';
-    var closeIdx = base.indexOf(closeTag, mIdx);
-    if (closeIdx === -1) return counter + base;
-    var insertAt = closeIdx + closeTag.length;
-    return base.slice(0, insertAt) + counter + base.slice(insertAt);
+    if (mIdx === -1) return base; // V3R a deja une progress bar, skip counter
+    // V3R a deja tv3r-progress-wrap : le counter ttc est redondant, on ne l'injecte pas
+    return base;
   };
 })();
 
@@ -13380,6 +13351,10 @@ window.renderHomeV8 = function() {
 })();
 /* end ultra-perso-v1 */
 
+
+
+/* taches-audit-v1 */
+// Audit appliqué le 2026-04-10 — 6 corrections
 
 </script>
 </body>
