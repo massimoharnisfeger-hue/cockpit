@@ -12852,6 +12852,535 @@ window.renderHomeV8 = function() {
 })();
 /* end perso-v1 */
 
+
+
+/* ultra-perso-v1 */
+(function(){
+'use strict';
+
+// ── FEATURE 1: 6 THEMES PREMIUM ─────────────────────────────────────────────
+var UP_THEMES = {
+  'dark':     {bg:'#06090D',bg1:'#0C1118',bg3:'#1E2D3D',b:'#1E2D3D',cyan:'#00D4FF',green:'#00E5A0',amber:'#FFB800',red:'#FF3A5C',purp:'#A855F7',w:'#F0F4F8',g1:'#8B9BAD',g2:'#4A5A6A'},
+  'midnight': {bg:'#000000',bg1:'#0A0A0F',bg3:'#13131E',b:'#1A1A2E',cyan:'#7C3AED',green:'#8B5CF6',amber:'#A78BFA',red:'#EF4444',purp:'#7C3AED',w:'#F1F5F9',g1:'#94A3B8',g2:'#475569'},
+  'ocean':    {bg:'#020B18',bg1:'#051828',bg3:'#0A2540',b:'#0E3057',cyan:'#0EA5E9',green:'#06B6D4',amber:'#38BDF8',red:'#F43F5E',purp:'#818CF8',w:'#E0F2FE',g1:'#7DD3FC',g2:'#38BDF8'},
+  'forest':   {bg:'#020D06',bg1:'#051A0A',bg3:'#0A2E12',b:'#0F3D18',cyan:'#22C55E',green:'#4ADE80',amber:'#A3E635',red:'#F97316',purp:'#86EFAC',w:'#F0FDF4',g1:'#86EFAC',g2:'#4ADE80'},
+  'solarized':{bg:'#002B36',bg1:'#073642',bg3:'#0D4A5A',b:'#586E75',cyan:'#2AA198',green:'#859900',amber:'#B58900',red:'#DC322F',purp:'#6C71C4',w:'#FDF6E3',g1:'#93A1A1',g2:'#839496'},
+  'light':    {bg:'#F8FAFC',bg1:'#FFFFFF',bg3:'#F1F5F9',b:'#E2E8F0',cyan:'#0284C7',green:'#059669',amber:'#D97706',red:'#DC2626',purp:'#7C3AED',w:'#0F172A',g1:'#475569',g2:'#94A3B8'}
+};
+
+window.upApplyTheme = function(name) {
+  var t = UP_THEMES[name] || UP_THEMES['dark'];
+  var r = document.documentElement;
+  Object.keys(t).forEach(function(k){ r.style.setProperty('--' + k, t[k]); });
+  if (typeof S !== 'undefined' && S && S.config) {
+    S.config.theme = name;
+    if (typeof save === 'function') save();
+  }
+};
+
+// Auto-apply saved theme on load
+(function(){
+  var tries = 0;
+  var iv = setInterval(function(){
+    tries++;
+    if (typeof S !== 'undefined' && S && S.config && S.config.theme && S.config.theme !== 'dark') {
+      upApplyTheme(S.config.theme);
+      clearInterval(iv);
+    }
+    if (tries > 20) clearInterval(iv);
+  }, 200);
+})();
+
+// ── FEATURE 2: CONFIGURABLE HOME WIDGETS ────────────────────────────────────
+var UP_DEFAULT_WIDGETS = ['score','weekBars','checkin','goals','tasks','finAlert'];
+
+var UP_WIDGET_LABELS = {
+  score:    'Score & Streak',
+  weekBars: 'Semaine',
+  checkin:  'Habitudes check-in',
+  goals:    'Objectif focus',
+  tasks:    'T\u00e2ches du jour',
+  finAlert: 'Finances'
+};
+
+window.upMoveWidget = function(key, dir) {
+  var cfg = (S && S.config) ? S.config : {};
+  var order = (cfg.homeWidgets && cfg.homeWidgets.length) ? cfg.homeWidgets.slice() : UP_DEFAULT_WIDGETS.slice();
+  var idx = order.indexOf(key);
+  if (idx === -1) return;
+  var newIdx = (dir === 'up') ? idx - 1 : idx + 1;
+  if (newIdx < 0 || newIdx >= order.length) return;
+  var tmp = order[idx]; order[idx] = order[newIdx]; order[newIdx] = tmp;
+  cfg.homeWidgets = order;
+  if (typeof save === 'function') save();
+  if (typeof render === 'function') render();
+};
+
+window.upToggleWidget = function(key) {
+  var cfg = (S && S.config) ? S.config : {};
+  if (!cfg.homeModules) cfg.homeModules = {};
+  cfg.homeModules[key] = (cfg.homeModules[key] === false) ? true : false;
+  if (typeof save === 'function') save();
+  if (typeof render === 'function') render();
+};
+
+// Backward-compat aliases
+window.upWidgetMove = function(key, dir) { window.upMoveWidget(key, dir === -1 ? 'up' : 'down'); };
+window.upWidgetToggle = window.upToggleWidget;
+
+// ── FEATURE 3: PWA NOTIFICATIONS ────────────────────────────────────────────
+window.upRequestNotif = function() {
+  if (!('Notification' in window)) {
+    if (typeof toast === 'function') toast('Non support\u00e9 sur cet appareil', 'var(--amber)');
+    return;
+  }
+  Notification.requestPermission().then(function(r){
+    if (!S.config) S.config = {};
+    S.config.notifications = S.config.notifications || {};
+    S.config.notifications.enabled = (r === 'granted');
+    if (typeof save === 'function') save();
+    if (typeof render === 'function') render();
+    if (typeof toast === 'function') {
+      toast(r === 'granted' ? 'Notifications activ\u00e9es !' : 'Permission refus\u00e9e',
+            r === 'granted' ? 'var(--green)' : 'var(--red)');
+    }
+  });
+};
+window.upRequestNotifPermission = window.upRequestNotif;
+
+window.upSaveNotifMorning = function(val) {
+  if (!S.config) S.config = {};
+  S.config.notifications = S.config.notifications || {};
+  S.config.notifications.habitsMorning = val;
+  if (typeof save === 'function') save();
+  if (typeof toast === 'function') toast('Rappel matin : ' + val + ' \u2713', 'var(--cyan)');
+};
+
+window.upToggleNotifTasks = function() {
+  if (!S.config) S.config = {};
+  S.config.notifications = S.config.notifications || {};
+  S.config.notifications.tasks = !S.config.notifications.tasks;
+  if (typeof save === 'function') save();
+  if (typeof render === 'function') render();
+};
+
+window.upNotifCheck = function() {
+  var cfg = (S && S.config && S.config.notifications) || {};
+  if (!cfg.enabled || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  var now = new Date();
+  var hhmm = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  var today2 = (typeof iso === 'function') ? iso() : now.toISOString().slice(0,10);
+  var key = 'upn_' + today2 + '_' + hhmm;
+  if (sessionStorage.getItem(key)) return;
+  if (cfg.habitsMorning && hhmm === cfg.habitsMorning) {
+    var habs2 = (typeof H === 'function') ? H() : (S.hcfg || []);
+    var dayData2 = (S.habits && S.habits[today2]) ? S.habits[today2] : {};
+    var done = Object.values(dayData2).filter(Boolean).length;
+    var total = habs2.length;
+    if (done < total) {
+      new Notification('Cockpit \u2014 Habitudes', {
+        body: done + "/" + total + " habitude" + (total > 1 ? "s" : "") + " aujourd\u2019hui",
+        icon: '/cockpit/icon-192.png'
+      });
+      sessionStorage.setItem(key, '1');
+    }
+  }
+  if (cfg.tasks && hhmm === '09:00') {
+    var urgent = (S.tasks || []).filter(function(t){
+      return t.status !== 'done' && (t.dueDate === today2 || t.priority === 'urgente');
+    });
+    if (urgent.length > 0) {
+      new Notification('Cockpit \u2014 T\u00e2ches urgentes', {
+        body: urgent.length + " t\u00e2che" + (urgent.length > 1 ? "s" : "") + " \u00e0 faire aujourd\u2019hui",
+        icon: '/cockpit/icon-192.png'
+      });
+      sessionStorage.setItem(key, '1');
+    }
+  }
+};
+setTimeout(function(){
+  if (typeof S !== 'undefined') setInterval(upNotifCheck, 60000);
+}, 3000);
+
+// ── KEYBOARD SHORTCUTS ───────────────────────────────────────────────────────
+window.upInitShortcuts = function() {
+  if (window._upShortcutsInit) return;
+  window._upShortcutsInit = true;
+  document.addEventListener('keydown', function(e) {
+    var tag = document.activeElement ? document.activeElement.tagName : '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    switch(e.key) {
+      case 'h': if(typeof nav==='function') nav('home'); break;
+      case 't': if(typeof nav==='function') nav('taches'); break;
+      case 'a': if(typeof nav==='function') nav('argent'); break;
+      case 'o': if(typeof nav==='function') nav('objectifs'); break;
+      case 's': if(typeof nav==='function') nav('stats'); break;
+      case 'p': if(typeof nav==='function') nav('plus'); break;
+      case 'b': if(typeof nav==='function') nav('habitudes'); break;
+      case 'n':
+        var txt = prompt('Note rapide :');
+        if (txt && txt.trim()) {
+          if (!S.notes) S.notes = [];
+          var nowN = new Date();
+          S.notes.unshift({
+            date: (typeof iso==='function' ? iso() : new Date().toISOString().slice(0,10)),
+            time: nowN.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+            text: txt.trim()
+          });
+          if (typeof save === 'function') save();
+          if (typeof toast === 'function') toast('Note ajout\u00e9e', 'var(--green)');
+        }
+        break;
+      case '?': upShowShortcuts(); break;
+      case 'Escape': upCloseShortcuts(); break;
+    }
+  });
+};
+
+window.upShowShortcuts = function() {
+  var existing = document.getElementById('up-shortcuts-overlay');
+  if (existing) { existing.remove(); return; }
+  var el = document.createElement('div');
+  el.id = 'up-shortcuts-overlay';
+  el.innerHTML = '<div class="up-sc-modal"><div class="up-sc-header">Raccourcis clavier <span onclick="upCloseShortcuts()" style="cursor:pointer;float:right">\u2715</span></div>'
+    + '<div class="up-sc-list">'
+    + '<div class="up-sc-row"><kbd>H</kbd><span>Accueil</span></div>'
+    + '<div class="up-sc-row"><kbd>T</kbd><span>T\u00e2ches</span></div>'
+    + '<div class="up-sc-row"><kbd>A</kbd><span>Argent</span></div>'
+    + '<div class="up-sc-row"><kbd>O</kbd><span>Objectifs</span></div>'
+    + '<div class="up-sc-row"><kbd>S</kbd><span>Stats</span></div>'
+    + '<div class="up-sc-row"><kbd>B</kbd><span>Habitudes</span></div>'
+    + '<div class="up-sc-row"><kbd>P</kbd><span>Profil</span></div>'
+    + '<div class="up-sc-row"><kbd>N</kbd><span>Note rapide</span></div>'
+    + '<div class="up-sc-row"><kbd>?</kbd><span>Ce panneau</span></div>'
+    + '<div class="up-sc-row"><kbd>Esc</kbd><span>Fermer</span></div>'
+    + '</div></div>';
+  document.body.appendChild(el);
+};
+window.upCloseShortcuts = function() {
+  var el = document.getElementById('up-shortcuts-overlay');
+  if (el) el.remove();
+};
+setTimeout(function(){ upInitShortcuts(); }, 500);
+
+// ── THEME PICKER HELPER ──────────────────────────────────────────────────────
+window.upThemePicker = function(currentTheme) {
+  var themeOrder = ['dark','midnight','ocean','forest','solarized','light'];
+  var themeLabels = {dark:'Dark',midnight:'Midnight',ocean:'Ocean',forest:'Forest',solarized:'Solarized',light:'Light'};
+  var h = '<div class="up-theme-grid">';
+  themeOrder.forEach(function(tid) {
+    var t = UP_THEMES[tid];
+    var isActive = currentTheme === tid;
+    h += '<div class="up-theme-card' + (isActive ? ' active' : '') + '"'
+      + ' onclick="upApplyTheme(\u0027' + tid + '\u0027);render();">';
+    h += '<div class="up-theme-preview" style="background:' + t.bg + ';border:2px solid ' + (isActive ? t.cyan : t.b) + '">';
+    h += '<div style="width:14px;height:14px;border-radius:50%;background:' + t.cyan + ';margin:0 auto 3px"></div>';
+    h += '<div style="width:100%;height:3px;border-radius:2px;background:' + t.bg3 + ';margin-bottom:3px"></div>';
+    h += '<div style="width:70%;height:3px;border-radius:2px;background:' + t.green + '"></div>';
+    h += '</div>';
+    h += '<div class="up-theme-name" style="color:' + (isActive ? t.cyan : 'var(--w)') + '">' + themeLabels[tid] + '</div>';
+    if (isActive) h += '<div style="font-size:9px;color:' + t.cyan + ';text-align:center;font-weight:700">\u2713 Actif</div>';
+    h += '</div>';
+  });
+  h += '</div>';
+  return h;
+};
+
+// ── renderPlusV8 OVERRIDE ────────────────────────────────────────────────────
+var _upPv3Base = window.renderPlusV8;
+window.renderPlusV8 = function() {
+  var base = (_upPv3Base && typeof _upPv3Base === 'function') ? _upPv3Base() : '';
+  var cfg = (S && S.config) ? S.config : {};
+  cfg.homeWidgets   = cfg.homeWidgets   || UP_DEFAULT_WIDGETS.slice();
+  cfg.homeModules   = cfg.homeModules   || {};
+  cfg.notifications = cfg.notifications || {};
+
+  var currentTheme = cfg.theme || 'dark';
+  var hwidgets     = cfg.homeWidgets;
+  var notif        = cfg.notifications;
+  var notifEnabled = !!(notif.enabled);
+  var notifMorning = notif.habitsMorning || '08:00';
+  var notifTasks   = !!(notif.tasks);
+  var density      = cfg.density || 'confort';
+
+  // Replace old APPARENCE section (4 themes) with 6-theme picker
+  var apparenceMarker = '<div class="pv3-sec">APPARENCE</div>';
+  if (base.indexOf(apparenceMarker) !== -1) {
+    var aStart = base.indexOf(apparenceMarker);
+    var densRowStart = base.indexOf('pv3-density-row', aStart);
+    var densRowClose = base.indexOf('</div>', densRowStart);
+    var cardClose    = base.indexOf('</div>', densRowClose + 6);
+    if (densRowStart !== -1 && cardClose !== -1) {
+      var newAppar = '<div class="pv3-sec">TH\u00c8MES PREMIUM</div>'
+        + '<div class="pv3-card">'
+        + upThemePicker(currentTheme)
+        + '<div style="padding:0 14px 8px;font-size:11px;color:var(--g2);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-top:4px">Densit\u00e9</div>'
+        + '<div class="pv3-density-row">';
+      ['compact','confort','spacieux'].forEach(function(d) {
+        var labels = {compact:'Compact',confort:'Confort',spacieux:'Spacieux'};
+        newAppar += '<button class="pv3-dens-btn' + (density === d ? ' active' : '') + '" onclick="pv3SetDensity(' + JSON.stringify(d) + ')">' + labels[d] + '</button>';
+      });
+      newAppar += '</div></div>';
+      base = base.slice(0, aStart) + newAppar + base.slice(cardClose + 6);
+    }
+  }
+
+  // Build WIDGETS ACCUEIL section
+  var wHtml = '<div class="pv3-sec">WIDGETS ACCUEIL</div>';
+  wHtml += '<div class="pv3-card">';
+  wHtml += '<div style="font-size:12px;color:var(--g2);padding:0 14px 10px">R\u00e9ordonnez et activez les blocs de la page d\u2019accueil.</div>';
+  hwidgets.forEach(function(key, i) {
+    var label = UP_WIDGET_LABELS[key] || key;
+    var isOn = cfg.homeModules[key] !== false;
+    wHtml += '<div class="up-widget-row">';
+    wHtml += '<div class="up-widget-handle">\u2630</div>';
+    wHtml += '<div class="up-widget-label">' + label + '</div>';
+    wHtml += '<div style="display:flex;align-items:center;gap:6px">';
+    wHtml += '<button class="up-w-arrow" onclick="upMoveWidget(' + JSON.stringify(key) + ',\u0027up\u0027)"'
+           + (i === 0 ? ' disabled' : '') + '>\u25b2</button>';
+    wHtml += '<button class="up-w-arrow" onclick="upMoveWidget(' + JSON.stringify(key) + ',\u0027down\u0027)"'
+           + (i === hwidgets.length - 1 ? ' disabled' : '') + '>\u25bc</button>';
+    wHtml += '<button class="pv3-toggle' + (isOn ? ' on' : '') + '" onclick="upToggleWidget(' + JSON.stringify(key) + ')" aria-label="toggle ' + key + '"></button>';
+    wHtml += '</div>';
+    wHtml += '</div>';
+  });
+  wHtml += '</div>';
+
+  // Build NOTIFICATIONS section
+  var notifHtml = '<div class="pv3-sec">NOTIFICATIONS</div>';
+  notifHtml += '<div class="pv3-card">';
+  notifHtml += '<div class="pv3-pref-row">';
+  notifHtml += '<div>';
+  notifHtml += '<div class="pv3-pref-lbl">Activer les notifications</div>';
+  notifHtml += '<div class="pv3-pref-sub">' + (notifEnabled ? 'Permission accord\u00e9e' : 'Rappels habitudes & t\u00e2ches') + '</div>';
+  notifHtml += '</div>';
+  if (notifEnabled) {
+    notifHtml += '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;background:rgba(0,229,160,0.15);color:var(--green);font-size:12px;font-weight:700">Actif \u2713</span>';
+  } else {
+    notifHtml += '<button class="btn btn-primary btn-sm" onclick="upRequestNotif()">Autoriser</button>';
+  }
+  notifHtml += '</div>';
+  if (notifEnabled) {
+    notifHtml += '<div class="pv3-pref-row">';
+    notifHtml += '<div class="pv3-pref-lbl">Rappel habitudes (matin)</div>';
+    notifHtml += '<input type="time" class="pv3-pref-input" style="width:90px" value="' + notifMorning + '" onchange="upSaveNotifMorning(this.value)">';
+    notifHtml += '</div>';
+    notifHtml += '<div class="pv3-pref-row">';
+    notifHtml += '<div><div class="pv3-pref-lbl">T\u00e2ches urgentes (09h00)</div><div class="pv3-pref-sub">Rappel quotidien</div></div>';
+    notifHtml += '<button class="pv3-toggle' + (notifTasks ? ' on' : '') + '" onclick="upToggleNotifTasks()" aria-label="notifs tasks toggle"></button>';
+    notifHtml += '</div>';
+  }
+  notifHtml += '</div>';
+
+  // Inject before DONNEES section
+  var donneesLit = '<div class="pv3-sec" id="pv3-notes-anchor">DONN\u00c9ES</div>';
+  if (base.indexOf(donneesLit) !== -1) {
+    base = base.replace(donneesLit, wHtml + notifHtml + donneesLit);
+  } else {
+    var ld = base.lastIndexOf('</div>');
+    base = ld !== -1 ? base.slice(0, ld) + wHtml + notifHtml + base.slice(ld) : base + wHtml + notifHtml;
+  }
+
+  return base;
+};
+
+// ── renderHomeV8 OVERRIDE ────────────────────────────────────────────────────
+window.renderHomeV8 = function() {
+  var cfg          = (S && S.config) ? S.config : {};
+  var mods         = cfg.homeModules || {};
+  var widgets      = (cfg.homeWidgets && cfg.homeWidgets.length) ? cfg.homeWidgets : UP_DEFAULT_WIDGETS.slice();
+  var today        = (typeof iso === 'function') ? iso() : new Date().toISOString().slice(0,10);
+  var habs         = (typeof H === 'function') ? H() : (S.hcfg || []);
+  var dayData      = (S.habits && S.habits[today]) ? S.habits[today] : {};
+  var score        = (typeof scoreDay === 'function') ? scoreDay(today) : 0;
+  var streak       = (typeof currentStreak === 'function') ? currentStreak() : 0;
+  var bestSt       = cfg.bestStreak || 0;
+  var xp           = cfg.xp || 0;
+  var lvl          = (typeof getLevelInfo === 'function') ? getLevelInfo(xp) : {level:1};
+  var profileName  = (cfg.profile && cfg.profile.name)  ? cfg.profile.name  : 'Cockpit';
+  var profileEmoji = (cfg.profile && cfg.profile.emoji) ? cfg.profile.emoji : '\ud83d\ude80';
+  var dateObj      = new Date();
+  var dayNames     = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  var monthNames   = ['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+  var dateStr      = dayNames[dateObj.getDay()] + ' ' + dateObj.getDate() + ' ' + monthNames[dateObj.getMonth()] + ' ' + dateObj.getFullYear();
+
+  var h = '<div class="hv2-page">';
+
+  // Header (always shown)
+  h += '<div class="hv2-header">';
+  h += '<div>';
+  h += '<div class="hv2-greeting">Bonjour ' + profileName + ' ' + profileEmoji + '</div>';
+  h += '<div class="hv2-date">' + dateStr + '</div>';
+  h += '</div>';
+  h += '<div style="display:flex;align-items:center;gap:8px">';
+  h += '<button onclick="hv2OpenCustomize()" style="background:var(--bg3);border:1px solid var(--b);border-radius:10px;width:36px;height:36px;cursor:pointer;font-size:16px;line-height:1" title="Personnaliser">\u2699\ufe0f</button>';
+  h += '<div class="hv2-lvl-badge">Niv.\u00a0' + (lvl.level || 1) + '</div>';
+  h += '</div>';
+  h += '</div>';
+
+  widgets.forEach(function(key) {
+    if (mods[key] === false) return;
+
+    if (key === 'score') {
+      var ringColor = score < 40 ? 'var(--red)' : score < 70 ? 'var(--amber)' : 'var(--green)';
+      var circ = Math.round(2 * Math.PI * 38);
+      var dash = Math.round(circ * score / 100);
+      var gap  = circ - dash;
+      h += '<div class="hv2-score-card" onclick="nav(\u0027stats\u0027)">';
+      h += '<div class="hv2-ring-wrap">';
+      h += '<svg width="88" height="88" viewBox="0 0 88 88">';
+      h += '<circle cx="44" cy="44" r="38" fill="none" stroke="var(--bg3)" stroke-width="8"/>';
+      h += '<circle cx="44" cy="44" r="38" fill="none" stroke="' + ringColor + '" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + dash + ' ' + gap + '"/>';
+      h += '</svg>';
+      h += '<div class="hv2-ring-center"><div class="hv2-ring-pct">' + score + '%</div><div class="hv2-ring-label">score</div></div>';
+      h += '</div>';
+      h += '<div class="hv2-streak-col">';
+      h += '<div class="hv2-streak-main">' + streak + ' \ud83d\udd25</div>';
+      h += '<div class="hv2-streak-sub">jours de suite</div>';
+      h += '<div class="hv2-best-streak">Record\u00a0: ' + bestSt + ' jour' + (bestSt > 1 ? 's' : '') + '</div>';
+      h += '</div></div>';
+
+    } else if (key === 'weekBars') {
+      var weekStart = new Date(dateObj);
+      var dow = dateObj.getDay();
+      weekStart.setDate(dateObj.getDate() + (dow === 0 ? -6 : 1 - dow));
+      var barLabels = ['L','M','M','J','V','S','D'];
+      h += '<div class="hv2-week">';
+      h += '<div class="hv2-section-label">Cette semaine</div>';
+      h += '<div class="hv2-week-bars">';
+      barLabels.forEach(function(lbl, wi) {
+        var d = new Date(weekStart);
+        d.setDate(weekStart.getDate() + wi);
+        var dStr = d.toISOString().slice(0, 10);
+        var s = (typeof scoreDay === 'function') ? scoreDay(dStr) : 0;
+        var isToday = dStr === today;
+        var barH = Math.max(3, Math.round(s / 100 * 40));
+        var bc = s >= 80 ? 'var(--green)' : s >= 50 ? 'var(--cyan)' : s > 0 ? 'var(--amber)' : 'var(--bg3)';
+        h += '<div class="hv2-bar-col">';
+        h += isToday ? '<div class="hv2-bar-dot"></div>' : '<div style="width:5px;height:5px"></div>';
+        h += '<div class="hv2-bar" style="height:' + barH + 'px;background:' + bc + ';opacity:' + (s === 0 ? '0.25' : '1') + '"></div>';
+        h += '<div class="hv2-bar-day' + (isToday ? ' today' : '') + '">' + lbl + '</div>';
+        h += '</div>';
+      });
+      h += '</div></div>';
+
+    } else if (key === 'checkin') {
+      var allDone = habs.length > 0 && habs.every(function(hb){ return !!dayData[hb.id]; });
+      h += '<div class="hv2-checkin">';
+      h += '<div class="hv2-section-label">Aujourd\u2019hui \u2014 ' + dateStr + '</div>';
+      if (allDone) {
+        h += '<div class="hv2-all-done">Toutes les habitudes faites\u00a0! \ud83c\udf89</div>';
+      } else if (habs.length === 0) {
+        h += '<div class="hv2-all-done" style="color:var(--g1)">Pas encore d\u2019habitudes \u2014 <span style="color:var(--cyan);cursor:pointer" onclick="nav(\u0027habitudes\u0027)">Configurer</span></div>';
+      } else {
+        habs.forEach(function(hb) {
+          var checked = !!dayData[hb.id];
+          h += '<div class="hv2-hab-row" onclick="toggleHabitV2(' + JSON.stringify(hb.id) + ')">';
+          h += '<div class="hv2-hab-left">';
+          h += '<div class="hv2-hab-emoji">' + (hb.emoji || '\u25cb') + '</div>';
+          h += '<div class="hv2-hab-label">' + (hb.label || hb.id) + '</div>';
+          h += '</div>';
+          if (checked) {
+            h += '<div class="hv2-check-circle done"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="#06090D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+          } else {
+            h += '<div class="hv2-check-circle"></div>';
+          }
+          h += '</div>';
+        });
+      }
+      h += '</div>';
+
+    } else if (key === 'goals') {
+      var goalsArr = (S.goals || []).filter(function(g){ return g.status === 'in_progress' && g.type === 'project'; });
+      goalsArr.sort(function(a, b) {
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+        return new Date(a.deadline) - new Date(b.deadline);
+      });
+      var hero = goalsArr[0] || null;
+      h += '<div>';
+      h += '<div class="hv2-section-label" style="margin-top:4px">Focus du jour</div>';
+      if (hero) {
+        var gPct   = (typeof goalProgress === 'function') ? Math.round(goalProgress(hero)) : 0;
+        var rhythm = (typeof window.ogRhythm === 'function') ? window.ogRhythm(hero) : 'neutral';
+        var rLabel = rhythm === 'ahead' ? 'En avance' : rhythm === 'ontrack' ? 'Dans les temps' : rhythm === 'late' ? 'En retard' : '';
+        var rClass = rhythm === 'ahead' ? 'hv2-rhythm-ahead' : rhythm === 'ontrack' ? 'hv2-rhythm-on' : rhythm === 'late' ? 'hv2-rhythm-late' : 'hv2-rhythm-neutral';
+        var nextA = '';
+        if (hero.subGoals && hero.subGoals.length) {
+          var ns = hero.subGoals.find(function(sg){ return !sg.done; });
+          if (ns) nextA = ns.text || ns.title || '';
+        }
+        h += '<div class="hv2-goal" onclick="if(typeof openGoalDetail===\u0027function\u0027)openGoalDetail(' + JSON.stringify(hero.id) + ');else nav(\u0027objectifs\u0027)">';
+        h += '<div class="hv2-goal-header">';
+        h += '<div class="hv2-goal-emoji">' + (hero.emoji || '\ud83c\udfaf') + '</div>';
+        h += '<div class="hv2-goal-title">' + (hero.title || '') + '</div>';
+        h += '<div class="hv2-rhythm-badge ' + rClass + '">' + rLabel + '</div>';
+        h += '</div>';
+        h += '<div class="hv2-goal-bar-wrap"><div class="hv2-goal-bar-fill" style="width:' + gPct + '%"></div></div>';
+        if (nextA) h += '<div class="hv2-goal-action">\u2192 ' + nextA + '</div>';
+        h += '</div>';
+      } else {
+        h += '<div class="hv2-goal" onclick="nav(\u0027objectifs\u0027)">';
+        h += '<div class="hv2-goal-empty">Aucun objectif en cours \u2014 <span>Cr\u00e9er \u2192</span></div>';
+        h += '</div>';
+      }
+      h += '</div>';
+
+    } else if (key === 'tasks') {
+      var urgentTasks = (S.tasks || []).filter(function(t) {
+        return t.status !== 'done' && (t.dueDate === today || t.priority === 'urgente');
+      });
+      var shown = urgentTasks.slice(0, 5);
+      var more  = urgentTasks.length - shown.length;
+      h += '<div class="hv2-tasks">';
+      h += '<div class="hv2-section-label">T\u00e2ches du jour</div>';
+      if (shown.length === 0) {
+        h += '<div class="hv2-tasks-empty">Aucune t\u00e2che urgente \u2014 <span style="color:var(--cyan);cursor:pointer" onclick="nav(\u0027taches\u0027)">Voir tout</span></div>';
+      } else {
+        shown.forEach(function(t) {
+          var isUrgent = t.priority === 'urgente';
+          h += '<div class="hv2-task-row" onclick="completeTaskV2(' + JSON.stringify(t.id) + ')">';
+          h += '<div class="hv2-task-cb"></div>';
+          h += '<div class="hv2-task-text' + (isUrgent ? ' urgent' : '') + '">' + (t.text || '') + '</div>';
+          h += '<div class="hv2-task-dot hv2-dot-' + (t.priority || 'normale') + '"></div>';
+          h += '</div>';
+        });
+        if (more > 0) {
+          h += '<div class="hv2-tasks-more" onclick="nav(\u0027taches\u0027)">Voir tout (' + urgentTasks.length + ')</div>';
+        }
+      }
+      h += '</div>';
+
+    } else if (key === 'finAlert') {
+      var mk2 = (typeof mKey === 'function') ? mKey() : today.slice(0,7);
+      var monthFin = (S.finance || []).filter(function(tx){ return (tx.date || '').slice(0,7) === mk2 && !tx.pending; });
+      var income   = monthFin.filter(function(tx){ return (tx.amt || 0) > 0; }).reduce(function(s,tx){ return s + (tx.amt||0); }, 0);
+      var expenses = monthFin.filter(function(tx){ return (tx.amt || 0) < 0; }).reduce(function(s,tx){ return s + (tx.amt||0); }, 0);
+      var net = income + expenses;
+      var allFin  = (S.finance || []).filter(function(tx){ return !tx.pending; });
+      var balance = allFin.reduce(function(s,tx){ return s + (tx.amt||0); }, 0);
+      var fmtE   = function(v){ return (v >= 0 ? '+' : '') + Math.round(v).toLocaleString('fr-FR') + '\u00a0\u20ac'; };
+      var fmtAbs = function(v){ return Math.round(Math.abs(v)).toLocaleString('fr-FR') + '\u00a0\u20ac'; };
+      h += '<div class="hv2-fin" onclick="nav(\u0027argent\u0027)">';
+      h += '<div class="hv2-fin-row">';
+      h += '<div class="hv2-fin-label">Ce mois</div>';
+      h += '<div class="hv2-fin-val">D\u00e9penses\u00a0' + fmtAbs(expenses) + ' / Revenus\u00a0' + fmtAbs(income) + '</div>';
+      h += '</div>';
+      h += '<div class="hv2-fin-net ' + (net >= 0 ? 'pos' : 'neg') + '">' + fmtE(net) + '</div>';
+      h += '<div class="hv2-fin-balance">Solde\u00a0: ' + fmtE(balance) + '</div>';
+      h += '</div>';
+    }
+  });
+
+  h += '</div>';
+  return h;
+};
+
+})();
+/* end ultra-perso-v1 */
+
+
 </script>
 </body>
 </html>
